@@ -1,0 +1,17 @@
+FROM node:lts-jod
+
+WORKDIR /app
+
+COPY package.json ./
+
+RUN npm install
+
+COPY config ./config
+COPY middleware ./middleware
+COPY routes ./routes
+COPY controllers ./controllers
+COPY schema.sql ./schema.sql
+
+EXPOSE 5000
+
+CMD ["node", "server.js"]
