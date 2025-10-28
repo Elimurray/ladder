@@ -34,8 +34,8 @@ function Ladder() {
             <tr>
               <th>Position</th>
               <th>Name</th>
-              <th>Email</th>
-              <th>Member</th>
+              {/* <th>Email</th>
+              <th>Member</th> */}
             </tr>
           </thead>
           <tbody>
@@ -43,8 +43,8 @@ function Ladder() {
               <tr key={user.id}>
                 <td>{index + 1}</td>
                 <td>{user.full_name}</td>
-                <td>{user.email}</td>
-                <td>{user.is_member ? "✓" : "✗"}</td>
+                {/* <td>{user.email}</td>
+                <td>{user.is_member ? "✓" : "✗"}</td> */}
               </tr>
             ))}
           </tbody>
