@@ -20,6 +20,8 @@ function Login() {
     setError("");
     setLoading(true);
 
+    console.log("Submitting:", formData); // Debug log
+
     try {
       if (isLogin) {
         await login(formData.email, formData.password);
@@ -28,6 +30,7 @@ function Login() {
       }
       navigate("/ladder");
     } catch (err) {
+      console.error("Error response:", err.response?.data); // Debug log
       setError(err.response?.data?.error || "An error occurred");
     } finally {
       setLoading(false);

@@ -259,6 +259,20 @@ td:first-child {
   font-size: 1rem;
 }
 
+.error {
+  color: #c53030;
+  padding: 1rem 1.5rem;
+  background: #fff5f5;
+  border: 2px solid #fc8181;
+  border-radius: 8px;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0 2px 4px rgba(229, 62, 62, 0.1);
+}
+
 @media (max-width: 768px) {
   /* Show hamburger menu */
   .menu-toggle {
