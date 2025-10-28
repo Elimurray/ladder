@@ -32,7 +32,12 @@ export const usersAPI = {
 };
 
 export const ladderAPI = {
-  getPositions: () => api.get("/ladder"),
+  getAll: () => api.get("/ladder"),
+  getMyPosition: () => api.get("/ladder/me"),
+  getUserPosition: (userId) => api.get(`/ladder/user/${userId}`),
+  updateStatus: (status) => api.patch("/ladder/status", { status }),
+  addToLadder: (user_id, position) =>
+    api.post("/ladder/add", { user_id, position }),
   updatePosition: (id, position) => api.put(`/ladder/${id}`, { position }),
 };
 

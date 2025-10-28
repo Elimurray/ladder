@@ -12,9 +12,11 @@ app.use(express.json());
 // Routes
 const authRoutes = require("./routes/auth");
 const usersRoutes = require("./routes/users");
+const ladderRoutes = require("./routes/ladder");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", usersRoutes);
+app.use("/api/ladder", ladderRoutes);
 
 // Health check
 app.get("/api/health", async (req, res) => {
@@ -34,7 +36,3 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
-
-// Routes
-const usersRouter = require("./routes/users");
-app.use("/api/users", usersRouter);
