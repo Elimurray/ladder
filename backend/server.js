@@ -9,7 +9,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Test database connection
+// Routes
+const authRoutes = require("./routes/auth");
+const usersRoutes = require("./routes/users");
+
+app.use("/api/auth", authRoutes);
+app.use("/api/users", usersRoutes);
+
+// Health check
 app.get("/api/health", async (req, res) => {
   try {
     const result = await pool.query("SELECT NOW()");
@@ -20,19 +27,6 @@ app.get("/api/health", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Database connection failed" });
-  }
-});
-
-// Test route to get all users
-app.get("/api/users", async (req, res) => {
-  try {
-    const result = await pool.query(
-      "SELECT id, email, full_name, is_member FROM users"
-    );
-    res.json(result.rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Database query failed" });
   }
 });
 

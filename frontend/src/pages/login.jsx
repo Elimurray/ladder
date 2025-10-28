@@ -1,35 +1,114 @@
 import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
-  const [email, setEmail] = useState("");
+  const [isLogin, setIsLogin] = useState(true);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    full_name: "",
+  });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const { login, register } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Login email:", email);
-    // TODO: Connect to backend auth
-    alert("Login link would be sent to: " + email);
+    setError("");
+    setLoading(true);
+
+    try {
+      if (isLogin) {
+        await login(formData.email, formData.password);
+      } else {
+        await register(formData.email, formData.full_name, formData.password);
+      }
+      navigate("/ladder");
+    } catch (err) {
+      setError(err.response?.data?.error || "An error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
   return (
     <div className="page">
       <div className="login-container">
-        <h1>Login</h1>
-        <p>Enter your email to receive a login link</p>
+        <h1>{isLogin ? "Login" : "Register"}</h1>
+        <p>{isLogin ? "Welcome back!" : "Create your account"}</p>
+
+        {error && <div className="error">{error}</div>}
 
         <form onSubmit={handleSubmit}>
+          {!isLogin && (
+            <div className="form-group">
+              <label>Full Name:</label>
+              <input
+                type="text"
+                name="full_name"
+                placeholder="John Doe"
+                value={formData.full_name}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          )}
+
           <div className="form-group">
+            <label>Email:</label>
             <input
               type="email"
+              name="email"
               placeholder="your.email@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={formData.email}
+              onChange={handleChange}
               required
             />
           </div>
-          <button type="submit" className="btn-primary">
-            Send Login Link
+
+          <div className="form-group">
+            <label>Password:</label>
+            <input
+              type="password"
+              name="password"
+              placeholder="••••••••"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              minLength="6"
+            />
+          </div>
+
+          <button type="submit" className="btn-primary" disabled={loading}>
+            {loading ? "Processing..." : isLogin ? "Login" : "Register"}
           </button>
         </form>
+
+        <p style={{ marginTop: "1.5rem", textAlign: "center" }}>
+          {isLogin ? "Don't have an account? " : "Already have an account? "}
+          <button
+            onClick={() => setIsLogin(!isLogin)}
+            style={{
+              background: "none",
+              border: "none",
+              color: "#667eea",
+              cursor: "pointer",
+              fontWeight: "bold",
+            }}
+          >
+            {isLogin ? "Register" : "Login"}
+          </button>
+        </p>
       </div>
     </div>
   );

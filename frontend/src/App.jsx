@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import { useState } from "react";
+import { useAuth } from "./context/AuthContext";
 import Home from "./pages/Home";
 import Ladder from "./pages/Ladder";
 import SubmitMatch from "./pages/SubmitMatch";
@@ -8,6 +9,7 @@ import "./App.css";
 
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { user, logout, loading } = useAuth();
 
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
@@ -17,6 +19,10 @@ function App() {
     setMenuOpen(false);
   };
 
+  if (loading) {
+    return <div className="page loading">Loading...</div>;
+  }
+
   return (
     <Router>
       <div className="app">
@@ -24,7 +30,6 @@ function App() {
           <div className="nav-container">
             <h1 className="nav-logo">Ladder</h1>
 
-            {/* Hamburger button */}
             <button
               className="menu-toggle"
               onClick={toggleMenu}
@@ -33,7 +38,6 @@ function App() {
               {menuOpen ? "✕" : "☰"}
             </button>
 
-            {/* Navigation menu */}
             <ul className={`nav-menu ${menuOpen ? "active" : ""}`}>
               <li>
                 <Link to="/" onClick={closeMenu}>
@@ -45,21 +49,44 @@ function App() {
                   Ladder
                 </Link>
               </li>
-              <li>
-                <Link to="/submit" onClick={closeMenu}>
-                  Submit Match
-                </Link>
-              </li>
-              <li>
-                <Link to="/login" onClick={closeMenu}>
-                  Login
-                </Link>
-              </li>
+              {user && (
+                <li>
+                  <Link to="/submit" onClick={closeMenu}>
+                    Submit Match
+                  </Link>
+                </li>
+              )}
+              {user ? (
+                <li>
+                  <button
+                    onClick={() => {
+                      logout();
+                      closeMenu();
+                    }}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "white",
+                      cursor: "pointer",
+                      padding: "0.5rem 1rem",
+                      fontSize: "inherit",
+                      fontWeight: "500",
+                    }}
+                  >
+                    Logout ({user.full_name})
+                  </button>
+                </li>
+              ) : (
+                <li>
+                  <Link to="/login" onClick={closeMenu}>
+                    Login
+                  </Link>
+                </li>
+              )}
             </ul>
           </div>
         </nav>
 
-        {/* Overlay for mobile menu */}
         <div
           className={`nav-overlay ${menuOpen ? "active" : ""}`}
           onClick={closeMenu}
