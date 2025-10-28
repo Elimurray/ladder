@@ -110,7 +110,7 @@ function Ladder() {
               <th>Name</th>
               <th>Email</th>
               <th>Status</th>
-              <th>Member</th>
+              {/* <th>Member</th> */}
             </tr>
           </thead>
           <tbody>
@@ -141,7 +141,7 @@ function Ladder() {
                 </td>
                 <td>{entry.email}</td>
                 <td>{getStatusBadge(entry.status)}</td>
-                <td>{entry.is_member ? "✓" : "✗"}</td>
+                {/* <td>{entry.is_member ? "✓" : "✗"}</td> */}
               </tr>
             ))}
           </tbody>

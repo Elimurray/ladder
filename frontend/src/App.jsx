@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import Ladder from "./pages/Ladder";
 import SubmitMatch from "./pages/SubmitMatch";
 import Login from "./pages/Login";
+import Admin from "./pages/Admin";
 import "./App.css";
 
 function App() {
@@ -56,6 +57,13 @@ function App() {
                   </Link>
                 </li>
               )}
+              {user && user.is_admin && (
+                <li>
+                  <Link to="/admin" onClick={closeMenu}>
+                    Admin
+                  </Link>
+                </li>
+              )}
               {user ? (
                 <li>
                   <button
@@ -63,15 +71,15 @@ function App() {
                       logout();
                       closeMenu();
                     }}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      color: "white",
-                      cursor: "pointer",
-                      padding: "0.5rem 1rem",
-                      fontSize: "inherit",
-                      fontWeight: "500",
-                    }}
+                    // style={{
+                    //   background: "none",
+                    //   border: "none",
+                    //   color: "white",
+                    //   cursor: "pointer",
+                    //   padding: "0.5rem 1rem",
+                    //   fontSize: "inherit",
+                    //   fontWeight: "500",
+                    // }}
                   >
                     Logout ({user.full_name})
                   </button>
@@ -98,6 +106,7 @@ function App() {
             <Route path="/ladder" element={<Ladder />} />
             <Route path="/submit" element={<SubmitMatch />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/admin" element={<Admin />} />
           </Routes>
         </div>
       </div>
