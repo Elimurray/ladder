@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 function Home() {
   return (
     <div className="page">
@@ -5,18 +7,24 @@ function Home() {
       <p>Track your position, submit matches, and climb to the top!</p>
 
       <div className="home-cards">
-        <div className="card">
-          <h3>📊 View Ladder</h3>
-          <p>See current standings and player positions</p>
-        </div>
-        <div className="card">
-          <h3>🎮 Submit Match</h3>
-          <p>Report your match results</p>
-        </div>
-        <div className="card">
-          <h3>👤 Your Profile</h3>
-          <p>Check your stats and history</p>
-        </div>
+        <Link to="/ladder" style={{ textDecoration: "none", color: "inherit" }}>
+          <div className="card">
+            <h3>📊 View Ladder</h3>
+            <p>See current standings and player positions</p>
+          </div>
+        </Link>
+        <Link to="/submit" style={{ textDecoration: "none", color: "inherit" }}>
+          <div className="card">
+            <h3>🎮 Submit Match</h3>
+            <p>Report your match results</p>
+          </div>
+        </Link>
+        <Link to="/" style={{ textDecoration: "none", color: "inherit" }}>
+          <div className="card">
+            <h3>👤 Your Profile</h3>
+            <p>Check your stats and history</p>
+          </div>
+        </Link>
       </div>
     </div>
   );
