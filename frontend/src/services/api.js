@@ -60,4 +60,13 @@ export const matchesAPI = {
   processWeek: (date) => api.post(`/matches/process-week/${date}`),
 };
 
+export const profileAPI = {
+  getProfile: () => api.get("/profile/me"),
+  getHistory: () => api.get("/profile/history"),
+  getStats: () => api.get("/profile/stats"),
+  updatePreferences: (preferences) =>
+    api.put("/profile/preferences", preferences),
+  updateStatus: (status) => api.patch("/profile/status", { status }),
+};
+
 export default api;

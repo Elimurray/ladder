@@ -15,6 +15,8 @@ const usersRoutes = require("./routes/users");
 const ladderRoutes = require("./routes/ladder");
 const drawRoutes = require("./routes/draw");
 const matchesRoutes = require("./routes/matches");
+const profileRoutes = require("./routes/profile");
+app.use("/api/profile", profileRoutes);
 app.use("/api/matches", matchesRoutes);
 app.use("/api/draw", drawRoutes);
 app.use("/api/auth", authRoutes);
