@@ -150,51 +150,87 @@ router.post("/add", authMiddleware, adminMiddleware, async (req, res) => {
 
 // Admin: Manually update position (for corrections)
 router.put("/:id", authMiddleware, adminMiddleware, async (req, res) => {
+  const client = await pool.connect();
+
   try {
     const { id } = req.params;
     const { position } = req.body;
 
+    await client.query("BEGIN");
+
     // Get current position
-    const current = await pool.query(
-      "SELECT position FROM ladder_positions WHERE id = $1",
+    const current = await client.query(
+      "SELECT position, user_id FROM ladder_positions WHERE id = $1",
       [id]
     );
 
     if (current.rows.length === 0) {
+      await client.query("ROLLBACK");
       return res.status(404).json({ error: "Ladder position not found" });
     }
 
     const oldPosition = current.rows[0].position;
+    const userId = current.rows[0].user_id;
 
-    if (oldPosition === position) {
+    if (oldPosition === parseInt(position)) {
+      await client.query("COMMIT");
       return res.json({ message: "Position unchanged" });
     }
 
-    // Move others around
-    if (position > oldPosition) {
+    // Remove this person from the ladder temporarily (set to 9999)
+    await client.query(
+      "UPDATE ladder_positions SET position = 9999 WHERE id = $1",
+      [id]
+    );
+
+    // Shift others
+    if (parseInt(position) > oldPosition) {
       // Moving down - shift others up
-      await pool.query(
-        "UPDATE ladder_positions SET position = position - 1 WHERE position > $1 AND position <= $2",
-        [oldPosition, position]
+      await client.query(
+        "UPDATE ladder_positions SET position = position - 1 WHERE position > $1 AND position <= $2 AND id != $3",
+        [oldPosition, position, id]
       );
     } else {
       // Moving up - shift others down
-      await pool.query(
-        "UPDATE ladder_positions SET position = position + 1 WHERE position >= $1 AND position < $2",
-        [position, oldPosition]
+      await client.query(
+        "UPDATE ladder_positions SET position = position + 1 WHERE position >= $1 AND position < $2 AND id != $3",
+        [position, oldPosition, id]
       );
     }
 
-    // Update the position
-    const result = await pool.query(
-      "UPDATE ladder_positions SET position = $1, updated_at = NOW() WHERE id = $2 RETURNING *",
+    // Now place the person at the new position
+    await client.query(
+      "UPDATE ladder_positions SET position = $1, updated_at = NOW() WHERE id = $2",
       [position, id]
+    );
+
+    // Normalize all positions to be sequential (1, 2, 3, 4...)
+    const allPositions = await client.query(
+      "SELECT id FROM ladder_positions ORDER BY position, updated_at"
+    );
+
+    for (let i = 0; i < allPositions.rows.length; i++) {
+      await client.query(
+        "UPDATE ladder_positions SET position = $1 WHERE id = $2",
+        [i + 1, allPositions.rows[i].id]
+      );
+    }
+
+    await client.query("COMMIT");
+
+    // Return updated ladder
+    const result = await client.query(
+      "SELECT * FROM ladder_positions WHERE id = $1",
+      [id]
     );
 
     res.json(result.rows[0]);
   } catch (err) {
+    await client.query("ROLLBACK");
     console.error(err.message);
     res.status(500).json({ error: "Server error" });
+  } finally {
+    client.release();
   }
 });
 

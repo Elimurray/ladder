@@ -108,30 +108,6 @@ function Draw() {
                       isMyMatch(pairing) ? "my-match" : ""
                     }`}
                   >
-                    {/* Squash Levels Badge - Only show if BOTH players opted in */}
-                    {pairing.player1_levels && pairing.player2_levels && (
-                      <div
-                        style={{
-                          position: "absolute",
-                          top: "1rem",
-                          right: "1rem",
-                          background:
-                            "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
-                          color: "white",
-                          padding: "0.5rem 1rem",
-                          borderRadius: "20px",
-                          fontSize: "0.75rem",
-                          fontWeight: "bold",
-                          boxShadow: "0 2px 8px rgba(245, 158, 11, 0.3)",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "0.5rem",
-                        }}
-                      >
-                        🏆 LEVELS MATCH
-                      </div>
-                    )}
-
                     <div className="match-players">
                       <div className="player">
                         <span className="position-badge">
@@ -143,7 +119,34 @@ function Draw() {
                         </span>
                       </div>
 
-                      <span className="vs">VS</span>
+                      {/* SQUASH LEVELS BADGE HERE */}
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          gap: "0.5rem",
+                        }}
+                      >
+                        {pairing.player1_levels && pairing.player2_levels && (
+                          <div
+                            style={{
+                              background:
+                                "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+                              color: "white",
+                              padding: "0.25rem 0.75rem",
+                              borderRadius: "20px",
+                              fontSize: "0.7rem",
+                              fontWeight: "bold",
+                              boxShadow: "0 2px 8px rgba(245, 158, 11, 0.3)",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            🏆 LEVELS
+                          </div>
+                        )}
+                        <span className="vs">VS</span>
+                      </div>
 
                       <div className="player">
                         {pairing.player2_id ? (
