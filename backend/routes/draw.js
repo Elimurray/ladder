@@ -14,8 +14,10 @@ router.get("/week/:date", async (req, res) => {
         d.*,
         u1.full_name as player1_name,
         u1.email as player1_email,
+        u1.play_for_levels as player1_levels,
         u2.full_name as player2_name,
-        u2.email as player2_email
+        u2.email as player2_email,
+        u2.play_for_levels as player2_levels
       FROM draws d
       LEFT JOIN users u1 ON d.player1_id = u1.id
       LEFT JOIN users u2 ON d.player2_id = u2.id
@@ -37,18 +39,20 @@ router.get("/current", async (req, res) => {
   try {
     // Get the most recent draw
     const result = await pool.query(`
-      SELECT 
-        d.*,
-        u1.full_name as player1_name,
-        u1.email as player1_email,
-        u2.full_name as player2_name,
-        u2.email as player2_email
-      FROM draws d
-      LEFT JOIN users u1 ON d.player1_id = u1.id
-      LEFT JOIN users u2 ON d.player2_id = u2.id
-      WHERE d.week_date = (SELECT MAX(week_date) FROM draws)
-      ORDER BY d.time_slot, d.player1_position
-    `);
+  SELECT 
+    d.*,
+    u1.full_name as player1_name,
+    u1.email as player1_email,
+    u1.play_for_levels as player1_levels,
+    u2.full_name as player2_name,
+    u2.email as player2_email,
+    u2.play_for_levels as player2_levels
+  FROM draws d
+  LEFT JOIN users u1 ON d.player1_id = u1.id
+  LEFT JOIN users u2 ON d.player2_id = u2.id
+  WHERE d.week_date = (SELECT MAX(week_date) FROM draws)
+  ORDER BY d.time_slot, d.player1_position
+`);
 
     res.json(result.rows);
   } catch (err) {

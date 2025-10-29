@@ -7,7 +7,7 @@ const { authMiddleware, adminMiddleware } = require("../middleware/auth");
 router.get("/me", authMiddleware, async (req, res) => {
   try {
     const user = await pool.query(
-      `SELECT u.id, u.email, u.full_name, u.is_member, u.is_admin, u.is_junior, u.created_at,
+      `SELECT u.id, u.email, u.full_name, u.is_member, u.is_admin, u.is_junior, u.play_for_levels, u.created_at,
           lp.position, lp.status,
           up.earliest_time, up.notes
    FROM users u
@@ -158,5 +158,26 @@ router.get(
     }
   }
 );
+
+// Update squash levels preference
+router.patch("/squash-levels", authMiddleware, async (req, res) => {
+  try {
+    const { play_for_levels } = req.body;
+
+    const result = await pool.query(
+      "UPDATE users SET play_for_levels = $1 WHERE id = $2 RETURNING id, email, full_name, is_member, is_admin, is_junior, play_for_levels",
+      [play_for_levels, req.user.id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Server error" });
+  }
+});
 
 module.exports = router;

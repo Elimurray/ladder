@@ -32,7 +32,7 @@ router.post("/register", async (req, res) => {
 
     // Create user
     const result = await pool.query(
-      "INSERT INTO users (email, full_name, password_hash, is_member) VALUES ($1, $2, $3, $4) RETURNING id, email, full_name, is_member, is_admin, is_junior",
+      "INSERT INTO users (email, full_name, password_hash, is_member) VALUES ($1, $2, $3, $4) RETURNING id, email, full_name, is_member, is_admin, is_junior, play_for_levels",
       [email, full_name, password_hash, true]
     );
 
@@ -58,6 +58,7 @@ router.post("/register", async (req, res) => {
         is_member: user.is_member,
         is_admin: user.is_admin,
         is_junior: user.is_junior,
+        play_for_levels: user.play_for_levels,
       },
     });
   } catch (err) {
@@ -116,6 +117,7 @@ router.post("/login", async (req, res) => {
         is_member: user.is_member,
         is_admin: user.is_admin,
         is_junior: user.is_junior,
+        play_for_levels: user.play_for_levels,
       },
     });
   } catch (err) {
@@ -128,7 +130,7 @@ router.post("/login", async (req, res) => {
 router.get("/me", authMiddleware, async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT id, email, full_name, is_member, is_admin, is_junior, created_at FROM users WHERE id = $1",
+      "SELECT id, email, full_name, is_member, is_admin, is_junior, play_for_levels, created_at FROM users WHERE id = $1",
       [req.user.id]
     );
 

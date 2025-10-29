@@ -881,7 +881,7 @@ td:first-child {
 }
 
 .results-table th {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #667eea;
   color: white;
   font-weight: 600;
   text-transform: uppercase;
@@ -901,7 +901,6 @@ td:first-child {
 .results-table tbody tr:hover {
   background: #f7fafc;
 }
-
 
 @media (max-width: 768px) {
   /* Show hamburger menu */
@@ -1062,14 +1061,14 @@ td:first-child {
     transform: rotate(90deg);
   }
 
-   .results-table {
+  .results-table {
     margin-left: -1.5rem;
     margin-right: -1.5rem;
     border-radius: 0;
     border-left: none;
     border-right: none;
   }
-  
+
   .results-table th,
   .results-table td {
     padding: 0.75rem 0.5rem;

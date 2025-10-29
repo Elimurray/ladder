@@ -93,15 +93,6 @@ function App() {
                       closeMenu();
                       window.location.href = "/login";
                     }}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      color: "white",
-                      cursor: "pointer",
-                      padding: "0.5rem 1rem",
-                      fontSize: "inherit",
-                      fontWeight: "500",
-                    }}
                   >
                     Logout ({user.full_name})
                   </button>

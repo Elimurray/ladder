@@ -379,6 +379,79 @@ function Profile() {
               </button>
             </div>
           </div>
+          {/* Squash Levels */}
+          <div
+            style={{
+              background: "white",
+              border: "2px solid #e2e8f0",
+              borderRadius: "12px",
+              padding: "2rem",
+              marginBottom: "2rem",
+            }}
+          >
+            <h3 style={{ marginBottom: "1rem", color: "#2d3748" }}>
+              Squash Levels
+            </h3>
+            <p
+              style={{
+                color: "#718096",
+                marginBottom: "1.5rem",
+                fontSize: "0.9rem",
+              }}
+            >
+              Do you want to play for squash levels? When both players opt-in,
+              your match will count towards level rankings.
+            </p>
+
+            <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+              <button
+                onClick={async () => {
+                  try {
+                    await profileAPI.updateSquashLevels(true);
+                    setSuccess("Now playing for squash levels!");
+                    setTimeout(() => setSuccess(null), 3000);
+                    fetchProfile();
+                  } catch (err) {
+                    setError(err.response?.data?.error || "Failed to update");
+                  }
+                }}
+                style={{
+                  padding: "0.75rem 1.5rem",
+                  background: profile.play_for_levels ? "#48bb78" : "#e2e8f0",
+                  color: profile.play_for_levels ? "white" : "#4a5568",
+                  border: "none",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  fontWeight: "600",
+                }}
+              >
+                ✓ Yes, Play for Levels
+              </button>
+              <button
+                onClick={async () => {
+                  try {
+                    await profileAPI.updateSquashLevels(false);
+                    setSuccess("Not playing for levels");
+                    setTimeout(() => setSuccess(null), 3000);
+                    fetchProfile();
+                  } catch (err) {
+                    setError(err.response?.data?.error || "Failed to update");
+                  }
+                }}
+                style={{
+                  padding: "0.75rem 1.5rem",
+                  background: !profile.play_for_levels ? "#e53e3e" : "#e2e8f0",
+                  color: !profile.play_for_levels ? "white" : "#4a5568",
+                  border: "none",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  fontWeight: "600",
+                }}
+              >
+                ✗ No Thanks
+              </button>
+            </div>
+          </div>
 
           {/* Time Preferences */}
           <div

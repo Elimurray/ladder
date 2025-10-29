@@ -150,7 +150,6 @@ function Results() {
                       </td>
                       <td
                         style={{
-                          textAlign: "center",
                           fontWeight: "bold",
                           fontSize: "1.1rem",
                         }}
