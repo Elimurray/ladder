@@ -260,29 +260,6 @@ function Admin() {
       showError(err.response?.data?.error || "Failed to delete draw");
     }
   };
-  const handleApproveMatch = async (matchId) => {
-    try {
-      await matchesAPI.approveMatch(matchId);
-      showSuccess("Match approved successfully!");
-      fetchData();
-    } catch (err) {
-      showError(err.response?.data?.error || "Failed to approve match");
-    }
-  };
-
-  const handleDeleteMatch = async (matchId) => {
-    if (!confirm("Are you sure you want to delete this match result?")) {
-      return;
-    }
-
-    try {
-      await matchesAPI.deleteMatch(matchId);
-      showSuccess("Match deleted successfully!");
-      fetchData();
-    } catch (err) {
-      showError(err.response?.data?.error || "Failed to delete match");
-    }
-  };
 
   const handleDrawDateChange = (e) => {
     const date = e.target.value;
@@ -316,30 +293,28 @@ function Admin() {
     }
   };
 
-  const handleApproveAll = async () => {
-    if (!confirm(`Approve all ${pendingMatches.length} pending matches?`)) {
+  const handleApproveMatch = async (matchId) => {
+    try {
+      await matchesAPI.approveMatch(matchId);
+      showSuccess("Match approved successfully!");
+      fetchData();
+    } catch (err) {
+      showError(err.response?.data?.error || "Failed to approve match");
+    }
+  };
+
+  const handleDeleteMatch = async (matchId) => {
+    if (!confirm("Are you sure you want to delete this match result?")) {
       return;
     }
 
     try {
-      const response = await matchesAPI.approveAll();
-      showSuccess(`${response.data.approved} matches approved!`);
+      await matchesAPI.deleteMatch(matchId);
+      showSuccess("Match deleted successfully!");
       fetchData();
     } catch (err) {
-      showError(err.response?.data?.error || "Failed to approve matches");
+      showError(err.response?.data?.error || "Failed to delete match");
     }
-  };
-
-  const handleStartEditMatch = (match) => {
-    setEditingMatchId(match.id);
-    setEditGamesWon(match.games_won);
-    setEditGamesLost(match.games_lost);
-  };
-
-  const handleCancelEditMatch = () => {
-    setEditingMatchId(null);
-    setEditGamesWon("");
-    setEditGamesLost("");
   };
 
   const handleSaveMatch = async (match) => {
@@ -353,21 +328,9 @@ function Admin() {
         return;
       }
 
-      // Calculate result
-      let result;
-      if (gamesWon === 3) result = "3";
-      else if (gamesWon === 2) result = "2";
-      else if (gamesWon === 1) result = "1";
-      else if (gamesWon === 0) result = "0";
-
-      const matchScore = `${gamesWon}-${gamesLost}`;
-
-      await matchesAPI.updateMatch(match.id, {
-        games_won: gamesWon,
-        games_lost: gamesLost,
-        result: result,
-        match_score: matchScore,
-        set_scores: match.set_scores,
+      await matchesAPI.updateMatch(match.match_id, {
+        player1_games_won: gamesWon,
+        player1_games_lost: gamesLost,
       });
 
       showSuccess("Match updated successfully!");
@@ -626,11 +589,10 @@ function Admin() {
 
           <div className="pending-matches-grid">
             {pendingMatches.map((match) => {
-              const badge = getResultBadge(match.result);
-              const isEditing = editingMatchId === match.id;
+              const isEditing = editingMatchId === match.match_id;
 
               return (
-                <div key={match.id} className="pending-match-card">
+                <div key={match.match_id} className="pending-match-card">
                   <div className="match-header">
                     <div className="match-date">
                       Week of {new Date(match.week_date).toLocaleDateString()}
@@ -640,13 +602,47 @@ function Admin() {
                     )}
                   </div>
 
-                  <div className="match-players-info">
-                    <div className="player-info">
-                      <strong>{match.player_name}</strong>
-                      <div style={{ fontSize: "0.875rem", color: "#718096" }}>
-                        vs {match.opponent_name}
-                      </div>
+                  <div style={{ padding: "1rem 0" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        marginBottom: "0.5rem",
+                      }}
+                    >
+                      <strong style={{ fontSize: "1rem" }}>
+                        {match.player1_name}
+                      </strong>
+                      <span
+                        style={{
+                          fontSize: "1.25rem",
+                          fontWeight: "bold",
+                          color: match.scores_match ? "#48bb78" : "#e53e3e",
+                        }}
+                      >
+                        {match.player1_games_won} - {match.player1_games_lost}
+                      </span>
+                      <strong style={{ fontSize: "1rem" }}>
+                        {match.player2_name}
+                      </strong>
                     </div>
+
+                    {!match.scores_match && (
+                      <div
+                        style={{
+                          background: "#fff5f5",
+                          border: "1px solid #feb2b2",
+                          padding: "0.5rem",
+                          borderRadius: "6px",
+                          fontSize: "0.875rem",
+                          color: "#c53030",
+                          textAlign: "center",
+                        }}
+                      >
+                        ⚠️ Scores don't match - please review
+                      </div>
+                    )}
                   </div>
 
                   {isEditing ? (
@@ -667,7 +663,7 @@ function Admin() {
                             fontSize: "0.875rem",
                           }}
                         >
-                          Edit Score:
+                          Correct Score ({match.player1_name}):
                         </label>
                         <div
                           style={{
@@ -730,35 +726,22 @@ function Admin() {
                     </div>
                   ) : (
                     <>
-                      <div className="match-result-display">
-                        <div className="result-score">
-                          Score: <strong>{match.match_score}</strong>
-                        </div>
-                        <div
-                          className="result-badge"
-                          style={{
-                            background: badge.color,
-                            color: "white",
-                            padding: "0.5rem 1rem",
-                            borderRadius: "8px",
-                            textAlign: "center",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          {badge.text} {badge.movement}
-                        </div>
-                      </div>
-
                       <div className="match-meta">
                         <small style={{ color: "#718096" }}>
                           Submitted{" "}
-                          {new Date(match.submitted_at).toLocaleString()}
+                          {new Date(
+                            match.player1_submitted_at
+                          ).toLocaleString()}
                         </small>
                       </div>
 
                       <div className="match-actions">
                         <button
-                          onClick={() => handleStartEditMatch(match)}
+                          onClick={() => {
+                            setEditingMatchId(match.match_id);
+                            setEditGamesWon(match.player1_games_won);
+                            setEditGamesLost(match.player1_games_lost);
+                          }}
                           style={{
                             flex: 1,
                             padding: "0.75rem",
@@ -774,13 +757,13 @@ function Admin() {
                           ✏️ Edit
                         </button>
                         <button
-                          onClick={() => handleApproveMatch(match.id)}
+                          onClick={() => handleApproveMatch(match.match_id)}
                           className="btn-approve"
                         >
                           ✓ Approve
                         </button>
                         <button
-                          onClick={() => handleDeleteMatch(match.id)}
+                          onClick={() => handleDeleteMatch(match.match_id)}
                           className="btn-reject"
                         >
                           ✗ Reject

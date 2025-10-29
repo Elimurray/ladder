@@ -200,7 +200,7 @@ router.get("/my-match", authMiddleware, async (req, res) => {
   }
 });
 
-// Admin: Get all pending results
+// Admin: Get all pending results (grouped by match)
 router.get("/pending", authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const result = await pool.query(
@@ -215,10 +215,56 @@ router.get("/pending", authMiddleware, adminMiddleware, async (req, res) => {
       LEFT JOIN users u2 ON m.opponent_id = u2.id
       LEFT JOIN draws d ON m.draw_id = d.id
       WHERE m.admin_approved = false
-      ORDER BY m.submitted_at DESC`
+      ORDER BY d.week_date DESC, m.player_id`
     );
 
-    res.json(result.rows);
+    // Group by match (each match has 2 entries - one per player)
+    const matches = [];
+    const processedPlayers = new Set();
+
+    result.rows.forEach((row) => {
+      if (!processedPlayers.has(row.player_id)) {
+        // Find opponent's result
+        const opponentResult = result.rows.find(
+          (r) =>
+            r.player_id === row.opponent_id && r.opponent_id === row.player_id
+        );
+
+        matches.push({
+          match_id: `${row.player_id}-${row.opponent_id}`,
+          player1_match_id: row.id,
+          player2_match_id: opponentResult?.id,
+          week_date: row.week_date,
+          time_slot: row.time_slot,
+          player1_id: row.player_id,
+          player1_name: row.player_name,
+          player1_score: row.match_score,
+          player1_games_won: row.games_won,
+          player1_games_lost: row.games_lost,
+          player1_result: row.result,
+          player1_set_scores: row.set_scores,
+          player1_submitted_at: row.submitted_at,
+          player2_id: row.opponent_id,
+          player2_name: row.opponent_name,
+          player2_score: opponentResult?.match_score || "Not submitted",
+          player2_games_won: opponentResult?.games_won || 0,
+          player2_games_lost: opponentResult?.games_lost || 0,
+          player2_result: opponentResult?.result,
+          player2_set_scores: opponentResult?.set_scores,
+          player2_submitted_at: opponentResult?.submitted_at,
+          // Check if scores match
+          scores_match:
+            opponentResult &&
+            row.games_won === opponentResult.games_lost &&
+            row.games_lost === opponentResult.games_won,
+        });
+
+        processedPlayers.add(row.player_id);
+        if (row.opponent_id) processedPlayers.add(row.opponent_id);
+      }
+    });
+
+    res.json(matches);
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ error: "Server error" });
@@ -423,19 +469,29 @@ router.post(
   }
 );
 
-// Admin: Bulk approve all pending matches
+// Admin: Approve a match (both players)
 router.post(
-  "/approve-all",
+  "/approve-match/:matchId",
   authMiddleware,
   adminMiddleware,
   async (req, res) => {
     try {
+      const { matchId } = req.params; // Format: "player1Id-player2Id"
+      const [player1Id, player2Id] = matchId
+        .split("-")
+        .map((id) => parseInt(id));
+
       const result = await pool.query(
-        "UPDATE matches SET admin_approved = true WHERE admin_approved = false RETURNING *"
+        `UPDATE matches 
+       SET admin_approved = true 
+       WHERE (player_id = $1 AND opponent_id = $2) 
+          OR (player_id = $2 AND opponent_id = $1)
+       RETURNING *`,
+        [player1Id, player2Id]
       );
 
       res.json({
-        message: "All matches approved",
+        message: "Match approved",
         approved: result.rows.length,
       });
     } catch (err) {
@@ -445,40 +501,110 @@ router.post(
   }
 );
 
-// Admin: Edit match result
-router.put("/:id", authMiddleware, adminMiddleware, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { games_won, games_lost, result, match_score, set_scores } = req.body;
+// Admin: Delete a match (both players)
+router.delete(
+  "/match/:matchId",
+  authMiddleware,
+  adminMiddleware,
+  async (req, res) => {
+    try {
+      const { matchId } = req.params;
+      const [player1Id, player2Id] = matchId
+        .split("-")
+        .map((id) => parseInt(id));
 
-    const updateResult = await pool.query(
-      `UPDATE matches 
+      await pool.query(
+        `DELETE FROM matches 
+       WHERE (player_id = $1 AND opponent_id = $2) 
+          OR (player_id = $2 AND opponent_id = $1)`,
+        [player1Id, player2Id]
+      );
+
+      res.json({ message: "Match deleted" });
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ error: "Server error" });
+    }
+  }
+);
+
+// Admin: Update match (both players)
+router.put(
+  "/match/:matchId",
+  authMiddleware,
+  adminMiddleware,
+  async (req, res) => {
+    const client = await pool.connect();
+
+    try {
+      const { matchId } = req.params;
+      const { player1_games_won, player1_games_lost } = req.body;
+      const [player1Id, player2Id] = matchId
+        .split("-")
+        .map((id) => parseInt(id));
+
+      await client.query("BEGIN");
+
+      // Calculate results
+      let player1Result;
+      if (player1_games_won === 3) player1Result = "3";
+      else if (player1_games_won === 2) player1Result = "2";
+      else if (player1_games_won === 1) player1Result = "1";
+      else if (player1_games_won === 0) player1Result = "0";
+
+      let player2Result;
+      if (player1_games_lost === 3) player2Result = "3";
+      else if (player1_games_lost === 2) player2Result = "2";
+      else if (player1_games_lost === 1) player2Result = "1";
+      else if (player1_games_lost === 0) player2Result = "0";
+
+      // Update player 1
+      await client.query(
+        `UPDATE matches 
        SET games_won = $1, 
            games_lost = $2, 
            result = $3, 
-           match_score = $4,
-           set_scores = $5
-       WHERE id = $6 
-       RETURNING *`,
-      [
-        games_won,
-        games_lost,
-        result,
-        match_score,
-        set_scores ? JSON.stringify(set_scores) : null,
-        id,
-      ]
-    );
+           match_score = $4
+       WHERE player_id = $5 AND opponent_id = $6`,
+        [
+          player1_games_won,
+          player1_games_lost,
+          player1Result,
+          `${player1_games_won}-${player1_games_lost}`,
+          player1Id,
+          player2Id,
+        ]
+      );
 
-    if (updateResult.rows.length === 0) {
-      return res.status(404).json({ error: "Match not found" });
+      // Update player 2 (opposite scores)
+      await client.query(
+        `UPDATE matches 
+       SET games_won = $1, 
+           games_lost = $2, 
+           result = $3, 
+           match_score = $4
+       WHERE player_id = $5 AND opponent_id = $6`,
+        [
+          player1_games_lost,
+          player1_games_won,
+          player2Result,
+          `${player1_games_lost}-${player1_games_won}`,
+          player2Id,
+          player1Id,
+        ]
+      );
+
+      await client.query("COMMIT");
+
+      res.json({ message: "Match updated successfully" });
+    } catch (err) {
+      await client.query("ROLLBACK");
+      console.error(err.message);
+      res.status(500).json({ error: "Server error" });
+    } finally {
+      client.release();
     }
-
-    res.json({ message: "Match updated", match: updateResult.rows[0] });
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ error: "Server error" });
   }
-});
+);
 
 module.exports = router;

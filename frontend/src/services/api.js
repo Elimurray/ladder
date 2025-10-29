@@ -55,10 +55,10 @@ export const matchesAPI = {
   getMyMatch: () => api.get("/matches/my-match"),
   getPending: () => api.get("/matches/pending"),
   getWeekResults: (date) => api.get(`/matches/week/${date}`),
-  approveMatch: (id) => api.patch(`/matches/${id}/approve`),
+  approveMatch: (matchId) => api.post(`/matches/approve-match/${matchId}`), // UPDATED
   approveAll: () => api.post("/matches/approve-all"),
-  updateMatch: (id, data) => api.put(`/matches/${id}`, data),
-  deleteMatch: (id) => api.delete(`/matches/${id}`),
+  updateMatch: (matchId, data) => api.put(`/matches/match/${matchId}`, data), // UPDATED
+  deleteMatch: (matchId) => api.delete(`/matches/match/${matchId}`), // UPDATED
   processWeek: (date) => api.post(`/matches/process-week/${date}`),
 };
 
