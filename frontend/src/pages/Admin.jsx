@@ -41,6 +41,10 @@ function Admin() {
   const [userPreferences, setUserPreferences] = useState([]);
   const [showPreferences, setShowPreferences] = useState(false);
 
+  const [editingMatchId, setEditingMatchId] = useState(null);
+  const [editGamesWon, setEditGamesWon] = useState("");
+  const [editGamesLost, setEditGamesLost] = useState("");
+
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -312,6 +316,70 @@ function Admin() {
     }
   };
 
+  const handleApproveAll = async () => {
+    if (!confirm(`Approve all ${pendingMatches.length} pending matches?`)) {
+      return;
+    }
+
+    try {
+      const response = await matchesAPI.approveAll();
+      showSuccess(`${response.data.approved} matches approved!`);
+      fetchData();
+    } catch (err) {
+      showError(err.response?.data?.error || "Failed to approve matches");
+    }
+  };
+
+  const handleStartEditMatch = (match) => {
+    setEditingMatchId(match.id);
+    setEditGamesWon(match.games_won);
+    setEditGamesLost(match.games_lost);
+  };
+
+  const handleCancelEditMatch = () => {
+    setEditingMatchId(null);
+    setEditGamesWon("");
+    setEditGamesLost("");
+  };
+
+  const handleSaveMatch = async (match) => {
+    try {
+      const gamesWon = parseInt(editGamesWon);
+      const gamesLost = parseInt(editGamesLost);
+
+      // Validate
+      if (gamesWon + gamesLost > 5 || gamesWon + gamesLost < 3) {
+        showError("Invalid score. Total must be 3, 4, or 5 games");
+        return;
+      }
+
+      // Calculate result
+      let result;
+      if (gamesWon === 3) result = "3";
+      else if (gamesWon === 2) result = "2";
+      else if (gamesWon === 1) result = "1";
+      else if (gamesWon === 0) result = "0";
+
+      const matchScore = `${gamesWon}-${gamesLost}`;
+
+      await matchesAPI.updateMatch(match.id, {
+        games_won: gamesWon,
+        games_lost: gamesLost,
+        result: result,
+        match_score: matchScore,
+        set_scores: match.set_scores,
+      });
+
+      showSuccess("Match updated successfully!");
+      setEditingMatchId(null);
+      setEditGamesWon("");
+      setEditGamesLost("");
+      fetchData();
+    } catch (err) {
+      showError(err.response?.data?.error || "Failed to update match");
+    }
+  };
+
   const getResultBadge = (result) => {
     const badges = {
       3: { text: "Won 3", color: "#48bb78", movement: "↑ 6" },
@@ -529,11 +597,38 @@ function Admin() {
       {/* Pending Match Approvals */}
       {pendingMatches.length > 0 && (
         <div className="admin-section">
-          <h2>Pending Match Approvals ({pendingMatches.length})</h2>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "1.5rem",
+            }}
+          >
+            <h2>Pending Match Approvals ({pendingMatches.length})</h2>
+            <button
+              onClick={handleApproveAll}
+              style={{
+                padding: "0.75rem 1.5rem",
+                background: "linear-gradient(135deg, #48bb78 0%, #38a169 100%)",
+                color: "white",
+                border: "none",
+                borderRadius: "8px",
+                cursor: "pointer",
+                fontWeight: "600",
+                boxShadow: "0 2px 8px rgba(72, 187, 120, 0.3)",
+                fontSize: "1rem",
+              }}
+            >
+              ✓ Approve All {pendingMatches.length} Matches
+            </button>
+          </div>
 
           <div className="pending-matches-grid">
             {pendingMatches.map((match) => {
               const badge = getResultBadge(match.result);
+              const isEditing = editingMatchId === match.id;
+
               return (
                 <div key={match.id} className="pending-match-card">
                   <div className="match-header">
@@ -554,45 +649,145 @@ function Admin() {
                     </div>
                   </div>
 
-                  <div className="match-result-display">
-                    <div className="result-score">
-                      Score: <strong>{match.match_score}</strong>
-                    </div>
+                  {isEditing ? (
                     <div
-                      className="result-badge"
                       style={{
-                        background: badge.color,
-                        color: "white",
-                        padding: "0.5rem 1rem",
+                        background: "#f7fafc",
+                        padding: "1rem",
                         borderRadius: "8px",
-                        textAlign: "center",
-                        fontWeight: "bold",
+                        marginTop: "1rem",
                       }}
                     >
-                      {badge.text} {badge.movement}
+                      <div style={{ marginBottom: "1rem" }}>
+                        <label
+                          style={{
+                            display: "block",
+                            marginBottom: "0.5rem",
+                            fontWeight: "600",
+                            fontSize: "0.875rem",
+                          }}
+                        >
+                          Edit Score:
+                        </label>
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "0.5rem",
+                            alignItems: "center",
+                          }}
+                        >
+                          <select
+                            value={editGamesWon}
+                            onChange={(e) => setEditGamesWon(e.target.value)}
+                            style={{
+                              padding: "0.5rem",
+                              border: "2px solid #e2e8f0",
+                              borderRadius: "6px",
+                              flex: 1,
+                            }}
+                          >
+                            <option value="">Won</option>
+                            <option value="3">3</option>
+                            <option value="2">2</option>
+                            <option value="1">1</option>
+                            <option value="0">0</option>
+                          </select>
+                          <span style={{ fontWeight: "bold" }}>-</span>
+                          <select
+                            value={editGamesLost}
+                            onChange={(e) => setEditGamesLost(e.target.value)}
+                            style={{
+                              padding: "0.5rem",
+                              border: "2px solid #e2e8f0",
+                              borderRadius: "6px",
+                              flex: 1,
+                            }}
+                          >
+                            <option value="">Lost</option>
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div style={{ display: "flex", gap: "0.5rem" }}>
+                        <button
+                          onClick={() => handleSaveMatch(match)}
+                          className="btn-save"
+                          style={{ flex: 1 }}
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={handleCancelEditMatch}
+                          className="btn-cancel"
+                          style={{ flex: 1 }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <>
+                      <div className="match-result-display">
+                        <div className="result-score">
+                          Score: <strong>{match.match_score}</strong>
+                        </div>
+                        <div
+                          className="result-badge"
+                          style={{
+                            background: badge.color,
+                            color: "white",
+                            padding: "0.5rem 1rem",
+                            borderRadius: "8px",
+                            textAlign: "center",
+                            fontWeight: "bold",
+                          }}
+                        >
+                          {badge.text} {badge.movement}
+                        </div>
+                      </div>
 
-                  <div className="match-meta">
-                    <small style={{ color: "#718096" }}>
-                      Submitted {new Date(match.submitted_at).toLocaleString()}
-                    </small>
-                  </div>
+                      <div className="match-meta">
+                        <small style={{ color: "#718096" }}>
+                          Submitted{" "}
+                          {new Date(match.submitted_at).toLocaleString()}
+                        </small>
+                      </div>
 
-                  <div className="match-actions">
-                    <button
-                      onClick={() => handleApproveMatch(match.id)}
-                      className="btn-approve"
-                    >
-                      ✓ Approve
-                    </button>
-                    <button
-                      onClick={() => handleDeleteMatch(match.id)}
-                      className="btn-reject"
-                    >
-                      ✗ Reject
-                    </button>
-                  </div>
+                      <div className="match-actions">
+                        <button
+                          onClick={() => handleStartEditMatch(match)}
+                          style={{
+                            flex: 1,
+                            padding: "0.75rem",
+                            background: "#667eea",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "8px",
+                            cursor: "pointer",
+                            fontWeight: "600",
+                            fontSize: "0.95rem",
+                          }}
+                        >
+                          ✏️ Edit
+                        </button>
+                        <button
+                          onClick={() => handleApproveMatch(match.id)}
+                          className="btn-approve"
+                        >
+                          ✓ Approve
+                        </button>
+                        <button
+                          onClick={() => handleDeleteMatch(match.id)}
+                          className="btn-reject"
+                        >
+                          ✗ Reject
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
               );
             })}

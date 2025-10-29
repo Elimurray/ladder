@@ -423,4 +423,62 @@ router.post(
   }
 );
 
+// Admin: Bulk approve all pending matches
+router.post(
+  "/approve-all",
+  authMiddleware,
+  adminMiddleware,
+  async (req, res) => {
+    try {
+      const result = await pool.query(
+        "UPDATE matches SET admin_approved = true WHERE admin_approved = false RETURNING *"
+      );
+
+      res.json({
+        message: "All matches approved",
+        approved: result.rows.length,
+      });
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ error: "Server error" });
+    }
+  }
+);
+
+// Admin: Edit match result
+router.put("/:id", authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { games_won, games_lost, result, match_score, set_scores } = req.body;
+
+    const updateResult = await pool.query(
+      `UPDATE matches 
+       SET games_won = $1, 
+           games_lost = $2, 
+           result = $3, 
+           match_score = $4,
+           set_scores = $5
+       WHERE id = $6 
+       RETURNING *`,
+      [
+        games_won,
+        games_lost,
+        result,
+        match_score,
+        set_scores ? JSON.stringify(set_scores) : null,
+        id,
+      ]
+    );
+
+    if (updateResult.rows.length === 0) {
+      return res.status(404).json({ error: "Match not found" });
+    }
+
+    res.json({ message: "Match updated", match: updateResult.rows[0] });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 module.exports = router;
