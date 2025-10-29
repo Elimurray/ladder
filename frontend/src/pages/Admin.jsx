@@ -260,39 +260,6 @@ function Admin() {
       showError(err.response?.data?.error || "Failed to delete draw");
     }
   };
-
-  const handleDrawDateChange = (e) => {
-    const date = e.target.value;
-    setSelectedDrawDate(date);
-    fetchDrawByDate(date);
-  };
-
-  const handleDeleteSelectedDraw = async () => {
-    if (!selectedDrawDate) return;
-
-    if (
-      !confirm(
-        `Are you sure you want to delete the draw for ${selectedDrawDate}? This will delete all matches and cannot be undone.`
-      )
-    ) {
-      return;
-    }
-
-    try {
-      await drawAPI.deleteDraw(selectedDrawDate);
-      showSuccess("Draw deleted successfully!");
-      setSelectedDrawDate("");
-      setCurrentDraw([]);
-
-      // Refresh page after short delay
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-    } catch (err) {
-      showError(err.response?.data?.error || "Failed to delete draw");
-    }
-  };
-
   const handleApproveMatch = async (matchId) => {
     try {
       await matchesAPI.approveMatch(matchId);
@@ -341,6 +308,64 @@ function Admin() {
     } catch (err) {
       showError(err.response?.data?.error || "Failed to update match");
     }
+  };
+
+  const handleDrawDateChange = (e) => {
+    const date = e.target.value;
+    setSelectedDrawDate(date);
+    fetchDrawByDate(date);
+  };
+
+  const handleDeleteSelectedDraw = async () => {
+    if (!selectedDrawDate) return;
+
+    if (
+      !confirm(
+        `Are you sure you want to delete the draw for ${selectedDrawDate}? This will delete all matches and cannot be undone.`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      await drawAPI.deleteDraw(selectedDrawDate);
+      showSuccess("Draw deleted successfully!");
+      setSelectedDrawDate("");
+      setCurrentDraw([]);
+
+      // Refresh page after short delay
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (err) {
+      showError(err.response?.data?.error || "Failed to delete draw");
+    }
+  };
+
+  const handleApproveAll = async () => {
+    if (!confirm(`Approve all ${pendingMatches.length} pending matches?`)) {
+      return;
+    }
+
+    try {
+      const response = await matchesAPI.approveAll();
+      showSuccess(`${response.data.approved} matches approved!`);
+      fetchData();
+    } catch (err) {
+      showError(err.response?.data?.error || "Failed to approve matches");
+    }
+  };
+
+  const handleStartEditMatch = (match) => {
+    setEditingMatchId(match.id);
+    setEditGamesWon(match.games_won);
+    setEditGamesLost(match.games_lost);
+  };
+
+  const handleCancelEditMatch = () => {
+    setEditingMatchId(null);
+    setEditGamesWon("");
+    setEditGamesLost("");
   };
 
   const getResultBadge = (result) => {

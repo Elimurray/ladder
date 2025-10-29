@@ -501,6 +501,28 @@ router.post(
   }
 );
 
+// Admin: Bulk approve all pending matches
+router.post(
+  "/approve-all",
+  authMiddleware,
+  adminMiddleware,
+  async (req, res) => {
+    try {
+      const result = await pool.query(
+        "UPDATE matches SET admin_approved = true WHERE admin_approved = false RETURNING *"
+      );
+
+      res.json({
+        message: "All matches approved",
+        approved: result.rows.length,
+      });
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ error: "Server error" });
+    }
+  }
+);
+
 // Admin: Delete a match (both players)
 router.delete(
   "/match/:matchId",
