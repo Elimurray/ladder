@@ -434,6 +434,21 @@ function Admin() {
                           style={{ color: "#2d3748", fontSize: "1.1rem" }}
                         >
                           #{player.position} {player.full_name}
+                          {player.is_junior && (
+                            <span
+                              style={{
+                                marginLeft: "0.5rem",
+                                padding: "0.25rem 0.5rem",
+                                background: "#fef3c7",
+                                color: "#92400e",
+                                borderRadius: "12px",
+                                fontSize: "0.75rem",
+                                fontWeight: "bold",
+                              }}
+                            >
+                              JUNIOR
+                            </span>
+                          )}
                         </strong>
                         <div style={{ fontSize: "0.875rem", color: "#718096" }}>
                           {player.email}

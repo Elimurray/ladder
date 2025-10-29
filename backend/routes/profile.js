@@ -7,13 +7,13 @@ const { authMiddleware, adminMiddleware } = require("../middleware/auth");
 router.get("/me", authMiddleware, async (req, res) => {
   try {
     const user = await pool.query(
-      `SELECT u.id, u.email, u.full_name, u.is_member, u.is_admin, u.created_at,
-              lp.position, lp.status,
-              up.preferred_times, up.earliest_time, up.latest_time, up.notes
-       FROM users u
-       LEFT JOIN ladder_positions lp ON u.id = lp.user_id
-       LEFT JOIN user_preferences up ON u.id = up.user_id
-       WHERE u.id = $1`,
+      `SELECT u.id, u.email, u.full_name, u.is_member, u.is_admin, u.is_junior, u.created_at,
+          lp.position, lp.status,
+          up.preferred_times, up.earliest_time, up.latest_time, up.notes
+   FROM users u
+   LEFT JOIN ladder_positions lp ON u.id = lp.user_id
+   LEFT JOIN user_preferences up ON u.id = up.user_id
+   WHERE u.id = $1`,
       [req.user.id]
     );
 
@@ -138,20 +138,21 @@ router.get(
     try {
       const preferences = await pool.query(
         `SELECT 
-        u.id,
-        u.full_name,
-        u.email,
-        lp.position,
-        lp.status,
-        up.preferred_times,
-        up.earliest_time,
-        up.latest_time,
-        up.notes
-       FROM users u
-       LEFT JOIN ladder_positions lp ON u.id = lp.user_id
-       LEFT JOIN user_preferences up ON u.id = up.user_id
-       WHERE lp.status = 'active'
-       ORDER BY lp.position`
+    u.id,
+    u.full_name,
+    u.email,
+    u.is_junior,
+    lp.position,
+    lp.status,
+    up.preferred_times,
+    up.earliest_time,
+    up.latest_time,
+    up.notes
+   FROM users u
+   LEFT JOIN ladder_positions lp ON u.id = lp.user_id
+   LEFT JOIN user_preferences up ON u.id = up.user_id
+   WHERE lp.status = 'active'
+   ORDER BY lp.position`
       );
 
       res.json(preferences.rows);
