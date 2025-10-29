@@ -1,5 +1,11 @@
 import { useState, useEffect } from "react";
-import { ladderAPI, usersAPI, drawAPI, matchesAPI } from "../services/api";
+import {
+  ladderAPI,
+  usersAPI,
+  drawAPI,
+  matchesAPI,
+  profileAPI,
+} from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
@@ -31,6 +37,9 @@ function Admin() {
 
   const [availableDraws, setAvailableDraws] = useState([]);
   const [selectedDrawDate, setSelectedDrawDate] = useState("");
+
+  const [userPreferences, setUserPreferences] = useState([]);
+  const [showPreferences, setShowPreferences] = useState(false);
 
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -72,11 +81,13 @@ function Admin() {
         ladderAPI.getAll(),
         usersAPI.getAll(),
         matchesAPI.getPending(),
+        profileAPI.getAllPreferences(),
       ]);
 
       setLadder(ladderRes.data);
       setUsers(usersRes.data);
       setPendingMatches(pendingRes.data);
+      setUserPreferences(preferencesRes.data);
 
       // Fetch all available draws
       try {
@@ -367,6 +378,161 @@ function Admin() {
             </div>
           </div>
         </form>
+      </div>
+      {/* User Time Preferences */}
+      <div className="admin-section">
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "1rem",
+          }}
+        >
+          <h2>Player Time Preferences</h2>
+          <button
+            onClick={() => setShowPreferences(!showPreferences)}
+            style={{
+              padding: "0.5rem 1rem",
+              background: "#667eea",
+              color: "white",
+              border: "none",
+              borderRadius: "6px",
+              cursor: "pointer",
+              fontWeight: "600",
+            }}
+          >
+            {showPreferences ? "▼ Hide" : "▶ Show"} Preferences
+          </button>
+        </div>
+
+        {showPreferences && (
+          <div style={{ marginTop: "1rem" }}>
+            {userPreferences.length === 0 ? (
+              <p style={{ color: "#718096", fontStyle: "italic" }}>
+                No active players with preferences set.
+              </p>
+            ) : (
+              <div className="preferences-grid">
+                {userPreferences.map((player) => (
+                  <div key={player.id} className="preference-card">
+                    <div className="preference-header">
+                      <div>
+                        <strong
+                          style={{ color: "#2d3748", fontSize: "1.1rem" }}
+                        >
+                          #{player.position} {player.full_name}
+                        </strong>
+                        <div style={{ fontSize: "0.875rem", color: "#718096" }}>
+                          {player.email}
+                        </div>
+                      </div>
+                      <span className={`status-badge status-${player.status}`}>
+                        {player.status}
+                      </span>
+                    </div>
+
+                    {player.preferred_times &&
+                    player.preferred_times.length > 0 ? (
+                      <>
+                        <div style={{ marginTop: "1rem" }}>
+                          <div
+                            style={{
+                              fontSize: "0.875rem",
+                              fontWeight: "600",
+                              color: "#4a5568",
+                              marginBottom: "0.5rem",
+                            }}
+                          >
+                            Preferred Times:
+                          </div>
+                          <div
+                            style={{
+                              display: "flex",
+                              flexWrap: "wrap",
+                              gap: "0.5rem",
+                            }}
+                          >
+                            {player.preferred_times.map((time) => (
+                              <span
+                                key={time}
+                                style={{
+                                  padding: "0.25rem 0.75rem",
+                                  background: "#e6f3ff",
+                                  color: "#2c5282",
+                                  borderRadius: "20px",
+                                  fontSize: "0.875rem",
+                                  fontWeight: "500",
+                                }}
+                              >
+                                {time}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        {(player.earliest_time || player.latest_time) && (
+                          <div
+                            style={{
+                              marginTop: "0.75rem",
+                              padding: "0.75rem",
+                              background: "#f7fafc",
+                              borderRadius: "6px",
+                              fontSize: "0.875rem",
+                            }}
+                          >
+                            {player.earliest_time && (
+                              <div>
+                                ⏰ Earliest:{" "}
+                                <strong>{player.earliest_time}</strong>
+                              </div>
+                            )}
+                            {player.latest_time && (
+                              <div>
+                                ⏰ Latest: <strong>{player.latest_time}</strong>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {player.notes && (
+                          <div
+                            style={{
+                              marginTop: "0.75rem",
+                              padding: "0.75rem",
+                              background: "#fffbeb",
+                              border: "1px solid #fde68a",
+                              borderRadius: "6px",
+                              fontSize: "0.875rem",
+                              color: "#78350f",
+                            }}
+                          >
+                            <strong>📝 Notes:</strong> {player.notes}
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div
+                        style={{
+                          marginTop: "1rem",
+                          padding: "1rem",
+                          background: "#f7fafc",
+                          borderRadius: "6px",
+                          textAlign: "center",
+                          color: "#718096",
+                          fontStyle: "italic",
+                          fontSize: "0.875rem",
+                        }}
+                      >
+                        No time preferences set
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
       {/* Pending Match Approvals */}
       {pendingMatches.length > 0 && (

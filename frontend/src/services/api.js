@@ -67,6 +67,7 @@ export const profileAPI = {
   updatePreferences: (preferences) =>
     api.put("/profile/preferences", preferences),
   updateStatus: (status) => api.patch("/profile/status", { status }),
+  getAllPreferences: () => api.get("/profile/all-preferences"), // ADD THIS
 };
 
 export default api;

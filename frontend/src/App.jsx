@@ -7,6 +7,7 @@ import SubmitMatch from "./pages/SubmitMatch";
 import Login from "./pages/Login";
 import Admin from "./pages/Admin";
 import Draw from "./pages/Draw";
+import Profile from "./pages/Profile";
 import "./App.css";
 
 function App() {
@@ -63,6 +64,13 @@ function App() {
                   </Link>
                 </li>
               )}
+              {user && (
+                <li>
+                  <Link to="/profile" onClick={closeMenu}>
+                    Profile
+                  </Link>
+                </li>
+              )}
               {user && user.is_admin && (
                 <li>
                   <Link to="/admin" onClick={closeMenu}>
@@ -115,6 +123,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/draw" element={<Draw />} />
+            <Route path="/profile" element={<Profile />} />
           </Routes>
         </div>
       </div>

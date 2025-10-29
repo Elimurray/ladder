@@ -129,4 +129,37 @@ router.patch("/status", authMiddleware, async (req, res) => {
   }
 });
 
+// Admin: Get all user preferences
+router.get(
+  "/all-preferences",
+  authMiddleware,
+  adminMiddleware,
+  async (req, res) => {
+    try {
+      const preferences = await pool.query(
+        `SELECT 
+        u.id,
+        u.full_name,
+        u.email,
+        lp.position,
+        lp.status,
+        up.preferred_times,
+        up.earliest_time,
+        up.latest_time,
+        up.notes
+       FROM users u
+       LEFT JOIN ladder_positions lp ON u.id = lp.user_id
+       LEFT JOIN user_preferences up ON u.id = up.user_id
+       WHERE lp.status = 'active'
+       ORDER BY lp.position`
+      );
+
+      res.json(preferences.rows);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ error: "Server error" });
+    }
+  }
+);
+
 module.exports = router;

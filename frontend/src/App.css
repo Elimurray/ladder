@@ -829,6 +829,36 @@ td:first-child {
   transform: translateY(-1px);
 }
 
+/* ============================================
+   PLAYER PREFERENCES
+   ============================================ */
+.preferences-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.preference-card {
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.preference-card:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.preference-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+
 @media (max-width: 768px) {
   /* Show hamburger menu */
   .menu-toggle {
