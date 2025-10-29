@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "./context/AuthContext";
 import Home from "./pages/Home";
@@ -12,6 +13,7 @@ import "./App.css";
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { user, logout, loading } = useAuth();
+  const navigate = useNavigate();
 
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
@@ -76,16 +78,17 @@ function App() {
                     onClick={() => {
                       logout();
                       closeMenu();
+                      navigate("/login");
                     }}
-                    // style={{
-                    //   background: "none",
-                    //   border: "none",
-                    //   color: "white",
-                    //   cursor: "pointer",
-                    //   padding: "0.5rem 1rem",
-                    //   fontSize: "inherit",
-                    //   fontWeight: "500",
-                    // }}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "white",
+                      cursor: "pointer",
+                      padding: "0.5rem 1rem",
+                      fontSize: "inherit",
+                      fontWeight: "500",
+                    }}
                   >
                     Logout ({user.full_name})
                   </button>

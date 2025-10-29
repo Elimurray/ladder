@@ -32,16 +32,16 @@ router.post("/submit", authMiddleware, async (req, res) => {
       return res.status(403).json({ error: "You are not part of this match" });
     }
 
-    // Check if result already submitted
+    // Check if result already submitted by EITHER player
     const existingResult = await pool.query(
-      "SELECT * FROM matches WHERE draw_id = $1 AND player_id = $2",
-      [draw_id, player_id]
+      "SELECT * FROM matches WHERE draw_id = $1 AND (player_id = $2 OR player_id = $3)",
+      [draw_id, player_id, opponent_id]
     );
 
     if (existingResult.rows.length > 0) {
       return res
         .status(400)
-        .json({ error: "You have already submitted a result for this match" });
+        .json({ error: "A result has already been submitted for this match" });
     }
 
     // Calculate match score

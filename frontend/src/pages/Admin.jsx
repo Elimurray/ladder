@@ -406,11 +406,7 @@ function Admin() {
               />
             </div>
             <div className="admin-button-group">
-              <button
-                type="submit"
-                className="btn-primary"
-                style={{ background: "#f39c12" }}
-              >
+              <button type="submit" className="btn-primary">
                 🔄 Process Week & Update Ladder
               </button>
             </div>
@@ -424,6 +420,7 @@ function Admin() {
             background: "#f0f4ff",
             borderRadius: "8px",
             fontSize: "0.875rem",
+            color: "black",
           }}
         >
           <strong>Position Changes:</strong>
