@@ -453,13 +453,31 @@ function Admin() {
         <form onSubmit={handleProcessWeek} className="admin-form">
           <div className="admin-form-row">
             <div className="form-group" style={{ flex: 1 }}>
-              <label>Week Date to Process:</label>
-              <input
-                type="date"
+              <label>Select Week to Process:</label>
+              <select
                 value={processWeekDate}
                 onChange={(e) => setProcessWeekDate(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "0.75rem",
+                  border: "2px solid #e2e8f0",
+                  borderRadius: "8px",
+                  fontSize: "1rem",
+                }}
                 required
-              />
+              >
+                <option value="">-- Select a week --</option>
+                {availableDraws.map((date) => (
+                  <option key={date} value={date}>
+                    Week of{" "}
+                    {new Date(date).toLocaleDateString("en-NZ", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="admin-button-group">
               <button type="submit" className="btn-primary">

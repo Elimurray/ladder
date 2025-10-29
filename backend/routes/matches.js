@@ -50,9 +50,9 @@ router.post("/submit", authMiddleware, async (req, res) => {
     // Insert match result
     const resultInsert = await pool.query(
       `INSERT INTO matches 
-       (week_date, player_id, opponent_id, draw_id, games_won, games_lost, result, match_score, admin_approved) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, false) 
-       RETURNING *`,
+   (week_date, player_id, opponent_id, draw_id, games_won, games_lost, result, match_score, admin_approved) 
+   VALUES ($1, $2, $3, $4, $5, $6, $7, $8, false) 
+   RETURNING *`,
       [
         week_date,
         player_id,
@@ -64,6 +64,44 @@ router.post("/submit", authMiddleware, async (req, res) => {
         match_score,
       ]
     );
+
+    // AUTO-CREATE OPPONENT'S RESULT (add this entire block)
+    if (opponent_id) {
+      // Calculate opponent's result (opposite of player's result)
+      const opponentGamesWon = games_lost;
+      const opponentGamesLost = games_won;
+      const opponentMatchScore = `${opponentGamesWon}-${opponentGamesLost}`;
+
+      let opponentResult;
+      if (result === "~") {
+        opponentResult = "~"; // Both didn't play
+      } else if (result === "D") {
+        opponentResult = "3"; // Opponent wins by default
+      } else {
+        // Calculate opponent result based on games won
+        if (opponentGamesWon === 3) opponentResult = "3";
+        else if (opponentGamesWon === 2) opponentResult = "2";
+        else if (opponentGamesWon === 1) opponentResult = "1";
+        else if (opponentGamesWon === 0) opponentResult = "0";
+      }
+
+      // Insert opponent's result
+      await pool.query(
+        `INSERT INTO matches 
+     (week_date, player_id, opponent_id, draw_id, games_won, games_lost, result, match_score, admin_approved) 
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, false)`,
+        [
+          week_date,
+          opponent_id,
+          player_id,
+          draw_id,
+          opponentGamesWon,
+          opponentGamesLost,
+          opponentResult,
+          opponentMatchScore,
+        ]
+      );
+    }
 
     res.status(201).json({
       message: "Match result submitted successfully. Awaiting admin approval.",
