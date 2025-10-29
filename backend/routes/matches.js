@@ -273,8 +273,24 @@ router.post(
           .json({ error: "No approved matches found for this week" });
       }
 
-      // Calculate position changes based on results
-      // Formula: 3=+6, 2=+3, 1=0, 0=-1, ~=0, D=-1
+      console.log("Processing matches:", matches.rows); // Debug
+
+      // Get current ladder - map user_id to ladder_positions entry
+      const currentLadder = await client.query(
+        "SELECT * FROM ladder_positions ORDER BY position"
+      );
+
+      // Create a map: user_id -> current ladder entry
+      const ladderMap = {};
+      currentLadder.rows.forEach((entry) => {
+        ladderMap[entry.user_id] = {
+          id: entry.id,
+          position: entry.position,
+          user_id: entry.user_id,
+        };
+      });
+
+      // Calculate position changes for each player
       const positionChanges = {};
 
       matches.rows.forEach((match) => {
@@ -282,8 +298,7 @@ router.post(
         const result = match.result;
 
         let movement = 0;
-        if (result === "3")
-          movement = -6; // Won - move UP 6 (lower position number)
+        if (result === "3") movement = -6; // Won - move UP 6
         else if (result === "2") movement = -3; // Won 2 - move UP 3
         else if (result === "1") movement = 0; // Won 1 - stay
         else if (result === "0") movement = 1; // Lost 0-3 - move DOWN 1
@@ -293,47 +308,39 @@ router.post(
         positionChanges[playerId] = movement;
       });
 
-      // Get current ladder positions
-      const currentLadder = await client.query(
-        "SELECT * FROM ladder_positions ORDER BY position"
-      );
+      console.log("Position changes:", positionChanges); // Debug
 
-      // Apply position changes
-      const updates = [];
-      currentLadder.rows.forEach((entry) => {
+      // Build new ladder order
+      const newLadder = currentLadder.rows.map((entry) => {
         const movement = positionChanges[entry.user_id] || 0;
-        const newPosition = Math.max(1, entry.position + movement); // Can't go below 1
+        const newPosition = Math.max(1, entry.position + movement);
 
-        if (newPosition !== entry.position) {
-          updates.push({
-            id: entry.id,
-            oldPosition: entry.position,
-            newPosition: newPosition,
-            user_id: entry.user_id,
-          });
-        }
+        return {
+          ...entry,
+          newPosition: newPosition,
+          oldPosition: entry.position,
+        };
       });
 
-      // Sort by new position to handle correctly
-      updates.sort((a, b) => a.newPosition - b.newPosition);
+      // Sort by new position (lower number = higher rank)
+      newLadder.sort((a, b) => {
+        if (a.newPosition !== b.newPosition) {
+          return a.newPosition - b.newPosition;
+        }
+        // If tied, keep original order
+        return a.oldPosition - b.oldPosition;
+      });
 
-      // Update positions
-      for (const update of updates) {
+      console.log("New ladder order:", newLadder); // Debug
+
+      // Assign final positions (1, 2, 3, 4, ...)
+      for (let i = 0; i < newLadder.length; i++) {
+        const entry = newLadder[i];
+        const finalPosition = i + 1;
+
         await client.query(
           "UPDATE ladder_positions SET position = $1, updated_at = NOW() WHERE id = $2",
-          [update.newPosition, update.id]
-        );
-      }
-
-      // Reorder ladder to fix any conflicts (normalize positions)
-      const finalLadder = await client.query(
-        "SELECT id FROM ladder_positions ORDER BY position, updated_at"
-      );
-
-      for (let i = 0; i < finalLadder.rows.length; i++) {
-        await client.query(
-          "UPDATE ladder_positions SET position = $1 WHERE id = $2",
-          [i + 1, finalLadder.rows[i].id]
+          [finalPosition, entry.id]
         );
       }
 
@@ -342,7 +349,8 @@ router.post(
       res.json({
         message: "Ladder updated successfully",
         processed: matches.rows.length,
-        updates: updates.length,
+        updates: newLadder.filter((e) => e.newPosition !== e.oldPosition)
+          .length,
       });
     } catch (err) {
       await client.query("ROLLBACK");

@@ -29,6 +29,9 @@ function Admin() {
 
   const [pendingMatches, setPendingMatches] = useState([]);
 
+  const [availableDraws, setAvailableDraws] = useState([]);
+  const [selectedDrawDate, setSelectedDrawDate] = useState("");
+
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -54,6 +57,15 @@ function Admin() {
     fetchData();
   }, [user, navigate]);
 
+  const fetchDrawByDate = async (date) => {
+    try {
+      const drawRes = await drawAPI.getWeekDraw(date);
+      setCurrentDraw(drawRes.data);
+    } catch (err) {
+      setCurrentDraw([]);
+    }
+  };
+
   const fetchData = async () => {
     try {
       const [ladderRes, usersRes, pendingRes] = await Promise.all([
@@ -66,12 +78,29 @@ function Admin() {
       setUsers(usersRes.data);
       setPendingMatches(pendingRes.data);
 
-      // Try to fetch current draw
+      // Fetch all available draws
       try {
-        const drawRes = await drawAPI.getCurrentDraw();
-        setCurrentDraw(drawRes.data);
+        const allDrawsRes = await drawAPI.getCurrentDraw();
+        if (allDrawsRes.data.length > 0) {
+          // Get unique week dates from draws
+          const uniqueDates = [
+            ...new Set(allDrawsRes.data.map((d) => d.week_date)),
+          ];
+          setAvailableDraws(
+            uniqueDates.sort((a, b) => new Date(b) - new Date(a))
+          );
+
+          // Auto-select most recent if none selected
+          if (!selectedDrawDate && uniqueDates.length > 0) {
+            setSelectedDrawDate(uniqueDates[0]);
+            fetchDrawByDate(uniqueDates[0]);
+          } else if (selectedDrawDate) {
+            fetchDrawByDate(selectedDrawDate);
+          }
+        }
       } catch (err) {
         setCurrentDraw([]);
+        setAvailableDraws([]);
       }
 
       setLoading(false);
@@ -230,6 +259,33 @@ function Admin() {
       fetchData();
     } catch (err) {
       showError(err.response?.data?.error || "Failed to delete match");
+    }
+  };
+
+  const handleDrawDateChange = (e) => {
+    const date = e.target.value;
+    setSelectedDrawDate(date);
+    fetchDrawByDate(date);
+  };
+
+  const handleDeleteSelectedDraw = async () => {
+    if (!selectedDrawDate) return;
+
+    if (
+      !confirm(
+        `Are you sure you want to delete the draw for ${selectedDrawDate}? This will delete all matches and cannot be undone.`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      await drawAPI.deleteDraw(selectedDrawDate);
+      showSuccess("Draw deleted successfully!");
+      setSelectedDrawDate("");
+      fetchData();
+    } catch (err) {
+      showError(err.response?.data?.error || "Failed to delete draw");
     }
   };
 
@@ -447,8 +503,8 @@ function Admin() {
         </div>
       </div>
 
-      {/* Current Draw Management */}
-      {currentDraw.length > 0 && (
+      {/* Manage Draw Section */}
+      {availableDraws.length > 0 && (
         <div className="admin-section">
           <div
             style={{
@@ -458,135 +514,192 @@ function Admin() {
               marginBottom: "1rem",
             }}
           >
-            <h2>Manage Current Draw</h2>
-            <button
-              onClick={handleDeleteDraw}
-              className="btn-danger"
-              style={{
-                background: "#e53e3e",
-                color: "white",
-                padding: "0.5rem 1rem",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
-                fontWeight: "600",
-              }}
-            >
-              Delete Draw
-            </button>
+            <h2>Manage Draw</h2>
           </div>
 
-          <div className="draw-admin-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>Match</th>
-                  <th>Time Slot</th>
-                  <th>Bar Duty</th>
-                  <th>Notes</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentDraw.map((pairing) => (
-                  <tr key={pairing.id}>
-                    <td>
-                      <strong>#{pairing.player1_position}</strong>{" "}
-                      {pairing.player1_name}
-                      <br />
-                      <span style={{ color: "#718096" }}>vs</span>
-                      <br />
-                      {pairing.player2_id ? (
-                        <>
-                          <strong>#{pairing.player2_position}</strong>{" "}
-                          {pairing.player2_name}
-                        </>
-                      ) : (
-                        <span style={{ color: "#ed8936", fontStyle: "italic" }}>
-                          BYE
-                        </span>
-                      )}
-                    </td>
-                    <td>
-                      {editingDrawId === pairing.id ? (
-                        <select
-                          value={editTimeSlot}
-                          onChange={(e) => setEditTimeSlot(e.target.value)}
-                          style={{ width: "100%", padding: "0.5rem" }}
-                        >
-                          <option value="">-- Select Time --</option>
-                          {timeSlots.map((slot) => (
-                            <option key={slot} value={slot}>
-                              {slot}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        pairing.time_slot || (
-                          <span style={{ color: "#a0aec0" }}>Not set</span>
-                        )
-                      )}
-                    </td>
-                    <td>
-                      {editingDrawId === pairing.id ? (
-                        <input
-                          type="text"
-                          value={editBarDuty}
-                          onChange={(e) => setEditBarDuty(e.target.value)}
-                          placeholder="e.g., Dave R"
-                          style={{ width: "100%", padding: "0.5rem" }}
-                        />
-                      ) : (
-                        pairing.bar_duty || (
-                          <span style={{ color: "#a0aec0" }}>-</span>
-                        )
-                      )}
-                    </td>
-                    <td>
-                      {editingDrawId === pairing.id ? (
-                        <input
-                          type="text"
-                          value={editNotes}
-                          onChange={(e) => setEditNotes(e.target.value)}
-                          placeholder="Optional notes"
-                          style={{ width: "100%", padding: "0.5rem" }}
-                        />
-                      ) : (
-                        pairing.notes || (
-                          <span style={{ color: "#a0aec0" }}>-</span>
-                        )
-                      )}
-                    </td>
-                    <td className="admin-actions">
-                      {editingDrawId === pairing.id ? (
-                        <div className="admin-edit-buttons">
-                          <button
-                            onClick={() => handleSaveDrawPairing(pairing.id)}
-                            className="btn-save"
-                          >
-                            Save
-                          </button>
-                          <button
-                            onClick={handleCancelEditDraw}
-                            className="btn-cancel"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => handleStartEditDraw(pairing)}
-                          className="btn-edit"
-                        >
-                          Edit
-                        </button>
-                      )}
-                    </td>
-                  </tr>
+          {/* Draw Selector */}
+          <div
+            style={{
+              marginBottom: "1.5rem",
+              display: "flex",
+              gap: "1rem",
+              alignItems: "center",
+            }}
+          >
+            <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
+              <label>Select Draw Week:</label>
+              <select
+                value={selectedDrawDate}
+                onChange={handleDrawDateChange}
+                style={{
+                  width: "100%",
+                  padding: "0.75rem",
+                  border: "2px solid #e2e8f0",
+                  borderRadius: "8px",
+                  fontSize: "1rem",
+                }}
+              >
+                <option value="">-- Select a draw --</option>
+                {availableDraws.map((date) => (
+                  <option key={date} value={date}>
+                    Week of{" "}
+                    {new Date(date).toLocaleDateString("en-NZ", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </option>
                 ))}
-              </tbody>
-            </table>
+              </select>
+            </div>
+
+            {selectedDrawDate && (
+              <button
+                onClick={handleDeleteSelectedDraw}
+                style={{
+                  background: "#e53e3e",
+                  color: "white",
+                  padding: "0.75rem 1.5rem",
+                  border: "none",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  fontWeight: "600",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Delete This Draw
+              </button>
+            )}
           </div>
+
+          {currentDraw.length > 0 ? (
+            <div className="draw-admin-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Match</th>
+                    <th>Time Slot</th>
+                    <th>Bar Duty</th>
+                    <th>Notes</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentDraw.map((pairing) => (
+                    <tr key={pairing.id}>
+                      <td>
+                        <strong>#{pairing.player1_position}</strong>{" "}
+                        {pairing.player1_name}
+                        <br />
+                        <span style={{ color: "#718096" }}>vs</span>
+                        <br />
+                        {pairing.player2_id ? (
+                          <>
+                            <strong>#{pairing.player2_position}</strong>{" "}
+                            {pairing.player2_name}
+                          </>
+                        ) : (
+                          <span
+                            style={{ color: "#ed8936", fontStyle: "italic" }}
+                          >
+                            BYE
+                          </span>
+                        )}
+                      </td>
+                      <td>
+                        {editingDrawId === pairing.id ? (
+                          <select
+                            value={editTimeSlot}
+                            onChange={(e) => setEditTimeSlot(e.target.value)}
+                            style={{ width: "100%", padding: "0.5rem" }}
+                          >
+                            <option value="">-- Select Time --</option>
+                            {timeSlots.map((slot) => (
+                              <option key={slot} value={slot}>
+                                {slot}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          pairing.time_slot || (
+                            <span style={{ color: "#a0aec0" }}>Not set</span>
+                          )
+                        )}
+                      </td>
+                      <td>
+                        {editingDrawId === pairing.id ? (
+                          <input
+                            type="text"
+                            value={editBarDuty}
+                            onChange={(e) => setEditBarDuty(e.target.value)}
+                            placeholder="e.g., Dave R"
+                            style={{ width: "100%", padding: "0.5rem" }}
+                          />
+                        ) : (
+                          pairing.bar_duty || (
+                            <span style={{ color: "#a0aec0" }}>-</span>
+                          )
+                        )}
+                      </td>
+                      <td>
+                        {editingDrawId === pairing.id ? (
+                          <input
+                            type="text"
+                            value={editNotes}
+                            onChange={(e) => setEditNotes(e.target.value)}
+                            placeholder="Optional notes"
+                            style={{ width: "100%", padding: "0.5rem" }}
+                          />
+                        ) : (
+                          pairing.notes || (
+                            <span style={{ color: "#a0aec0" }}>-</span>
+                          )
+                        )}
+                      </td>
+                      <td className="admin-actions">
+                        {editingDrawId === pairing.id ? (
+                          <div className="admin-edit-buttons">
+                            <button
+                              onClick={() => handleSaveDrawPairing(pairing.id)}
+                              className="btn-save"
+                            >
+                              Save
+                            </button>
+                            <button
+                              onClick={handleCancelEditDraw}
+                              className="btn-cancel"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => handleStartEditDraw(pairing)}
+                            className="btn-edit"
+                          >
+                            Edit
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p
+              style={{
+                color: "#718096",
+                fontStyle: "italic",
+                textAlign: "center",
+                padding: "2rem",
+              }}
+            >
+              {selectedDrawDate
+                ? "No pairings found for this draw."
+                : "Select a draw to manage."}
+            </p>
+          )}
         </div>
       )}
 
