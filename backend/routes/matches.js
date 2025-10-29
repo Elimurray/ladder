@@ -6,7 +6,8 @@ const { authMiddleware, adminMiddleware } = require("../middleware/auth");
 // Submit match result (authenticated users only)
 router.post("/submit", authMiddleware, async (req, res) => {
   try {
-    const { draw_id, opponent_id, games_won, games_lost, result } = req.body;
+    const { draw_id, opponent_id, games_won, games_lost, result, set_scores } =
+      req.body;
     const player_id = req.user.id;
 
     // Validate result
@@ -48,10 +49,11 @@ router.post("/submit", authMiddleware, async (req, res) => {
     const match_score = `${games_won}-${games_lost}`;
 
     // Insert match result
+    // Insert match result
     const resultInsert = await pool.query(
       `INSERT INTO matches 
-   (week_date, player_id, opponent_id, draw_id, games_won, games_lost, result, match_score, admin_approved) 
-   VALUES ($1, $2, $3, $4, $5, $6, $7, $8, false) 
+   (week_date, player_id, opponent_id, draw_id, games_won, games_lost, result, match_score, set_scores, admin_approved) 
+   VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, false) 
    RETURNING *`,
       [
         week_date,
@@ -62,6 +64,7 @@ router.post("/submit", authMiddleware, async (req, res) => {
         games_lost,
         result,
         match_score,
+        set_scores ? JSON.stringify(set_scores) : null,
       ]
     );
 
@@ -86,10 +89,11 @@ router.post("/submit", authMiddleware, async (req, res) => {
       }
 
       // Insert opponent's result
+      // Insert opponent's result
       await pool.query(
         `INSERT INTO matches 
-     (week_date, player_id, opponent_id, draw_id, games_won, games_lost, result, match_score, admin_approved) 
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, false)`,
+   (week_date, player_id, opponent_id, draw_id, games_won, games_lost, result, match_score, set_scores, admin_approved) 
+   VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, false)`,
         [
           week_date,
           opponent_id,
@@ -99,6 +103,13 @@ router.post("/submit", authMiddleware, async (req, res) => {
           opponentGamesLost,
           opponentResult,
           opponentMatchScore,
+          set_scores
+            ? JSON.stringify({
+                sets: set_scores.sets.map((s) =>
+                  s.split("-").reverse().join("-")
+                ),
+              })
+            : null, // Reverse scores for opponent
         ]
       );
     }

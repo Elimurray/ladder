@@ -12,6 +12,8 @@ function SubmitMatch() {
   const [gamesWon, setGamesWon] = useState("");
   const [gamesLost, setGamesLost] = useState("");
   const [result, setResult] = useState("");
+  const [setScores, setSetScores] = useState([]);
+  const [showSetScores, setShowSetScores] = useState(false);
 
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -48,6 +50,49 @@ function SubmitMatch() {
     return "";
   };
 
+  const validateSetScore = (score) => {
+    if (!score) return false;
+    const parts = score.split("-");
+    if (parts.length !== 2) return false;
+
+    const [score1, score2] = parts.map((s) => parseInt(s.trim()));
+    if (isNaN(score1) || isNaN(score2)) return false;
+
+    // One score must be 15 or higher
+    if (score1 < 15 && score2 < 15) return false;
+
+    // Winner must have at least 15
+    const winner = Math.max(score1, score2);
+    const loser = Math.min(score1, score2);
+
+    if (winner < 15) return false;
+
+    // If tied at 14, must win by 2
+    if (loser >= 14 && winner - loser < 2) return false;
+
+    return true;
+  };
+
+  const handleGamesChange = (won, lost) => {
+    setGamesWon(won);
+    setGamesLost(lost);
+
+    if (won && lost) {
+      const totalGames = parseInt(won) + parseInt(lost);
+      setSetScores(new Array(totalGames).fill(""));
+      setShowSetScores(true);
+    } else {
+      setShowSetScores(false);
+      setSetScores([]);
+    }
+  };
+
+  const handleSetScoreChange = (index, value) => {
+    const newSetScores = [...setScores];
+    newSetScores[index] = value;
+    setSetScores(newSetScores);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
@@ -66,6 +111,28 @@ function SubmitMatch() {
       return;
     }
 
+    // Validate all set scores are filled and valid
+    const totalGames = won + lost;
+    if (setScores.length !== totalGames) {
+      setError("Please enter all set scores");
+      return;
+    }
+
+    for (let i = 0; i < setScores.length; i++) {
+      if (!setScores[i]) {
+        setError(`Please enter score for Set ${i + 1}`);
+        return;
+      }
+      if (!validateSetScore(setScores[i])) {
+        setError(
+          `Invalid score for Set ${
+            i + 1
+          }. Format: 15-10. Winner must reach 15, if tied at 14 must win by 2.`
+        );
+        return;
+      }
+    }
+
     const calculatedResult = calculateResult(gamesWon, gamesLost);
 
     try {
@@ -75,6 +142,7 @@ function SubmitMatch() {
         games_won: won,
         games_lost: lost,
         result: calculatedResult,
+        set_scores: { sets: setScores },
       });
 
       setSuccess(
@@ -83,6 +151,8 @@ function SubmitMatch() {
       setGamesWon("");
       setGamesLost("");
       setResult("");
+      setSetScores([]);
+      setShowSetScores(false);
 
       // Refresh match data
       setTimeout(() => {
@@ -254,6 +324,36 @@ function SubmitMatch() {
                 Result: <strong>{myMatch.submitted_result.match_score}</strong>{" "}
                 ({myMatch.submitted_result.result})
               </p>
+              {myMatch.submitted_result.set_scores?.sets && (
+                <div style={{ marginTop: "1rem", color: "#2c7a7b" }}>
+                  <strong>Set Scores:</strong>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      gap: "0.5rem",
+                      marginTop: "0.5rem",
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    {myMatch.submitted_result.set_scores.sets.map(
+                      (score, i) => (
+                        <span
+                          key={i}
+                          style={{
+                            padding: "0.25rem 0.75rem",
+                            background: "#b2f5ea",
+                            borderRadius: "6px",
+                            fontWeight: "bold",
+                          }}
+                        >
+                          Set {i + 1}: {score}
+                        </span>
+                      )
+                    )}
+                  </div>
+                </div>
+              )}
               <p
                 style={{
                   color: "#2c7a7b",
@@ -291,7 +391,9 @@ function SubmitMatch() {
                       <label>Games You Won:</label>
                       <select
                         value={gamesWon}
-                        onChange={(e) => setGamesWon(e.target.value)}
+                        onChange={(e) =>
+                          handleGamesChange(e.target.value, gamesLost)
+                        }
                         required
                       >
                         <option value="">-- Select --</option>
@@ -306,7 +408,9 @@ function SubmitMatch() {
                       <label>Games You Lost:</label>
                       <select
                         value={gamesLost}
-                        onChange={(e) => setGamesLost(e.target.value)}
+                        onChange={(e) =>
+                          handleGamesChange(gamesWon, e.target.value)
+                        }
                         required
                       >
                         <option value="">-- Select --</option>
@@ -316,6 +420,65 @@ function SubmitMatch() {
                         <option value="3">3</option>
                       </select>
                     </div>
+
+                    {/* Set Scores Input */}
+                    {showSetScores && (
+                      <div
+                        style={{
+                          background: "#f7fafc",
+                          padding: "1.5rem",
+                          borderRadius: "8px",
+                          marginBottom: "1rem",
+                        }}
+                      >
+                        <h3 style={{ marginBottom: "1rem", color: "#2d3748" }}>
+                          Enter Set Scores
+                        </h3>
+                        <p
+                          style={{
+                            fontSize: "0.875rem",
+                            color: "#718096",
+                            marginBottom: "1rem",
+                          }}
+                        >
+                          First to 15 points. If tied at 14, must win by 2.
+                          Format: 15-10
+                        </p>
+
+                        <div
+                          style={{
+                            display: "grid",
+                            gridTemplateColumns:
+                              "repeat(auto-fit, minmax(150px, 1fr))",
+                            gap: "1rem",
+                          }}
+                        >
+                          {setScores.map((score, index) => (
+                            <div
+                              key={index}
+                              className="form-group"
+                              style={{ marginBottom: 0 }}
+                            >
+                              <label>Set {index + 1}:</label>
+                              <input
+                                type="text"
+                                placeholder="15-10"
+                                value={score}
+                                onChange={(e) =>
+                                  handleSetScoreChange(index, e.target.value)
+                                }
+                                required
+                                style={{
+                                  padding: "0.75rem",
+                                  fontSize: "1rem",
+                                  textAlign: "center",
+                                }}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                     {result && (
                       <div

@@ -309,7 +309,7 @@ function Profile() {
             }}
           >
             <h3 style={{ marginBottom: "1rem", color: "#2d3748" }}>
-              Availability Status
+              Availability Status for following week starting:
             </h3>
             <p
               style={{
