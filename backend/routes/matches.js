@@ -243,4 +243,115 @@ router.delete("/:id", authMiddleware, adminMiddleware, async (req, res) => {
   }
 });
 
+// Admin: Process approved matches and update ladder
+router.post(
+  "/process-week/:date",
+  authMiddleware,
+  adminMiddleware,
+  async (req, res) => {
+    const client = await pool.connect();
+
+    try {
+      const { date } = req.params;
+
+      await client.query("BEGIN");
+
+      // Get all approved matches for this week
+      const matches = await client.query(
+        `SELECT m.*, d.player1_position, d.player2_position
+       FROM matches m
+       JOIN draws d ON m.draw_id = d.id
+       WHERE m.week_date = $1 AND m.admin_approved = true
+       ORDER BY d.player1_position`,
+        [date]
+      );
+
+      if (matches.rows.length === 0) {
+        await client.query("ROLLBACK");
+        return res
+          .status(400)
+          .json({ error: "No approved matches found for this week" });
+      }
+
+      // Calculate position changes based on results
+      // Formula: 3=+6, 2=+3, 1=0, 0=-1, ~=0, D=-1
+      const positionChanges = {};
+
+      matches.rows.forEach((match) => {
+        const playerId = match.player_id;
+        const result = match.result;
+
+        let movement = 0;
+        if (result === "3")
+          movement = -6; // Won - move UP 6 (lower position number)
+        else if (result === "2") movement = -3; // Won 2 - move UP 3
+        else if (result === "1") movement = 0; // Won 1 - stay
+        else if (result === "0") movement = 1; // Lost 0-3 - move DOWN 1
+        else if (result === "~") movement = 0; // Didn't play - stay
+        else if (result === "D") movement = 1; // Default - move DOWN 1
+
+        positionChanges[playerId] = movement;
+      });
+
+      // Get current ladder positions
+      const currentLadder = await client.query(
+        "SELECT * FROM ladder_positions ORDER BY position"
+      );
+
+      // Apply position changes
+      const updates = [];
+      currentLadder.rows.forEach((entry) => {
+        const movement = positionChanges[entry.user_id] || 0;
+        const newPosition = Math.max(1, entry.position + movement); // Can't go below 1
+
+        if (newPosition !== entry.position) {
+          updates.push({
+            id: entry.id,
+            oldPosition: entry.position,
+            newPosition: newPosition,
+            user_id: entry.user_id,
+          });
+        }
+      });
+
+      // Sort by new position to handle correctly
+      updates.sort((a, b) => a.newPosition - b.newPosition);
+
+      // Update positions
+      for (const update of updates) {
+        await client.query(
+          "UPDATE ladder_positions SET position = $1, updated_at = NOW() WHERE id = $2",
+          [update.newPosition, update.id]
+        );
+      }
+
+      // Reorder ladder to fix any conflicts (normalize positions)
+      const finalLadder = await client.query(
+        "SELECT id FROM ladder_positions ORDER BY position, updated_at"
+      );
+
+      for (let i = 0; i < finalLadder.rows.length; i++) {
+        await client.query(
+          "UPDATE ladder_positions SET position = $1 WHERE id = $2",
+          [i + 1, finalLadder.rows[i].id]
+        );
+      }
+
+      await client.query("COMMIT");
+
+      res.json({
+        message: "Ladder updated successfully",
+        processed: matches.rows.length,
+        updates: updates.length,
+      });
+    } catch (err) {
+      await client.query("ROLLBACK");
+      console.error("Process week error:", err);
+      res.status(500).json({ error: "Server error: " + err.message });
+    } finally {
+      client.release();
+    }
+  }
+);
+
 module.exports = router;

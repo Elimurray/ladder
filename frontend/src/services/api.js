@@ -57,6 +57,7 @@ export const matchesAPI = {
   getWeekResults: (date) => api.get(`/matches/week/${date}`),
   approveMatch: (id) => api.patch(`/matches/${id}/approve`),
   deleteMatch: (id) => api.delete(`/matches/${id}`),
+  processWeek: (date) => api.post(`/matches/process-week/${date}`),
 };
 
 export default api;

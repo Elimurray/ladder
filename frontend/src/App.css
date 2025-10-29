@@ -729,6 +729,106 @@ td:first-child {
   color: #7c2d12;
 }
 
+.pending-matches-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.pending-match-card {
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.match-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.match-date {
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.match-time {
+  color: #718096;
+  font-size: 0.875rem;
+}
+
+.match-players-info {
+  padding: 0.5rem 0;
+}
+
+.player-info strong {
+  color: #2d3748;
+  font-size: 1.1rem;
+}
+
+.match-result-display {
+  background: #f7fafc;
+  padding: 1rem;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.result-score {
+  font-size: 1.1rem;
+  color: #2d3748;
+}
+
+.match-meta {
+  padding-top: 0.5rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.match-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-approve,
+.btn-reject {
+  flex: 1;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.95rem;
+}
+
+.btn-approve {
+  background: #48bb78;
+  color: white;
+}
+
+.btn-approve:hover {
+  background: #38a169;
+  transform: translateY(-1px);
+}
+
+.btn-reject {
+  background: #e53e3e;
+  color: white;
+}
+
+.btn-reject:hover {
+  background: #c53030;
+  transform: translateY(-1px);
+}
+
 @media (max-width: 768px) {
   /* Show hamburger menu */
   .menu-toggle {

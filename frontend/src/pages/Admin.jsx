@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ladderAPI, usersAPI, drawAPI } from "../services/api";
+import { ladderAPI, usersAPI, drawAPI, matchesAPI } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
@@ -11,6 +11,7 @@ function Admin() {
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [drawWeek, setDrawWeek] = useState("");
+  const [processWeekDate, setProcessWeekDate] = useState("");
 
   // Add user to ladder state
   const [selectedUser, setSelectedUser] = useState("");
@@ -25,6 +26,8 @@ function Admin() {
   const [editTimeSlot, setEditTimeSlot] = useState("");
   const [editBarDuty, setEditBarDuty] = useState("");
   const [editNotes, setEditNotes] = useState("");
+
+  const [pendingMatches, setPendingMatches] = useState([]);
 
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -53,13 +56,15 @@ function Admin() {
 
   const fetchData = async () => {
     try {
-      const [ladderRes, usersRes] = await Promise.all([
+      const [ladderRes, usersRes, pendingRes] = await Promise.all([
         ladderAPI.getAll(),
         usersAPI.getAll(),
+        matchesAPI.getPending(),
       ]);
 
       setLadder(ladderRes.data);
       setUsers(usersRes.data);
+      setPendingMatches(pendingRes.data);
 
       // Try to fetch current draw
       try {
@@ -204,6 +209,69 @@ function Admin() {
       showError(err.response?.data?.error || "Failed to delete draw");
     }
   };
+  const handleApproveMatch = async (matchId) => {
+    try {
+      await matchesAPI.approveMatch(matchId);
+      showSuccess("Match approved successfully!");
+      fetchData();
+    } catch (err) {
+      showError(err.response?.data?.error || "Failed to approve match");
+    }
+  };
+
+  const handleDeleteMatch = async (matchId) => {
+    if (!confirm("Are you sure you want to delete this match result?")) {
+      return;
+    }
+
+    try {
+      await matchesAPI.deleteMatch(matchId);
+      showSuccess("Match deleted successfully!");
+      fetchData();
+    } catch (err) {
+      showError(err.response?.data?.error || "Failed to delete match");
+    }
+  };
+
+  const getResultBadge = (result) => {
+    const badges = {
+      3: { text: "Won 3", color: "#48bb78", movement: "↑ 6" },
+      2: { text: "Won 2", color: "#38b2ac", movement: "↑ 3" },
+      1: { text: "Won 1", color: "#ed8936", movement: "→ 0" },
+      0: { text: "Won 0", color: "#e53e3e", movement: "↓ 1" },
+      "~": { text: "No Play", color: "#718096", movement: "→ 0" },
+      D: { text: "Default", color: "#e53e3e", movement: "↓ 1" },
+    };
+    return badges[result] || badges["0"];
+  };
+
+  const handleProcessWeek = async (e) => {
+    e.preventDefault();
+
+    if (!processWeekDate) {
+      showError("Please select a week date");
+      return;
+    }
+
+    if (
+      !confirm(
+        `Process all approved matches for week of ${processWeekDate}? This will update the ladder positions.`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const response = await matchesAPI.processWeek(processWeekDate);
+      showSuccess(
+        `Ladder updated! Processed ${response.data.processed} matches with ${response.data.updates} position changes.`
+      );
+      setProcessWeekDate("");
+      fetchData();
+    } catch (err) {
+      showError(err.response?.data?.error || "Failed to process week");
+    }
+  };
 
   // Get users not on ladder
   const usersOnLadder = new Set(ladder.map((l) => l.user_id));
@@ -243,6 +311,143 @@ function Admin() {
             </div>
           </div>
         </form>
+      </div>
+      {/* Pending Match Approvals */}
+      {pendingMatches.length > 0 && (
+        <div className="admin-section">
+          <h2>Pending Match Approvals ({pendingMatches.length})</h2>
+
+          <div className="pending-matches-grid">
+            {pendingMatches.map((match) => {
+              const badge = getResultBadge(match.result);
+              return (
+                <div key={match.id} className="pending-match-card">
+                  <div className="match-header">
+                    <div className="match-date">
+                      Week of {new Date(match.week_date).toLocaleDateString()}
+                    </div>
+                    {match.time_slot && (
+                      <div className="match-time">🕐 {match.time_slot}</div>
+                    )}
+                  </div>
+
+                  <div className="match-players-info">
+                    <div className="player-info">
+                      <strong>{match.player_name}</strong>
+                      <div style={{ fontSize: "0.875rem", color: "#718096" }}>
+                        vs {match.opponent_name}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="match-result-display">
+                    <div className="result-score">
+                      Score: <strong>{match.match_score}</strong>
+                    </div>
+                    <div
+                      className="result-badge"
+                      style={{
+                        background: badge.color,
+                        color: "white",
+                        padding: "0.5rem 1rem",
+                        borderRadius: "8px",
+                        textAlign: "center",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {badge.text} {badge.movement}
+                    </div>
+                  </div>
+
+                  <div className="match-meta">
+                    <small style={{ color: "#718096" }}>
+                      Submitted {new Date(match.submitted_at).toLocaleString()}
+                    </small>
+                  </div>
+
+                  <div className="match-actions">
+                    <button
+                      onClick={() => handleApproveMatch(match.id)}
+                      className="btn-approve"
+                    >
+                      ✓ Approve
+                    </button>
+                    <button
+                      onClick={() => handleDeleteMatch(match.id)}
+                      className="btn-reject"
+                    >
+                      ✗ Reject
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Process Week and Update Ladder */}
+      <div className="admin-section">
+        <h2>Process Week & Update Ladder</h2>
+        <p style={{ color: "#718096", marginBottom: "1rem" }}>
+          After approving all matches, process the week to update ladder
+          positions based on results.
+        </p>
+
+        <form onSubmit={handleProcessWeek} className="admin-form">
+          <div className="admin-form-row">
+            <div className="form-group" style={{ flex: 1 }}>
+              <label>Week Date to Process:</label>
+              <input
+                type="date"
+                value={processWeekDate}
+                onChange={(e) => setProcessWeekDate(e.target.value)}
+                required
+              />
+            </div>
+            <div className="admin-button-group">
+              <button
+                type="submit"
+                className="btn-primary"
+                style={{ background: "#f39c12" }}
+              >
+                🔄 Process Week & Update Ladder
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <div
+          style={{
+            marginTop: "1rem",
+            padding: "1rem",
+            background: "#f0f4ff",
+            borderRadius: "8px",
+            fontSize: "0.875rem",
+          }}
+        >
+          <strong>Position Changes:</strong>
+          <ul style={{ margin: "0.5rem 0", paddingLeft: "1.5rem" }}>
+            <li>
+              Won 3 games: <strong>Move UP 6 positions</strong>
+            </li>
+            <li>
+              Won 2 games: <strong>Move UP 3 positions</strong>
+            </li>
+            <li>
+              Won 1 game: <strong>Stay in position</strong>
+            </li>
+            <li>
+              Won 0 games: <strong>Move DOWN 1 position</strong>
+            </li>
+            <li>
+              Did not play (~): <strong>Stay in position</strong>
+            </li>
+            <li>
+              Defaulted (D): <strong>Move DOWN 1 position</strong>
+            </li>
+          </ul>
+        </div>
       </div>
 
       {/* Current Draw Management */}
