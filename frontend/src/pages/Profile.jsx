@@ -12,9 +12,9 @@ function Profile() {
   const [success, setSuccess] = useState(null);
 
   // Preferences state
-  const [preferredTimes, setPreferredTimes] = useState([]);
+
   const [earliestTime, setEarliestTime] = useState("");
-  const [latestTime, setLatestTime] = useState("");
+
   const [notes, setNotes] = useState("");
 
   const { user } = useAuth();
@@ -60,9 +60,7 @@ function Profile() {
     try {
       const response = await profileAPI.getProfile();
       setProfile(response.data);
-      setPreferredTimes(response.data.preferred_times || []);
       setEarliestTime(response.data.earliest_time || "");
-      setLatestTime(response.data.latest_time || "");
       setNotes(response.data.notes || "");
       setLoading(false);
     } catch (err) {
@@ -104,9 +102,7 @@ function Profile() {
 
     try {
       await profileAPI.updatePreferences({
-        preferred_times: preferredTimes,
         earliest_time: earliestTime,
-        latest_time: latestTime,
         notes: notes,
       });
       setSuccess("Preferences saved successfully!");
@@ -416,191 +412,67 @@ function Profile() {
               </div>
             )}
 
-            {profile.is_admin ? (
-              // ADMIN: Show all fields
-              <>
-                <p
-                  style={{
-                    color: "#718096",
-                    marginBottom: "1.5rem",
-                    fontSize: "0.9rem",
-                  }}
+            <p
+              style={{
+                color: "#718096",
+                marginBottom: "1.5rem",
+                fontSize: "0.9rem",
+              }}
+            >
+              Set your earliest available time slot. This helps admins schedule
+              matches.
+            </p>
+
+            <form onSubmit={handleSavePreferences}>
+              <div className="form-group">
+                <label>Earliest Time I Can Play:</label>
+                <select
+                  value={earliestTime}
+                  onChange={(e) => setEarliestTime(e.target.value)}
                 >
-                  Select your preferred time slots. This helps admins schedule
-                  matches.
-                </p>
+                  <option value="">Any time</option>
+                  {(profile.is_junior
+                    ? timeSlots.filter((t) => {
+                        // Only show times before 7:30pm for juniors
+                        const hour = parseInt(t.split(":")[0]);
+                        const isPM = t.includes("pm");
+                        const time24 = isPM && hour !== 12 ? hour + 12 : hour;
+                        return (
+                          time24 < 19 || (time24 === 19 && t.includes("7:00"))
+                        );
+                      })
+                    : timeSlots
+                  ).map((time) => (
+                    <option key={time} value={time}>
+                      {time}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-                <form onSubmit={handleSavePreferences}>
-                  <div className="form-group">
-                    <label>Preferred Time Slots:</label>
-                    <div
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns:
-                          "repeat(auto-fill, minmax(100px, 1fr))",
-                        gap: "0.5rem",
-                        marginTop: "0.5rem",
-                      }}
-                    >
-                      {timeSlots.map((time) => (
-                        <button
-                          key={time}
-                          type="button"
-                          onClick={() => handleToggleTime(time)}
-                          style={{
-                            padding: "0.5rem",
-                            background: preferredTimes.includes(time)
-                              ? "#667eea"
-                              : "#f7fafc",
-                            color: preferredTimes.includes(time)
-                              ? "white"
-                              : "#4a5568",
-                            border: "2px solid #e2e8f0",
-                            borderRadius: "6px",
-                            cursor: "pointer",
-                            fontSize: "0.875rem",
-                            fontWeight: preferredTimes.includes(time)
-                              ? "600"
-                              : "400",
-                            transition: "all 0.2s",
-                          }}
-                        >
-                          {time}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "1fr 1fr",
-                      gap: "1rem",
-                    }}
-                  >
-                    <div className="form-group">
-                      <label>Earliest Time:</label>
-                      <select
-                        value={earliestTime}
-                        onChange={(e) => setEarliestTime(e.target.value)}
-                      >
-                        <option value="">No preference</option>
-                        {timeSlots.map((time) => (
-                          <option key={time} value={time}>
-                            {time}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="form-group">
-                      <label>Latest Time:</label>
-                      <select
-                        value={latestTime}
-                        onChange={(e) => setLatestTime(e.target.value)}
-                      >
-                        <option value="">No preference</option>
-                        {timeSlots.map((time) => (
-                          <option key={time} value={time}>
-                            {time}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="form-group">
-                    <label>Additional Notes:</label>
-                    <textarea
-                      value={notes}
-                      onChange={(e) => setNotes(e.target.value)}
-                      placeholder="e.g., Can't play first week of each month, prefer early games"
-                      rows="3"
-                      style={{
-                        width: "100%",
-                        padding: "0.75rem",
-                        border: "2px solid #e2e8f0",
-                        borderRadius: "8px",
-                        fontSize: "1rem",
-                        fontFamily: "inherit",
-                        resize: "vertical",
-                      }}
-                    />
-                  </div>
-
-                  <button type="submit" className="btn-primary">
-                    Save Preferences
-                  </button>
-                </form>
-              </>
-            ) : (
-              // NORMAL MEMBERS: Only show earliest time (no preferred times array, no latest time)
-              <>
-                <p
+              <div className="form-group">
+                <label>Additional Notes:</label>
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="e.g., Can't play first week of each month"
+                  rows="3"
                   style={{
-                    color: "#718096",
-                    marginBottom: "1.5rem",
-                    fontSize: "0.9rem",
+                    width: "100%",
+                    padding: "0.75rem",
+                    border: "2px solid #e2e8f0",
+                    borderRadius: "8px",
+                    fontSize: "1rem",
+                    fontFamily: "inherit",
+                    resize: "vertical",
                   }}
-                >
-                  Set your earliest available time slot. This helps admins
-                  schedule matches.
-                </p>
+                />
+              </div>
 
-                <form onSubmit={handleSavePreferences}>
-                  <div className="form-group">
-                    <label>Earliest Time I Can Play:</label>
-                    <select
-                      value={earliestTime}
-                      onChange={(e) => setEarliestTime(e.target.value)}
-                    >
-                      <option value="">Any time</option>
-                      {(profile.is_junior
-                        ? timeSlots.filter((t) => {
-                            // Only show times before 7:30pm for juniors
-                            const hour = parseInt(t.split(":")[0]);
-                            const isPM = t.includes("pm");
-                            const time24 =
-                              isPM && hour !== 12 ? hour + 12 : hour;
-                            return (
-                              time24 < 19 ||
-                              (time24 === 19 && t.includes("7:00"))
-                            );
-                          })
-                        : timeSlots
-                      ).map((time) => (
-                        <option key={time} value={time}>
-                          {time}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="form-group">
-                    <label>Additional Notes:</label>
-                    <textarea
-                      value={notes}
-                      onChange={(e) => setNotes(e.target.value)}
-                      placeholder="e.g., Can't play first week of each month"
-                      rows="3"
-                      style={{
-                        width: "100%",
-                        padding: "0.75rem",
-                        border: "2px solid #e2e8f0",
-                        borderRadius: "8px",
-                        fontSize: "1rem",
-                        fontFamily: "inherit",
-                        resize: "vertical",
-                      }}
-                    />
-                  </div>
-
-                  <button type="submit" className="btn-primary">
-                    Save Preferences
-                  </button>
-                </form>
-              </>
-            )}
+              <button type="submit" className="btn-primary">
+                Save Preferences
+              </button>
+            </form>
           </div>
 
           {/* Match History */}

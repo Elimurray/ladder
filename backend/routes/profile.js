@@ -9,7 +9,7 @@ router.get("/me", authMiddleware, async (req, res) => {
     const user = await pool.query(
       `SELECT u.id, u.email, u.full_name, u.is_member, u.is_admin, u.is_junior, u.created_at,
           lp.position, lp.status,
-          up.preferred_times, up.earliest_time, up.latest_time, up.notes
+          up.earliest_time, up.notes
    FROM users u
    LEFT JOIN ladder_positions lp ON u.id = lp.user_id
    LEFT JOIN user_preferences up ON u.id = up.user_id
@@ -80,20 +80,18 @@ router.get("/stats", authMiddleware, async (req, res) => {
 // Update my preferences
 router.put("/preferences", authMiddleware, async (req, res) => {
   try {
-    const { preferred_times, earliest_time, latest_time, notes } = req.body;
+    const { earliest_time, notes } = req.body;
 
     const result = await pool.query(
-      `INSERT INTO user_preferences (user_id, preferred_times, earliest_time, latest_time, notes)
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO user_preferences (user_id, earliest_time, notes)
+       VALUES ($1, $2, $3)
        ON CONFLICT (user_id) 
        DO UPDATE SET 
-         preferred_times = $2,
-         earliest_time = $3,
-         latest_time = $4,
-         notes = $5,
+         earliest_time = $2,
+         notes = $3,
          updated_at = NOW()
        RETURNING *`,
-      [req.user.id, preferred_times, earliest_time, latest_time, notes]
+      [req.user.id, earliest_time, notes]
     );
 
     res.json(result.rows[0]);
@@ -144,9 +142,7 @@ router.get(
     u.is_junior,
     lp.position,
     lp.status,
-    up.preferred_times,
     up.earliest_time,
-    up.latest_time,
     up.notes
    FROM users u
    LEFT JOIN ladder_positions lp ON u.id = lp.user_id

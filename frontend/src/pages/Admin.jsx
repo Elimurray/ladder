@@ -459,8 +459,7 @@ function Admin() {
                       </span>
                     </div>
 
-                    {player.preferred_times &&
-                    player.preferred_times.length > 0 ? (
+                    {player.earliest_time ? (
                       <>
                         <div style={{ marginTop: "1rem" }}>
                           <div
@@ -471,56 +470,22 @@ function Admin() {
                               marginBottom: "0.5rem",
                             }}
                           >
-                            Preferred Times:
+                            Earliest Time:
                           </div>
-                          <div
+                          <span
                             style={{
-                              display: "flex",
-                              flexWrap: "wrap",
-                              gap: "0.5rem",
-                            }}
-                          >
-                            {player.preferred_times.map((time) => (
-                              <span
-                                key={time}
-                                style={{
-                                  padding: "0.25rem 0.75rem",
-                                  background: "#e6f3ff",
-                                  color: "#2c5282",
-                                  borderRadius: "20px",
-                                  fontSize: "0.875rem",
-                                  fontWeight: "500",
-                                }}
-                              >
-                                {time}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-
-                        {(player.earliest_time || player.latest_time) && (
-                          <div
-                            style={{
-                              marginTop: "0.75rem",
-                              padding: "0.75rem",
-                              background: "#f7fafc",
-                              borderRadius: "6px",
+                              padding: "0.5rem 1rem",
+                              background: "#e6f3ff",
+                              color: "#2c5282",
+                              borderRadius: "20px",
                               fontSize: "0.875rem",
+                              fontWeight: "600",
+                              display: "inline-block",
                             }}
                           >
-                            {player.earliest_time && (
-                              <div>
-                                ⏰ Earliest:{" "}
-                                <strong>{player.earliest_time}</strong>
-                              </div>
-                            )}
-                            {player.latest_time && (
-                              <div>
-                                ⏰ Latest: <strong>{player.latest_time}</strong>
-                              </div>
-                            )}
-                          </div>
-                        )}
+                            {player.earliest_time} or later
+                          </span>
+                        </div>
 
                         {player.notes && (
                           <div
@@ -840,31 +805,29 @@ function Admin() {
                               >
                                 {pairing.player1_name}:
                               </div>
-                              {player1Prefs?.preferred_times?.length > 0 ? (
-                                <div
-                                  style={{
-                                    display: "flex",
-                                    flexWrap: "wrap",
-                                    gap: "0.25rem",
-                                    marginBottom: "0.25rem",
-                                  }}
-                                >
-                                  {player1Prefs.preferred_times.map((time) => (
-                                    <span
-                                      key={time}
+                              {player1Prefs?.earliest_time ? (
+                                <>
+                                  <div
+                                    style={{
+                                      fontSize: "0.875rem",
+                                      color: "#2c5282",
+                                      fontWeight: "600",
+                                    }}
+                                  >
+                                    ⏰ {player1Prefs.earliest_time} or later
+                                  </div>
+                                  {player1Prefs.is_junior && (
+                                    <div
                                       style={{
-                                        padding: "0.125rem 0.5rem",
-                                        background: "#e6f3ff",
-                                        color: "#2c5282",
-                                        borderRadius: "12px",
                                         fontSize: "0.75rem",
-                                        fontWeight: "500",
+                                        color: "#92400e",
+                                        marginTop: "0.25rem",
                                       }}
                                     >
-                                      {time}
-                                    </span>
-                                  ))}
-                                </div>
+                                      ⚠️ Junior (before 7:30pm)
+                                    </div>
+                                  )}
+                                </>
                               ) : (
                                 <span
                                   style={{
@@ -872,19 +835,8 @@ function Admin() {
                                     fontSize: "0.75rem",
                                   }}
                                 >
-                                  No preference
+                                  Any time
                                 </span>
-                              )}
-                              {player1Prefs?.earliest_time && (
-                                <div
-                                  style={{
-                                    fontSize: "0.75rem",
-                                    color: "#718096",
-                                  }}
-                                >
-                                  ⏰ {player1Prefs.earliest_time} -{" "}
-                                  {player1Prefs.latest_time || "any"}
-                                </div>
                               )}
                               {player1Prefs?.notes && (
                                 <div
@@ -914,33 +866,29 @@ function Admin() {
                                 >
                                   {pairing.player2_name}:
                                 </div>
-                                {player2Prefs?.preferred_times?.length > 0 ? (
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      flexWrap: "wrap",
-                                      gap: "0.25rem",
-                                      marginBottom: "0.25rem",
-                                    }}
-                                  >
-                                    {player2Prefs.preferred_times.map(
-                                      (time) => (
-                                        <span
-                                          key={time}
-                                          style={{
-                                            padding: "0.125rem 0.5rem",
-                                            background: "#f0e6ff",
-                                            color: "#5b21b6",
-                                            borderRadius: "12px",
-                                            fontSize: "0.75rem",
-                                            fontWeight: "500",
-                                          }}
-                                        >
-                                          {time}
-                                        </span>
-                                      )
+                                {player2Prefs?.earliest_time ? (
+                                  <>
+                                    <div
+                                      style={{
+                                        fontSize: "0.875rem",
+                                        color: "#5b21b6",
+                                        fontWeight: "600",
+                                      }}
+                                    >
+                                      ⏰ {player2Prefs.earliest_time} or later
+                                    </div>
+                                    {player2Prefs.is_junior && (
+                                      <div
+                                        style={{
+                                          fontSize: "0.75rem",
+                                          color: "#92400e",
+                                          marginTop: "0.25rem",
+                                        }}
+                                      >
+                                        ⚠️ Junior (before 7:30pm)
+                                      </div>
                                     )}
-                                  </div>
+                                  </>
                                 ) : (
                                   <span
                                     style={{
@@ -948,19 +896,8 @@ function Admin() {
                                       fontSize: "0.75rem",
                                     }}
                                   >
-                                    No preference
+                                    Any time
                                   </span>
-                                )}
-                                {player2Prefs?.earliest_time && (
-                                  <div
-                                    style={{
-                                      fontSize: "0.75rem",
-                                      color: "#718096",
-                                    }}
-                                  >
-                                    ⏰ {player2Prefs.earliest_time} -{" "}
-                                    {player2Prefs.latest_time || "any"}
-                                  </div>
                                 )}
                                 {player2Prefs?.notes && (
                                   <div
@@ -988,38 +925,11 @@ function Admin() {
                               style={{ width: "100%", padding: "0.5rem" }}
                             >
                               <option value="">-- Select Time --</option>
-                              {timeSlots.map((slot) => {
-                                // Highlight if this time works for both players
-                                const worksForPlayer1 =
-                                  !player1Prefs?.preferred_times?.length ||
-                                  player1Prefs.preferred_times.includes(slot);
-                                const worksForPlayer2 =
-                                  !pairing.player2_id ||
-                                  !player2Prefs?.preferred_times?.length ||
-                                  player2Prefs.preferred_times.includes(slot);
-                                const worksBoth =
-                                  worksForPlayer1 && worksForPlayer2;
-
-                                return (
-                                  <option
-                                    key={slot}
-                                    value={slot}
-                                    style={{
-                                      background: worksBoth
-                                        ? "#c6f6d5"
-                                        : "white",
-                                      fontWeight: worksBoth ? "bold" : "normal",
-                                    }}
-                                  >
-                                    {slot}{" "}
-                                    {worksBoth
-                                      ? "✓✓"
-                                      : worksForPlayer1
-                                      ? "✓"
-                                      : ""}
-                                  </option>
-                                );
-                              })}
+                              {timeSlots.map((slot) => (
+                                <option key={slot} value={slot}>
+                                  {slot}
+                                </option>
+                              ))}
                             </select>
                           ) : (
                             pairing.time_slot || (
