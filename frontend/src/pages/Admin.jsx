@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 function Admin() {
   const [ladder, setLadder] = useState([]);
   const [users, setUsers] = useState([]);
+  const [currentDraw, setCurrentDraw] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
@@ -19,11 +20,29 @@ function Admin() {
   const [editingId, setEditingId] = useState(null);
   const [editPosition, setEditPosition] = useState("");
 
+  // Edit draw pairing state
+  const [editingDrawId, setEditingDrawId] = useState(null);
+  const [editTimeSlot, setEditTimeSlot] = useState("");
+  const [editBarDuty, setEditBarDuty] = useState("");
+  const [editNotes, setEditNotes] = useState("");
+
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  // Time slot options
+  const timeSlots = [
+    "5:30pm",
+    "6:00pm",
+    "6:30pm",
+    "7:00pm",
+    "7:30pm",
+    "8:00pm",
+    "8:30pm",
+    "9:00pm",
+    "9:30pm",
+  ];
+
   useEffect(() => {
-    // Check if user is admin
     if (!user || !user.is_admin) {
       navigate("/");
       return;
@@ -41,6 +60,15 @@ function Admin() {
 
       setLadder(ladderRes.data);
       setUsers(usersRes.data);
+
+      // Try to fetch current draw
+      try {
+        const drawRes = await drawAPI.getCurrentDraw();
+        setCurrentDraw(drawRes.data);
+      } catch (err) {
+        setCurrentDraw([]);
+      }
+
       setLoading(false);
     } catch (err) {
       setError("Failed to load data");
@@ -117,8 +145,63 @@ function Admin() {
       await drawAPI.generateDraw(drawWeek);
       showSuccess("Draw generated successfully!");
       setDrawWeek("");
+      fetchData(); // Refresh to show new draw
     } catch (err) {
       showError(err.response?.data?.error || "Failed to generate draw");
+    }
+  };
+
+  const handleStartEditDraw = (pairing) => {
+    setEditingDrawId(pairing.id);
+    setEditTimeSlot(pairing.time_slot || "");
+    setEditBarDuty(pairing.bar_duty || "");
+    setEditNotes(pairing.notes || "");
+  };
+
+  const handleCancelEditDraw = () => {
+    setEditingDrawId(null);
+    setEditTimeSlot("");
+    setEditBarDuty("");
+    setEditNotes("");
+  };
+
+  const handleSaveDrawPairing = async (id) => {
+    try {
+      await drawAPI.updatePairing(id, {
+        time_slot: editTimeSlot,
+        bar_duty: editBarDuty,
+        notes: editNotes,
+      });
+      showSuccess("Pairing updated successfully!");
+      setEditingDrawId(null);
+      setEditTimeSlot("");
+      setEditBarDuty("");
+      setEditNotes("");
+      fetchData();
+    } catch (err) {
+      showError(err.response?.data?.error || "Failed to update pairing");
+      console.error(err);
+    }
+  };
+
+  const handleDeleteDraw = async () => {
+    if (!currentDraw.length) return;
+
+    if (
+      !confirm(
+        "Are you sure you want to delete the current draw? This cannot be undone."
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const weekDate = currentDraw[0].week_date;
+      await drawAPI.deleteDraw(weekDate);
+      showSuccess("Draw deleted successfully!");
+      fetchData();
+    } catch (err) {
+      showError(err.response?.data?.error || "Failed to delete draw");
     }
   };
 
@@ -133,13 +216,177 @@ function Admin() {
     <div className="page">
       <h1>🔧 Admin Panel</h1>
 
-      {/* Success Message */}
       {successMessage && (
         <div className="admin-message success">✓ {successMessage}</div>
       )}
 
-      {/* Error Message */}
       {error && <div className="error">✗ {error}</div>}
+
+      {/* Generate Draw Section */}
+      <div className="admin-section">
+        <h2>Generate Weekly Draw</h2>
+        <form onSubmit={handleGenerateDraw} className="admin-form">
+          <div className="admin-form-row">
+            <div className="form-group" style={{ flex: 1 }}>
+              <label>Week Date (Thursday):</label>
+              <input
+                type="date"
+                value={drawWeek}
+                onChange={(e) => setDrawWeek(e.target.value)}
+                required
+              />
+            </div>
+            <div className="admin-button-group">
+              <button type="submit" className="btn-primary">
+                Generate Draw
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      {/* Current Draw Management */}
+      {currentDraw.length > 0 && (
+        <div className="admin-section">
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "1rem",
+            }}
+          >
+            <h2>Manage Current Draw</h2>
+            <button
+              onClick={handleDeleteDraw}
+              className="btn-danger"
+              style={{
+                background: "#e53e3e",
+                color: "white",
+                padding: "0.5rem 1rem",
+                border: "none",
+                borderRadius: "6px",
+                cursor: "pointer",
+                fontWeight: "600",
+              }}
+            >
+              Delete Draw
+            </button>
+          </div>
+
+          <div className="draw-admin-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Match</th>
+                  <th>Time Slot</th>
+                  <th>Bar Duty</th>
+                  <th>Notes</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentDraw.map((pairing) => (
+                  <tr key={pairing.id}>
+                    <td>
+                      <strong>#{pairing.player1_position}</strong>{" "}
+                      {pairing.player1_name}
+                      <br />
+                      <span style={{ color: "#718096" }}>vs</span>
+                      <br />
+                      {pairing.player2_id ? (
+                        <>
+                          <strong>#{pairing.player2_position}</strong>{" "}
+                          {pairing.player2_name}
+                        </>
+                      ) : (
+                        <span style={{ color: "#ed8936", fontStyle: "italic" }}>
+                          BYE
+                        </span>
+                      )}
+                    </td>
+                    <td>
+                      {editingDrawId === pairing.id ? (
+                        <select
+                          value={editTimeSlot}
+                          onChange={(e) => setEditTimeSlot(e.target.value)}
+                          style={{ width: "100%", padding: "0.5rem" }}
+                        >
+                          <option value="">-- Select Time --</option>
+                          {timeSlots.map((slot) => (
+                            <option key={slot} value={slot}>
+                              {slot}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        pairing.time_slot || (
+                          <span style={{ color: "#a0aec0" }}>Not set</span>
+                        )
+                      )}
+                    </td>
+                    <td>
+                      {editingDrawId === pairing.id ? (
+                        <input
+                          type="text"
+                          value={editBarDuty}
+                          onChange={(e) => setEditBarDuty(e.target.value)}
+                          placeholder="e.g., Dave R"
+                          style={{ width: "100%", padding: "0.5rem" }}
+                        />
+                      ) : (
+                        pairing.bar_duty || (
+                          <span style={{ color: "#a0aec0" }}>-</span>
+                        )
+                      )}
+                    </td>
+                    <td>
+                      {editingDrawId === pairing.id ? (
+                        <input
+                          type="text"
+                          value={editNotes}
+                          onChange={(e) => setEditNotes(e.target.value)}
+                          placeholder="Optional notes"
+                          style={{ width: "100%", padding: "0.5rem" }}
+                        />
+                      ) : (
+                        pairing.notes || (
+                          <span style={{ color: "#a0aec0" }}>-</span>
+                        )
+                      )}
+                    </td>
+                    <td className="admin-actions">
+                      {editingDrawId === pairing.id ? (
+                        <div className="admin-edit-buttons">
+                          <button
+                            onClick={() => handleSaveDrawPairing(pairing.id)}
+                            className="btn-save"
+                          >
+                            Save
+                          </button>
+                          <button
+                            onClick={handleCancelEditDraw}
+                            className="btn-cancel"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => handleStartEditDraw(pairing)}
+                          className="btn-edit"
+                        >
+                          Edit
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* Add User to Ladder Section */}
       <div className="admin-section">
@@ -263,23 +510,6 @@ function Admin() {
             <p className="admin-empty">No one on the ladder yet.</p>
           )}
         </div>
-      </div>
-      <div className="admin-section">
-        <h2>Generate Weekly Draw</h2>
-        <form onSubmit={handleGenerateDraw} className="admin-form">
-          <div className="form-group">
-            <label>Week Date (Thursday):</label>
-            <input
-              type="date"
-              value={drawWeek}
-              onChange={(e) => setDrawWeek(e.target.value)}
-              required
-            />
-          </div>
-          <button type="submit" className="btn-primary">
-            Generate Draw
-          </button>
-        </form>
       </div>
     </div>
   );

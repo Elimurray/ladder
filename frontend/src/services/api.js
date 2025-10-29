@@ -41,17 +41,22 @@ export const ladderAPI = {
   updatePosition: (id, position) => api.put(`/ladder/${id}`, { position }),
 };
 
-export const matchesAPI = {
-  submit: (matchData) => api.post("/matches", matchData),
-  getWeekly: (date) => api.get(`/matches/week/${date}`),
-};
-
 export const drawAPI = {
   getCurrentDraw: () => api.get("/draw/current"),
   getWeekDraw: (date) => api.get(`/draw/week/${date}`),
   generateDraw: (week_date) => api.post("/draw/generate", { week_date }),
   updatePairing: (id, data) => api.patch(`/draw/${id}`, data),
   deleteDraw: (date) => api.delete(`/draw/week/${date}`),
+};
+
+export const matchesAPI = {
+  submitResult: (matchData) => api.post("/matches/submit", matchData),
+  getMyResults: () => api.get("/matches/my-results"),
+  getMyMatch: () => api.get("/matches/my-match"),
+  getPending: () => api.get("/matches/pending"),
+  getWeekResults: (date) => api.get(`/matches/week/${date}`),
+  approveMatch: (id) => api.patch(`/matches/${id}/approve`),
+  deleteMatch: (id) => api.delete(`/matches/${id}`),
 };
 
 export default api;
