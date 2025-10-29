@@ -183,19 +183,37 @@ router.patch("/:id", authMiddleware, adminMiddleware, async (req, res) => {
 });
 
 // Admin: Delete a draw (for regenerating)
+// Admin: Delete a draw (for regenerating)
 router.delete(
   "/week/:date",
   authMiddleware,
   adminMiddleware,
   async (req, res) => {
+    const client = await pool.connect();
+
     try {
       const { date } = req.params;
 
-      await pool.query("DELETE FROM draws WHERE week_date = $1", [date]);
-      res.json({ message: "Draw deleted successfully" });
+      await client.query("BEGIN");
+
+      // First delete all matches associated with this draw
+      await client.query(
+        `DELETE FROM matches 
+         WHERE draw_id IN (SELECT id FROM draws WHERE week_date = $1)`,
+        [date]
+      );
+
+      // Then delete the draws
+      await client.query("DELETE FROM draws WHERE week_date = $1", [date]);
+
+      await client.query("COMMIT");
+      res.json({ message: "Draw and associated matches deleted successfully" });
     } catch (err) {
+      await client.query("ROLLBACK");
       console.error(err.message);
-      res.status(500).json({ error: "Server error" });
+      res.status(500).json({ error: "Server error: " + err.message });
+    } finally {
+      client.release();
     }
   }
 );
