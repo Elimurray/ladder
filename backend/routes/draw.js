@@ -57,22 +57,26 @@ router.get("/current", async (req, res) => {
   }
 });
 
-// Admin: Generate draw for a week (auto-pair based on ladder positions)
+// Admin: Generate draw for a week
 router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
   const client = await pool.connect();
 
   try {
     const { week_date } = req.body;
 
+    console.log("Generating draw for:", week_date); // Debug
+
     await client.query("BEGIN");
 
-    // Check if draw already exists for this week
+    // Check if draw already exists
     const existingDraw = await client.query(
       "SELECT COUNT(*) FROM draws WHERE week_date = $1",
       [week_date]
     );
 
-    if (existingDraw.rows[0].count > 0) {
+    console.log("Existing draws:", existingDraw.rows[0].count); // Debug
+
+    if (parseInt(existingDraw.rows[0].count) > 0) {
       await client.query("ROLLBACK");
       return res
         .status(400)
@@ -92,10 +96,17 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
       ORDER BY lp.position
     `);
 
+    console.log("Active players:", ladder.rows.length); // Debug
+
+    if (ladder.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({ error: "No active players on ladder" });
+    }
+
     const players = ladder.rows;
     const draws = [];
 
-    // Pair players: 1 vs 2, 3 vs 4, etc.
+    // Pair players
     for (let i = 0; i < players.length - 1; i += 2) {
       const player1 = players[i];
       const player2 = players[i + 1];
@@ -108,7 +119,7 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
       });
     }
 
-    // If odd number of players, last player gets a bye
+    // Handle odd number
     if (players.length % 2 !== 0) {
       const lastPlayer = players[players.length - 1];
       draws.push({
@@ -118,6 +129,8 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
         player2_position: null,
       });
     }
+
+    console.log("Creating", draws.length, "pairings"); // Debug
 
     // Insert draws
     for (const draw of draws) {
@@ -140,8 +153,8 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
     });
   } catch (err) {
     await client.query("ROLLBACK");
-    console.error(err.message);
-    res.status(500).json({ error: "Server error" });
+    console.error("Draw generation error:", err); // Better debug
+    res.status(500).json({ error: "Server error: " + err.message });
   } finally {
     client.release();
   }
