@@ -6,6 +6,7 @@ import Ladder from "./pages/Ladder";
 import SubmitMatch from "./pages/SubmitMatch";
 import Login from "./pages/Login";
 import Admin from "./pages/Admin";
+import Draw from "./pages/Draw";
 import "./App.css";
 
 function App() {
@@ -48,6 +49,11 @@ function App() {
               <li>
                 <Link to="/ladder" onClick={closeMenu}>
                   Ladder
+                </Link>
+              </li>
+              <li>
+                <Link to="/draw" onClick={closeMenu}>
+                  Draw
                 </Link>
               </li>
               {user && (
@@ -107,6 +113,7 @@ function App() {
             <Route path="/submit" element={<SubmitMatch />} />
             <Route path="/login" element={<Login />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/draw" element={<Draw />} />
           </Routes>
         </div>
       </div>

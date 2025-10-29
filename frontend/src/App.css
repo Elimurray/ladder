@@ -476,6 +476,116 @@ td:first-child {
   box-sizing: border-box;
 }
 
+/* ============================================
+   DRAW PAGE
+   ============================================ */
+.draw-schedule {
+  margin-top: 2rem;
+}
+
+.time-slot-section {
+  margin-bottom: 2.5rem;
+}
+
+.time-slot-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.draw-matches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1rem;
+}
+
+.draw-match-card {
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.draw-match-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.draw-match-card.my-match {
+  border-color: #667eea;
+  background: linear-gradient(135deg, #f0f4ff 0%, #ffffff 100%);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+}
+
+.match-players {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.player {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.position-badge {
+  background: #667eea;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: bold;
+}
+
+.player-name {
+  font-weight: 600;
+  color: #2d3748;
+  text-align: center;
+}
+
+.vs {
+  font-weight: bold;
+  color: #718096;
+  font-size: 1.25rem;
+}
+
+.bye {
+  color: #ed8936;
+  font-weight: bold;
+  font-style: italic;
+}
+
+.bar-duty {
+  background: #fef5e7;
+  border-left: 4px solid #f39c12;
+  padding: 0.5rem 1rem;
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  color: #856404;
+  border-radius: 4px;
+}
+
+.match-notes {
+  background: #e8f4f8;
+  border-left: 4px solid #3498db;
+  padding: 0.5rem 1rem;
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #1e3a5f;
+  border-radius: 4px;
+}
+
+
+
 @media (max-width: 768px) {
   /* Show hamburger menu */
   .menu-toggle {
@@ -620,5 +730,18 @@ td:first-child {
 
   .admin-actions {
     text-align: left;
+  }
+
+  .draw-matches {
+    grid-template-columns: 1fr;
+  }
+  
+  .match-players {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .vs {
+    transform: rotate(90deg);
   }
 }

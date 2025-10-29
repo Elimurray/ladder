@@ -46,4 +46,12 @@ export const matchesAPI = {
   getWeekly: (date) => api.get(`/matches/week/${date}`),
 };
 
+export const drawAPI = {
+  getCurrentDraw: () => api.get("/draw/current"),
+  getWeekDraw: (date) => api.get(`/draw/week/${date}`),
+  generateDraw: (week_date) => api.post("/draw/generate", { week_date }),
+  updatePairing: (id, data) => api.patch(`/draw/${id}`, data),
+  deleteDraw: (date) => api.delete(`/draw/week/${date}`),
+};
+
 export default api;

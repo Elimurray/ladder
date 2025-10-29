@@ -9,6 +9,7 @@ function Admin() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
+  const [drawWeek, setDrawWeek] = useState("");
 
   // Add user to ladder state
   const [selectedUser, setSelectedUser] = useState("");
@@ -101,6 +102,23 @@ function Admin() {
     } catch (err) {
       showError(err.response?.data?.error || "Failed to update position");
       console.error(err);
+    }
+  };
+
+  const handleGenerateDraw = async (e) => {
+    e.preventDefault();
+
+    if (!drawWeek) {
+      showError("Please select a week date");
+      return;
+    }
+
+    try {
+      await drawAPI.generateDraw(drawWeek);
+      showSuccess("Draw generated successfully!");
+      setDrawWeek("");
+    } catch (err) {
+      showError(err.response?.data?.error || "Failed to generate draw");
     }
   };
 
@@ -245,6 +263,23 @@ function Admin() {
             <p className="admin-empty">No one on the ladder yet.</p>
           )}
         </div>
+      </div>
+      <div className="admin-section">
+        <h2>Generate Weekly Draw</h2>
+        <form onSubmit={handleGenerateDraw} className="admin-form">
+          <div className="form-group">
+            <label>Week Date (Thursday):</label>
+            <input
+              type="date"
+              value={drawWeek}
+              onChange={(e) => setDrawWeek(e.target.value)}
+              required
+            />
+          </div>
+          <button type="submit" className="btn-primary">
+            Generate Draw
+          </button>
+        </form>
       </div>
     </div>
   );
