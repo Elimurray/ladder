@@ -67,7 +67,9 @@ export const profileAPI = {
   updatePreferences: (preferences) =>
     api.put("/profile/preferences", preferences),
   updateStatus: (status) => api.patch("/profile/status", { status }),
-  getAllPreferences: () => api.get("/profile/all-preferences"), // ADD THIS
+  updateSquashLevels: (play_for_levels) =>
+    api.patch("/profile/squash-levels", { play_for_levels }), // ADD THIS LINE
+  getAllPreferences: () => api.get("/profile/all-preferences"),
 };
 
 export const resultsAPI = {
