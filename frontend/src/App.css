@@ -859,6 +859,50 @@ td:first-child {
   border-bottom: 2px solid #e2e8f0;
 }
 
+/* ============================================
+   RESULTS TABLE
+   ============================================ */
+.results-table {
+  overflow-x: auto;
+  margin-top: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.results-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.results-table th,
+.results-table td {
+  padding: 1rem;
+  text-align: left;
+}
+
+.results-table th {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}
+
+.results-table td {
+  border-bottom: 1px solid #e2e8f0;
+  color: #2d3748;
+}
+
+.results-table tr:last-child td {
+  border-bottom: none;
+}
+
+.results-table tbody tr:hover {
+  background: #f7fafc;
+}
+
+
 @media (max-width: 768px) {
   /* Show hamburger menu */
   .menu-toggle {
@@ -1016,5 +1060,19 @@ td:first-child {
 
   .vs {
     transform: rotate(90deg);
+  }
+
+   .results-table {
+    margin-left: -1.5rem;
+    margin-right: -1.5rem;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+  
+  .results-table th,
+  .results-table td {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.9rem;
   }
 }

@@ -8,6 +8,8 @@ import Login from "./pages/Login";
 import Admin from "./pages/Admin";
 import Draw from "./pages/Draw";
 import Profile from "./pages/Profile";
+import Results from "./pages/Results";
+
 import "./App.css";
 
 function App() {
@@ -55,6 +57,11 @@ function App() {
               <li>
                 <Link to="/draw" onClick={closeMenu}>
                   Draw
+                </Link>
+              </li>
+              <li>
+                <Link to="/results" onClick={closeMenu}>
+                  Results
                 </Link>
               </li>
               {user && (
@@ -124,6 +131,7 @@ function App() {
             <Route path="/admin" element={<Admin />} />
             <Route path="/draw" element={<Draw />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/results" element={<Results />} />
           </Routes>
         </div>
       </div>

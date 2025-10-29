@@ -70,4 +70,9 @@ export const profileAPI = {
   getAllPreferences: () => api.get("/profile/all-preferences"), // ADD THIS
 };
 
+export const resultsAPI = {
+  getWeeks: () => api.get("/results/weeks"),
+  getWeekResults: (date) => api.get(`/results/week/${date}`),
+};
+
 export default api;

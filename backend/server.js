@@ -16,6 +16,8 @@ const ladderRoutes = require("./routes/ladder");
 const drawRoutes = require("./routes/draw");
 const matchesRoutes = require("./routes/matches");
 const profileRoutes = require("./routes/profile");
+const resultsRoutes = require("./routes/results");
+app.use("/api/results", resultsRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/matches", matchesRoutes);
 app.use("/api/draw", drawRoutes);
