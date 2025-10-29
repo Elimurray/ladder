@@ -382,10 +382,22 @@ router.post(
         );
       }
 
+      // CLEAN UP AFTER PROCESSING (keeps matches for history)
+      console.log("Cleaning up processed draw...");
+
+      // Set draw_id to NULL in matches (so they become history records)
+      await client.query(
+        "UPDATE matches SET draw_id = NULL WHERE week_date = $1",
+        [date]
+      );
+
+      // Delete the draw itself
+      await client.query("DELETE FROM draws WHERE week_date = $1", [date]);
+
       await client.query("COMMIT");
 
       res.json({
-        message: "Ladder updated successfully",
+        message: "Ladder updated successfully and draw deleted",
         processed: matches.rows.length,
         updates: newLadder.filter((e) => e.newPosition !== e.oldPosition)
           .length,

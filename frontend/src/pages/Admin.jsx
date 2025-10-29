@@ -81,13 +81,20 @@ function Admin() {
         ladderAPI.getAll(),
         usersAPI.getAll(),
         matchesAPI.getPending(),
-        profileAPI.getAllPreferences(),
       ]);
 
       setLadder(ladderRes.data);
       setUsers(usersRes.data);
       setPendingMatches(pendingRes.data);
-      setUserPreferences(preferencesRes.data);
+
+      // Fetch preferences separately
+      try {
+        const preferencesRes = await profileAPI.getAllPreferences();
+        setUserPreferences(preferencesRes.data);
+      } catch (err) {
+        console.log("Could not load preferences");
+        setUserPreferences([]);
+      }
 
       // Fetch all available draws
       try {
@@ -294,7 +301,12 @@ function Admin() {
       await drawAPI.deleteDraw(selectedDrawDate);
       showSuccess("Draw deleted successfully!");
       setSelectedDrawDate("");
-      fetchData();
+      setCurrentDraw([]);
+
+      // Refresh page after short delay
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     } catch (err) {
       showError(err.response?.data?.error || "Failed to delete draw");
     }
@@ -349,7 +361,7 @@ function Admin() {
 
   return (
     <div className="page">
-      <h1>🔧 Admin Panel</h1>
+      <h1>Admin Panel</h1>
 
       {successMessage && (
         <div className="admin-message success">✓ {successMessage}</div>
@@ -762,6 +774,7 @@ function Admin() {
                 <thead>
                   <tr>
                     <th>Match</th>
+                    <th>Preferences</th>
                     <th>Time Slot</th>
                     <th>Bar Duty</th>
                     <th>Notes</th>
@@ -769,104 +782,296 @@ function Admin() {
                   </tr>
                 </thead>
                 <tbody>
-                  {currentDraw.map((pairing) => (
-                    <tr key={pairing.id}>
-                      <td>
-                        <strong>#{pairing.player1_position}</strong>{" "}
-                        {pairing.player1_name}
-                        <br />
-                        <span style={{ color: "#718096" }}>vs</span>
-                        <br />
-                        {pairing.player2_id ? (
-                          <>
-                            <strong>#{pairing.player2_position}</strong>{" "}
-                            {pairing.player2_name}
-                          </>
-                        ) : (
-                          <span
-                            style={{ color: "#ed8936", fontStyle: "italic" }}
-                          >
-                            BYE
-                          </span>
-                        )}
-                      </td>
-                      <td>
-                        {editingDrawId === pairing.id ? (
-                          <select
-                            value={editTimeSlot}
-                            onChange={(e) => setEditTimeSlot(e.target.value)}
-                            style={{ width: "100%", padding: "0.5rem" }}
-                          >
-                            <option value="">-- Select Time --</option>
-                            {timeSlots.map((slot) => (
-                              <option key={slot} value={slot}>
-                                {slot}
-                              </option>
-                            ))}
-                          </select>
-                        ) : (
-                          pairing.time_slot || (
-                            <span style={{ color: "#a0aec0" }}>Not set</span>
-                          )
-                        )}
-                      </td>
-                      <td>
-                        {editingDrawId === pairing.id ? (
-                          <input
-                            type="text"
-                            value={editBarDuty}
-                            onChange={(e) => setEditBarDuty(e.target.value)}
-                            placeholder="e.g., Dave R"
-                            style={{ width: "100%", padding: "0.5rem" }}
-                          />
-                        ) : (
-                          pairing.bar_duty || (
-                            <span style={{ color: "#a0aec0" }}>-</span>
-                          )
-                        )}
-                      </td>
-                      <td>
-                        {editingDrawId === pairing.id ? (
-                          <input
-                            type="text"
-                            value={editNotes}
-                            onChange={(e) => setEditNotes(e.target.value)}
-                            placeholder="Optional notes"
-                            style={{ width: "100%", padding: "0.5rem" }}
-                          />
-                        ) : (
-                          pairing.notes || (
-                            <span style={{ color: "#a0aec0" }}>-</span>
-                          )
-                        )}
-                      </td>
-                      <td className="admin-actions">
-                        {editingDrawId === pairing.id ? (
-                          <div className="admin-edit-buttons">
-                            <button
-                              onClick={() => handleSaveDrawPairing(pairing.id)}
-                              className="btn-save"
+                  {currentDraw.map((pairing) => {
+                    // Find preferences for both players
+                    const player1Prefs = userPreferences.find(
+                      (p) => p.id === pairing.player1_id
+                    );
+                    const player2Prefs = userPreferences.find(
+                      (p) => p.id === pairing.player2_id
+                    );
+
+                    return (
+                      <tr key={pairing.id}>
+                        <td>
+                          <strong>#{pairing.player1_position}</strong>{" "}
+                          {pairing.player1_name}
+                          <br />
+                          <span style={{ color: "#718096" }}>vs</span>
+                          <br />
+                          {pairing.player2_id ? (
+                            <>
+                              <strong>#{pairing.player2_position}</strong>{" "}
+                              {pairing.player2_name}
+                            </>
+                          ) : (
+                            <span
+                              style={{ color: "#ed8936", fontStyle: "italic" }}
                             >
-                              Save
-                            </button>
-                            <button
-                              onClick={handleCancelEditDraw}
-                              className="btn-cancel"
-                            >
-                              Cancel
-                            </button>
+                              BYE
+                            </span>
+                          )}
+                        </td>
+                        <td>
+                          <div style={{ fontSize: "0.875rem" }}>
+                            {/* Player 1 Preferences */}
+                            <div style={{ marginBottom: "0.75rem" }}>
+                              <div
+                                style={{
+                                  fontWeight: "600",
+                                  color: "#4a5568",
+                                  marginBottom: "0.25rem",
+                                }}
+                              >
+                                {pairing.player1_name}:
+                              </div>
+                              {player1Prefs?.preferred_times?.length > 0 ? (
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    flexWrap: "wrap",
+                                    gap: "0.25rem",
+                                    marginBottom: "0.25rem",
+                                  }}
+                                >
+                                  {player1Prefs.preferred_times.map((time) => (
+                                    <span
+                                      key={time}
+                                      style={{
+                                        padding: "0.125rem 0.5rem",
+                                        background: "#e6f3ff",
+                                        color: "#2c5282",
+                                        borderRadius: "12px",
+                                        fontSize: "0.75rem",
+                                        fontWeight: "500",
+                                      }}
+                                    >
+                                      {time}
+                                    </span>
+                                  ))}
+                                </div>
+                              ) : (
+                                <span
+                                  style={{
+                                    color: "#a0aec0",
+                                    fontSize: "0.75rem",
+                                  }}
+                                >
+                                  No preference
+                                </span>
+                              )}
+                              {player1Prefs?.earliest_time && (
+                                <div
+                                  style={{
+                                    fontSize: "0.75rem",
+                                    color: "#718096",
+                                  }}
+                                >
+                                  ⏰ {player1Prefs.earliest_time} -{" "}
+                                  {player1Prefs.latest_time || "any"}
+                                </div>
+                              )}
+                              {player1Prefs?.notes && (
+                                <div
+                                  style={{
+                                    fontSize: "0.75rem",
+                                    color: "#78350f",
+                                    background: "#fef3c7",
+                                    padding: "0.25rem 0.5rem",
+                                    borderRadius: "4px",
+                                    marginTop: "0.25rem",
+                                  }}
+                                >
+                                  📝 {player1Prefs.notes}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Player 2 Preferences */}
+                            {pairing.player2_id && (
+                              <div>
+                                <div
+                                  style={{
+                                    fontWeight: "600",
+                                    color: "#4a5568",
+                                    marginBottom: "0.25rem",
+                                  }}
+                                >
+                                  {pairing.player2_name}:
+                                </div>
+                                {player2Prefs?.preferred_times?.length > 0 ? (
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      flexWrap: "wrap",
+                                      gap: "0.25rem",
+                                      marginBottom: "0.25rem",
+                                    }}
+                                  >
+                                    {player2Prefs.preferred_times.map(
+                                      (time) => (
+                                        <span
+                                          key={time}
+                                          style={{
+                                            padding: "0.125rem 0.5rem",
+                                            background: "#f0e6ff",
+                                            color: "#5b21b6",
+                                            borderRadius: "12px",
+                                            fontSize: "0.75rem",
+                                            fontWeight: "500",
+                                          }}
+                                        >
+                                          {time}
+                                        </span>
+                                      )
+                                    )}
+                                  </div>
+                                ) : (
+                                  <span
+                                    style={{
+                                      color: "#a0aec0",
+                                      fontSize: "0.75rem",
+                                    }}
+                                  >
+                                    No preference
+                                  </span>
+                                )}
+                                {player2Prefs?.earliest_time && (
+                                  <div
+                                    style={{
+                                      fontSize: "0.75rem",
+                                      color: "#718096",
+                                    }}
+                                  >
+                                    ⏰ {player2Prefs.earliest_time} -{" "}
+                                    {player2Prefs.latest_time || "any"}
+                                  </div>
+                                )}
+                                {player2Prefs?.notes && (
+                                  <div
+                                    style={{
+                                      fontSize: "0.75rem",
+                                      color: "#78350f",
+                                      background: "#fef3c7",
+                                      padding: "0.25rem 0.5rem",
+                                      borderRadius: "4px",
+                                      marginTop: "0.25rem",
+                                    }}
+                                  >
+                                    📝 {player2Prefs.notes}
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </div>
-                        ) : (
-                          <button
-                            onClick={() => handleStartEditDraw(pairing)}
-                            className="btn-edit"
-                          >
-                            Edit
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td>
+                          {editingDrawId === pairing.id ? (
+                            <select
+                              value={editTimeSlot}
+                              onChange={(e) => setEditTimeSlot(e.target.value)}
+                              style={{ width: "100%", padding: "0.5rem" }}
+                            >
+                              <option value="">-- Select Time --</option>
+                              {timeSlots.map((slot) => {
+                                // Highlight if this time works for both players
+                                const worksForPlayer1 =
+                                  !player1Prefs?.preferred_times?.length ||
+                                  player1Prefs.preferred_times.includes(slot);
+                                const worksForPlayer2 =
+                                  !pairing.player2_id ||
+                                  !player2Prefs?.preferred_times?.length ||
+                                  player2Prefs.preferred_times.includes(slot);
+                                const worksBoth =
+                                  worksForPlayer1 && worksForPlayer2;
+
+                                return (
+                                  <option
+                                    key={slot}
+                                    value={slot}
+                                    style={{
+                                      background: worksBoth
+                                        ? "#c6f6d5"
+                                        : "white",
+                                      fontWeight: worksBoth ? "bold" : "normal",
+                                    }}
+                                  >
+                                    {slot}{" "}
+                                    {worksBoth
+                                      ? "✓✓"
+                                      : worksForPlayer1
+                                      ? "✓"
+                                      : ""}
+                                  </option>
+                                );
+                              })}
+                            </select>
+                          ) : (
+                            pairing.time_slot || (
+                              <span style={{ color: "#a0aec0" }}>Not set</span>
+                            )
+                          )}
+                        </td>
+                        <td>
+                          {editingDrawId === pairing.id ? (
+                            <input
+                              type="text"
+                              value={editBarDuty}
+                              onChange={(e) => setEditBarDuty(e.target.value)}
+                              placeholder="e.g., Dave R"
+                              style={{ width: "100%", padding: "0.5rem" }}
+                            />
+                          ) : (
+                            pairing.bar_duty || (
+                              <span style={{ color: "#a0aec0" }}>-</span>
+                            )
+                          )}
+                        </td>
+                        <td>
+                          {editingDrawId === pairing.id ? (
+                            <input
+                              type="text"
+                              value={editNotes}
+                              onChange={(e) => setEditNotes(e.target.value)}
+                              placeholder="Optional notes"
+                              style={{ width: "100%", padding: "0.5rem" }}
+                            />
+                          ) : (
+                            pairing.notes || (
+                              <span style={{ color: "#a0aec0" }}>-</span>
+                            )
+                          )}
+                        </td>
+                        <td className="admin-actions">
+                          {editingDrawId === pairing.id ? (
+                            <div className="admin-edit-buttons">
+                              <button
+                                onClick={() =>
+                                  handleSaveDrawPairing(pairing.id)
+                                }
+                                className="btn-save"
+                              >
+                                Save
+                              </button>
+                              <button
+                                onClick={handleCancelEditDraw}
+                                className="btn-cancel"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => handleStartEditDraw(pairing)}
+                              className="btn-edit"
+                            >
+                              Edit
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
