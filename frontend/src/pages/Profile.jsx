@@ -210,6 +210,22 @@ function Profile() {
                   {new Date(profile.created_at).toLocaleDateString()}
                 </div>
               </div>
+              <div>
+                <div style={{ fontSize: "0.875rem", opacity: 0.8 }}>
+                  Phone Number
+                </div>
+                <div style={{ fontWeight: "bold" }}>
+                  {profile.phone_number || "Not provided"}
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: "0.875rem", opacity: 0.8 }}>
+                  Squash Grade
+                </div>
+                <div style={{ fontWeight: "bold" }}>
+                  {profile.squash_grade || "Not set"}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -506,14 +522,14 @@ function Profile() {
                   <option value="">Any time</option>
                   {(profile.is_junior
                     ? timeSlots.filter((t) => {
-                        // Only show times before 7:30pm for juniors
-                        const hour = parseInt(t.split(":")[0]);
-                        const isPM = t.includes("pm");
-                        const time24 = isPM && hour !== 12 ? hour + 12 : hour;
-                        return (
-                          time24 < 19 || (time24 === 19 && t.includes("7:00"))
-                        );
-                      })
+                      // Only show times before 7:30pm for juniors
+                      const hour = parseInt(t.split(":")[0]);
+                      const isPM = t.includes("pm");
+                      const time24 = isPM && hour !== 12 ? hour + 12 : hour;
+                      return (
+                        time24 < 19 || (time24 === 19 && t.includes("7:00"))
+                      );
+                    })
                     : timeSlots
                   ).map((time) => (
                     <option key={time} value={time}>
@@ -590,31 +606,31 @@ function Profile() {
                                 match.result === "3"
                                   ? "#c6f6d5"
                                   : match.result === "2"
-                                  ? "#bee3f8"
-                                  : match.result === "1"
-                                  ? "#feebc8"
-                                  : "#fed7d7",
+                                    ? "#bee3f8"
+                                    : match.result === "1"
+                                      ? "#feebc8"
+                                      : "#fed7d7",
                               color:
                                 match.result === "3"
                                   ? "#22543d"
                                   : match.result === "2"
-                                  ? "#2c5282"
-                                  : match.result === "1"
-                                  ? "#7c2d12"
-                                  : "#742a2a",
+                                    ? "#2c5282"
+                                    : match.result === "1"
+                                      ? "#7c2d12"
+                                      : "#742a2a",
                             }}
                           >
                             {match.result === "3"
                               ? "Won"
                               : match.result === "2"
-                              ? "Won 2"
-                              : match.result === "1"
-                              ? "Won 1"
-                              : match.result === "0"
-                              ? "Lost"
-                              : match.result === "~"
-                              ? "No Play"
-                              : "Default"}
+                                ? "Won 2"
+                                : match.result === "1"
+                                  ? "Won 1"
+                                  : match.result === "0"
+                                    ? "Lost"
+                                    : match.result === "~"
+                                      ? "No Play"
+                                      : "Default"}
                           </span>
                         </td>
                       </tr>

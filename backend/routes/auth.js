@@ -8,10 +8,10 @@ const { authMiddleware } = require("../middleware/auth");
 // Register new user
 router.post("/register", async (req, res) => {
   try {
-    const { email, full_name, password } = req.body;
+    const { email, full_name, password, phone_number, squash_grade } = req.body;
 
     // Validate input
-    if (!email || !full_name || !password) {
+    if (!email || !full_name || !password || !phone_number) {
       return res
         .status(400)
         .json({ error: "Please provide all required fields" });
@@ -32,8 +32,8 @@ router.post("/register", async (req, res) => {
 
     // Create user
     const result = await pool.query(
-      "INSERT INTO users (email, full_name, password_hash, is_member) VALUES ($1, $2, $3, $4) RETURNING id, email, full_name, is_member, is_admin, is_junior, play_for_levels",
-      [email, full_name, password_hash, true]
+      "INSERT INTO users (email, full_name, password_hash, phone_number, squash_grade, is_member) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, email, full_name, phone_number, squash_grade, is_member, is_admin, is_junior, play_for_levels",
+      [email, full_name, password_hash, phone_number, squash_grade, true]
     );
 
     const user = result.rows[0];
@@ -55,6 +55,8 @@ router.post("/register", async (req, res) => {
         id: user.id,
         email: user.email,
         full_name: user.full_name,
+        phone_number: user.phone_number,
+        squash_grade: user.squash_grade,
         is_member: user.is_member,
         is_admin: user.is_admin,
         is_junior: user.is_junior,
@@ -114,6 +116,8 @@ router.post("/login", async (req, res) => {
         id: user.id,
         email: user.email,
         full_name: user.full_name,
+        phone_number: user.phone_number,
+        squash_grade: user.squash_grade,
         is_member: user.is_member,
         is_admin: user.is_admin,
         is_junior: user.is_junior,
@@ -130,7 +134,7 @@ router.post("/login", async (req, res) => {
 router.get("/me", authMiddleware, async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT id, email, full_name, is_member, is_admin, is_junior, play_for_levels, created_at FROM users WHERE id = $1",
+      "SELECT id, email, full_name, phone_number, squash_grade, is_member, is_admin, is_junior, play_for_levels, created_at FROM users WHERE id = $1",
       [req.user.id]
     );
 

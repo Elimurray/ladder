@@ -8,6 +8,8 @@ function Login() {
     email: "",
     password: "",
     full_name: "",
+    phone_number: "",
+    squash_grade: "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -26,7 +28,13 @@ function Login() {
       if (isLogin) {
         await login(formData.email, formData.password);
       } else {
-        await register(formData.email, formData.full_name, formData.password);
+        await register(
+          formData.email,
+          formData.full_name,
+          formData.password,
+          formData.phone_number,
+          formData.squash_grade
+        );
       }
       navigate("/ladder");
     } catch (err) {
@@ -66,6 +74,34 @@ function Login() {
               />
             </div>
           )}
+          <div className="form-group">
+            <label>Phone Number:</label>
+            <input
+              type="tel"
+              name="phone_number"
+              placeholder="+64 21 123 4567"
+              value={formData.phone_number}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Squash Grade:</label>
+            <select
+              name="squash_grade"
+              value={formData.squash_grade}
+              onChange={handleChange}
+              required
+            >
+              <option value="">-- Select Grade --</option>
+              <option value="A">A Grade</option>
+              <option value="B">B Grade</option>
+              <option value="C">C Grade</option>
+              <option value="D">D Grade</option>
+              <option value="E">E Grade</option>
+            </select>
+          </div>
 
           <div className="form-group">
             <label>Email:</label>
