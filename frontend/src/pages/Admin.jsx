@@ -623,9 +623,6 @@ function Admin() {
                       Week of {new Date(match.week_date).toLocaleDateString()}
                     </div>
                     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                      {match.time_slot && (
-                        <div className="match-time">🕐 {match.time_slot}</div>
-                      )}
                       {match.player1_levels && match.player2_levels && (
                         <div
                           style={{
@@ -641,6 +638,10 @@ function Admin() {
                           🏆 LEVELS
                         </div>
                       )}
+                      {match.time_slot && (
+                        <div className="match-time">🕐 {match.time_slot}</div>
+                      )}
+
                     </div>
                   </div>
 
