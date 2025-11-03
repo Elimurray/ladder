@@ -246,6 +246,7 @@ router.get("/pending", authMiddleware, adminMiddleware, async (req, res) => {
           player1_result: row.result,
           player1_set_scores: row.set_scores,
           player1_submitted_at: row.submitted_at,
+          player1_levels: row.player1_levels,
           player2_id: row.opponent_id,
           player2_name: row.opponent_name,
           player2_score: opponentResult?.match_score || "Not submitted",
@@ -254,6 +255,7 @@ router.get("/pending", authMiddleware, adminMiddleware, async (req, res) => {
           player2_result: opponentResult?.result,
           player2_set_scores: opponentResult?.set_scores,
           player2_submitted_at: opponentResult?.submitted_at,
+          player2_levels: opponentResult?.player2_levels,
           // Check if scores match
           scores_match:
             opponentResult &&
