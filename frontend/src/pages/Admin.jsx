@@ -685,7 +685,10 @@ function Admin() {
                           Set Scores:
                         </strong>
                         <div style={{ color: "#2d3748", fontFamily: "monospace" }}>
-                          {JSON.parse(match.player1_set_scores).sets.join(", ")}
+                          {(typeof match.player1_set_scores === 'string'
+                            ? JSON.parse(match.player1_set_scores)
+                            : match.player1_set_scores
+                          ).sets.join(", ")}
                         </div>
                       </div>
                     )}
