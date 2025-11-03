@@ -270,6 +270,51 @@ td:first-child {
   transform: translateY(0);
 }
 
+.home-title p {
+  padding-bottom: 20px;
+}
+
+.info-intro {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+/* Ladder Rules Section */
+.ladder-rules-section {
+  background: #fff;
+  border: 2px solid #e2e8f0;
+  padding: 2rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.ladder-rules-section h2 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #2d3748;
+  padding-bottom: 0.5rem;
+}
+
+.rules-list {
+  line-height: 1.8;
+  padding-left: 1.5rem;
+  color: #4a5568;
+}
+
+.warning-text {
+  color: #e53e3e;
+}
+
+.rules-email-link {
+  color: #667eea;
+  text-decoration: underline;
+}
+
+.conduct-text {
+  margin-top: 1rem;
+}
+
 .login-container {
   max-width: 450px;
   margin: 0 auto;

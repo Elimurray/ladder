@@ -462,7 +462,8 @@ function Admin() {
             onClick={() => setShowPreferences(!showPreferences)}
             style={{
               padding: "0.5rem 1rem",
-              background: "#fd720d",
+              background: "linear-gradient(90deg, #f97316, #ea580c)",
+
               color: "white",
               border: "none",
               borderRadius: "6px",
