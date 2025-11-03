@@ -62,46 +62,50 @@ function Login() {
 
         <form onSubmit={handleSubmit}>
           {!isLogin && (
-            <div className="form-group">
-              <label>Full Name:</label>
-              <input
-                type="text"
-                name="full_name"
-                placeholder="John Doe"
-                value={formData.full_name}
-                onChange={handleChange}
-                required
-              />
-            </div>
-          )}
-          <div className="form-group">
-            <label>Phone Number:</label>
-            <input
-              type="tel"
-              name="phone_number"
-              placeholder="+64 21 123 4567"
-              value={formData.phone_number}
-              onChange={handleChange}
-              required
-            />
-          </div>
+            <>
+              <div className="form-group">
+                <label>Full Name:</label>
+                <input
+                  type="text"
+                  name="full_name"
+                  placeholder="John Doe"
+                  value={formData.full_name}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
 
-          <div className="form-group">
-            <label>Squash Grade:</label>
-            <select
-              name="squash_grade"
-              value={formData.squash_grade}
-              onChange={handleChange}
-              required
-            >
-              <option value="">-- Select Grade --</option>
-              <option value="A">A Grade</option>
-              <option value="B">B Grade</option>
-              <option value="C">C Grade</option>
-              <option value="D">D Grade</option>
-              <option value="E">E Grade</option>
-            </select>
-          </div>
+              <div className="form-group">
+                <label>Phone Number:</label>
+                <input
+                  type="tel"
+                  name="phone_number"
+                  placeholder="+64 21 123 4567"
+                  value={formData.phone_number}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Squash Grade:</label>
+                <select
+                  name="squash_grade"
+                  value={formData.squash_grade}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">-- Select Grade --</option>
+                  <option value="A">A Grade</option>
+                  <option value="B">B Grade</option>
+                  <option value="C">C Grade</option>
+                  <option value="D">D Grade</option>
+                  <option value="E">E Grade</option>
+                </select>
+              </div>
+            </>
+          )}
+
 
           <div className="form-group">
             <label>Email:</label>
