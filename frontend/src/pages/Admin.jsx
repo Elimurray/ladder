@@ -622,9 +622,26 @@ function Admin() {
                     <div className="match-date">
                       Week of {new Date(match.week_date).toLocaleDateString()}
                     </div>
-                    {match.time_slot && (
-                      <div className="match-time">🕐 {match.time_slot}</div>
-                    )}
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                      {match.time_slot && (
+                        <div className="match-time">🕐 {match.time_slot}</div>
+                      )}
+                      {match.player1_levels && match.player2_levels && (
+                        <div
+                          style={{
+                            background: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+                            color: "white",
+                            padding: "0.25rem 0.75rem",
+                            borderRadius: "20px",
+                            fontSize: "0.75rem",
+                            fontWeight: "bold",
+                            boxShadow: "0 2px 8px rgba(245, 158, 11, 0.3)",
+                          }}
+                        >
+                          🏆 LEVELS
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <div style={{ padding: "1rem 0" }}>
@@ -653,6 +670,26 @@ function Admin() {
                       </strong>
                     </div>
 
+                    {/* ADD SET SCORES DISPLAY */}
+                    {match.player1_set_scores && (
+                      <div
+                        style={{
+                          background: "#f7fafc",
+                          padding: "0.75rem",
+                          borderRadius: "6px",
+                          marginTop: "0.75rem",
+                          fontSize: "0.875rem",
+                        }}
+                      >
+                        <strong style={{ color: "#4a5568", display: "block", marginBottom: "0.5rem" }}>
+                          Set Scores:
+                        </strong>
+                        <div style={{ color: "#2d3748", fontFamily: "monospace" }}>
+                          {JSON.parse(match.player1_set_scores).sets.join(", ")}
+                        </div>
+                      </div>
+                    )}
+
                     {!match.scores_match && (
                       <div
                         style={{
@@ -663,6 +700,7 @@ function Admin() {
                           fontSize: "0.875rem",
                           color: "#c53030",
                           textAlign: "center",
+                          marginTop: "0.5rem",
                         }}
                       >
                         ⚠️ Scores don't match - please review

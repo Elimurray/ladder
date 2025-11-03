@@ -105,10 +105,10 @@ router.post("/submit", authMiddleware, async (req, res) => {
           opponentMatchScore,
           set_scores
             ? JSON.stringify({
-                sets: set_scores.sets.map((s) =>
-                  s.split("-").reverse().join("-")
-                ),
-              })
+              sets: set_scores.sets.map((s) =>
+                s.split("-").reverse().join("-")
+              ),
+            })
             : null, // Reverse scores for opponent
         ]
       );
@@ -207,7 +207,9 @@ router.get("/pending", authMiddleware, adminMiddleware, async (req, res) => {
       `SELECT 
         m.*,
         u1.full_name as player_name,
+        u1.play_for_levels as player1_levels,
         u2.full_name as opponent_name,
+        u2.play_for_levels as player2_levels,
         d.week_date,
         d.time_slot
       FROM matches m
