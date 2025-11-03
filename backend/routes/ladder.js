@@ -7,19 +7,19 @@ const { authMiddleware, adminMiddleware } = require("../middleware/auth");
 router.get("/", async (req, res) => {
   try {
     const result = await pool.query(`
-      SELECT 
-        lp.id,
-        lp.position,
-        lp.status,
-        u.id as user_id,
-        u.full_name,
-        u.email,
-        u.is_member,
-        lp.updated_at
-      FROM ladder_positions lp
-      JOIN users u ON lp.user_id = u.id
-      ORDER BY lp.position ASC
-    `);
+  SELECT 
+    lp.id,
+    lp.position,
+    lp.status,
+    u.id as user_id,
+    u.full_name,
+    u.phone_number,
+    u.is_member,
+    lp.updated_at
+  FROM ladder_positions lp
+  JOIN users u ON lp.user_id = u.id
+  ORDER BY lp.position ASC
+`);
 
     res.json(result.rows);
   } catch (err) {

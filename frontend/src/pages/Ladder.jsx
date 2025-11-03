@@ -108,24 +108,22 @@ function Ladder() {
             <tr>
               <th>Rank</th>
               <th>Name</th>
-              <th>Email</th>
+              {user && <th>Phone</th>}
               <th>Status</th>
-              {/* <th>Member</th> */}
             </tr>
           </thead>
           <tbody>
             {ladder.map((entry) => (
               <tr
                 key={entry.id}
-                className={`${getPositionClass(entry.position)} ${
-                  user && entry.user_id === user.id ? "my-row" : ""
-                }`}
+                className={`${getPositionClass(entry.position)} ${user && entry.user_id === user.id ? "my-row" : ""
+                  }`}
                 style={
                   user && entry.user_id === user.id
                     ? {
-                        background: "#f0f4ff",
-                        fontWeight: "bold",
-                      }
+                      background: "#f0f4ff",
+                      fontWeight: "bold",
+                    }
                     : {}
                 }
               >
@@ -139,7 +137,7 @@ function Ladder() {
                   {entry.full_name}
                   {user && entry.user_id === user.id && " (You)"}
                 </td>
-                <td>{entry.email}</td>
+                {user && <td>{entry.phone_number || "Not provided"}</td>}
                 <td>{getStatusBadge(entry.status)}</td>
                 {/* <td>{entry.is_member ? "✓" : "✗"}</td> */}
               </tr>
