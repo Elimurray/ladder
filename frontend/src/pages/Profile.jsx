@@ -3,6 +3,7 @@ import { profileAPI } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
+
 function Profile() {
   const [profile, setProfile] = useState(null);
   const [stats, setStats] = useState(null);
@@ -93,6 +94,22 @@ function Profile() {
       setPreferredTimes(preferredTimes.filter((t) => t !== time));
     } else {
       setPreferredTimes([...preferredTimes, time]);
+    }
+  };
+
+  const handleWithdraw = async () => {
+    if (!confirm("Are you sure you want to withdraw from the ladder? This will remove you completely and an admin will need to add you back.")) {
+      return;
+    }
+
+    try {
+      await ladderAPI.withdrawFromLadder();
+      setSuccess("You have been withdrawn from the ladder");
+      setTimeout(() => {
+        navigate("/ladder");
+      }, 2000);
+    } catch (err) {
+      setError(err.response?.data?.error || "Failed to withdraw from ladder");
     }
   };
 
@@ -344,9 +361,9 @@ function Profile() {
                 fontSize: "0.9rem",
               }}
             >
-              Set your status if you need to withdraw for a week or take a
-              break.
+              Set your status for the upcoming week.
             </p>
+
             <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
               <button
                 onClick={() => handleUpdateStatus("active")}
@@ -379,20 +396,37 @@ function Profile() {
                 ⏸ No Play This Week
               </button>
               <button
-                onClick={() => handleUpdateStatus("withdrawn")}
+                onClick={handleWithdraw}
                 style={{
                   padding: "0.75rem 1.5rem",
-                  background:
-                    profile.status === "withdrawn" ? "#e53e3e" : "#e2e8f0",
-                  color: profile.status === "withdrawn" ? "white" : "#4a5568",
+                  background: "#e53e3e",
+                  color: "white",
                   border: "none",
                   borderRadius: "8px",
                   cursor: "pointer",
                   fontWeight: "600",
                 }}
               >
-                🚫 Withdrawn
+                🚫 Withdraw From Ladder
               </button>
+            </div>
+
+            <div
+              style={{
+                marginTop: "1rem",
+                padding: "1rem",
+                background: "#f7fafc",
+                borderRadius: "8px",
+                fontSize: "0.875rem",
+                color: "#4a5568",
+              }}
+            >
+              <strong>Status Options:</strong>
+              <ul style={{ marginTop: "0.5rem", paddingLeft: "1.5rem" }}>
+                <li><strong>Active:</strong> Available to play this week - included in draw</li>
+                <li><strong>No Play This Week:</strong> Skip this week's draw but stay on ladder</li>
+                <li><strong>Withdraw:</strong> Permanently removes you from the ladder (can be re-added by admin)</li>
+              </ul>
             </div>
           </div>
           {/* Squash Levels */}
