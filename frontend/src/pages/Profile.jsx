@@ -184,8 +184,8 @@ function Profile() {
           {/* Basic Info Card */}
           <div
             style={{
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-              color: "white",
+              border: "2px solid rgb(226, 232, 240)",
+              color: "black",
               padding: "2rem",
               borderRadius: "12px",
               marginBottom: "2rem",
@@ -195,7 +195,7 @@ function Profile() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+                gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
                 gap: "1rem",
               }}
             >
@@ -272,7 +272,6 @@ function Profile() {
                     style={{
                       fontSize: "2rem",
                       fontWeight: "bold",
-                      color: "#667eea",
                     }}
                   >
                     {stats.total_matches}
@@ -314,7 +313,6 @@ function Profile() {
                     style={{
                       fontSize: "2rem",
                       fontWeight: "bold",
-                      color: "#667eea",
                     }}
                   >
                     {calculateWinRate()}%
@@ -328,7 +326,6 @@ function Profile() {
                     style={{
                       fontSize: "2rem",
                       fontWeight: "bold",
-                      color: "#4299e1",
                     }}
                   >
                     {stats.total_games_won || 0}

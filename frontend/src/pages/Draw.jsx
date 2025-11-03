@@ -76,8 +76,7 @@ function Draw() {
       {currentWeek && (
         <div
           style={{
-            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-            color: "white",
+            border: "2px solid rgb(226, 232, 240)",
             padding: "1rem",
             borderRadius: "8px",
             marginBottom: "2rem",
@@ -104,9 +103,8 @@ function Draw() {
                 {groupedDraw[slot].map((pairing) => (
                   <div
                     key={pairing.id}
-                    className={`draw-match-card ${
-                      isMyMatch(pairing) ? "my-match" : ""
-                    }`}
+                    className={`draw-match-card ${isMyMatch(pairing) ? "my-match" : ""
+                      }`}
                   >
                     <div className="match-players">
                       <div className="player">

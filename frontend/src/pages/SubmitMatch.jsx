@@ -125,8 +125,7 @@ function SubmitMatch() {
       }
       if (!validateSetScore(setScores[i])) {
         setError(
-          `Invalid score for Set ${
-            i + 1
+          `Invalid score for Set ${i + 1
           }. Format: 15-10. Winner must reach 15, if tied at 14 must win by 2.`
         );
         return;
@@ -243,8 +242,7 @@ function SubmitMatch() {
           {/* Match Info Card */}
           <div
             style={{
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-              color: "white",
+              border: "2px solid rgb(226, 232, 240)",
               padding: "1.5rem",
               borderRadius: "12px",
               marginBottom: "2rem",
@@ -301,7 +299,7 @@ function SubmitMatch() {
                   borderTop: "1px solid rgba(255,255,255,0.2)",
                 }}
               >
-                🕐 {myMatch.time_slot}
+                {myMatch.time_slot}
               </div>
             )}
           </div>
@@ -501,10 +499,22 @@ function SubmitMatch() {
                         </small>
                       </div>
                     )}
+                    <div
 
-                    <button type="submit" className="btn-primary">
-                      Submit Result
-                    </button>
+                    >
+                      <button style={{
+                        padding: "0.75rem 1.5rem",
+                        background: "#48bb78",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "8px",
+                        cursor: "pointer",
+                        fontWeight: "600",
+                      }}>
+                        Submit Result
+                      </button>
+                    </div>
+
                   </form>
 
                   {/* Alternative Options */}

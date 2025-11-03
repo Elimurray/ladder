@@ -9,19 +9,19 @@ function Home() {
       <div className="home-cards">
         <Link to="/ladder" style={{ textDecoration: "none", color: "inherit" }}>
           <div className="card">
-            <h3>📊 View Ladder</h3>
+            <h3>View Ladder</h3>
             <p>See current standings and player positions</p>
           </div>
         </Link>
         <Link to="/submit" style={{ textDecoration: "none", color: "inherit" }}>
           <div className="card">
-            <h3>🎮 Submit Match</h3>
+            <h3>Submit Match</h3>
             <p>Report your match results</p>
           </div>
         </Link>
         <Link to="/" style={{ textDecoration: "none", color: "inherit" }}>
           <div className="card">
-            <h3>👤 Your Profile</h3>
+            <h3>Your Profile</h3>
             <p>Check your stats and history</p>
           </div>
         </Link>

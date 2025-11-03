@@ -462,7 +462,7 @@ function Admin() {
             onClick={() => setShowPreferences(!showPreferences)}
             style={{
               padding: "0.5rem 1rem",
-              background: "#667eea",
+              background: "#fd720d",
               color: "white",
               border: "none",
               borderRadius: "6px",
@@ -812,7 +812,7 @@ function Admin() {
                           style={{
                             flex: 1,
                             padding: "0.75rem",
-                            background: "#667eea",
+                            background: "#fd720d",
                             color: "white",
                             border: "none",
                             borderRadius: "8px",
@@ -884,7 +884,7 @@ function Admin() {
             </div>
             <div className="admin-button-group">
               <button type="submit" className="btn-primary">
-                🔄 Process Week & Update Ladder
+                Process Week & Update Ladder
               </button>
             </div>
           </div>

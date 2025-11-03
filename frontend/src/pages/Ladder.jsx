@@ -82,10 +82,11 @@ function Ladder() {
       {myPosition && (
         <div
           style={{
-            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-            color: "white",
+            background: "white",
+            color: "black",
             padding: "1.5rem",
             borderRadius: "8px",
+            border: "2px solid rgb(226, 232, 240)",
             marginBottom: "2rem",
             textAlign: "center",
           }}
@@ -93,7 +94,7 @@ function Ladder() {
           <h2 style={{ margin: "0 0 0.5rem 0", fontSize: "1.25rem" }}>
             Your Position
           </h2>
-          <div style={{ fontSize: "3rem", fontWeight: "bold" }}>
+          <div style={{ fontSize: "3rem", fontWeight: "bold", color: "#f97316" }}>
             #{myPosition.position}
           </div>
           <div style={{ marginTop: "0.5rem" }}>

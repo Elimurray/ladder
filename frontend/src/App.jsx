@@ -4,11 +4,12 @@ import { useAuth } from "./context/AuthContext";
 import Home from "./pages/Home";
 import Ladder from "./pages/Ladder";
 import SubmitMatch from "./pages/SubmitMatch";
-import Login from "./pages/Login";
+import Login from "./pages/login";
 import Admin from "./pages/Admin";
 import Draw from "./pages/Draw";
 import Profile from "./pages/Profile";
 import Results from "./pages/Results";
+import logo from "./assets/logo.png";
 
 import "./App.css";
 
@@ -33,7 +34,9 @@ function App() {
       <div className="app">
         <nav className="navbar">
           <div className="nav-container">
-            <h1 className="nav-logo">Ladder</h1>
+            <Link to="/" className="nav-logo">
+              <img src={logo} alt="Ladder Logo" className="nav-logo-img" />
+            </Link>
 
             <button
               className="menu-toggle"
