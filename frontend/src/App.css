@@ -36,6 +36,17 @@ body {
   align-items: center;
 }
 
+.nav-menu a.active,
+.nav-menu button.active {
+  background: #d3d3d3;
+  font-weight: 600;
+}
+
+/* Optional: add a border or underline
+.nav-menu a.active {
+  border-bottom: 3px solid #333;
+} */
+
 .nav-logo {
   display: flex;
   align-items: center;

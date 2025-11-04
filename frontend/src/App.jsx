@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, NavLink } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "./context/AuthContext";
 import Home from "./pages/Home";
@@ -34,9 +34,9 @@ function App() {
       <div className="app">
         <nav className="navbar">
           <div className="nav-container">
-            <Link to="/" className="nav-logo">
+            <NavLink to="/" className="nav-logo" style={{ background: 'none' }}>
               <img src={logo} alt="Ladder Logo" className="nav-logo-img" />
-            </Link>
+            </NavLink>
 
             <button
               className="menu-toggle"
@@ -48,44 +48,44 @@ function App() {
 
             <ul className={`nav-menu ${menuOpen ? "active" : ""}`}>
               <li>
-                <Link to="/" onClick={closeMenu}>
+                <NavLink to="/" onClick={closeMenu}>
                   Home
-                </Link>
+                </NavLink>
               </li>
               <li>
-                <Link to="/ladder" onClick={closeMenu}>
+                <NavLink to="/ladder" onClick={closeMenu}>
                   Ladder
-                </Link>
+                </NavLink>
               </li>
               <li>
-                <Link to="/draw" onClick={closeMenu}>
+                <NavLink to="/draw" onClick={closeMenu}>
                   Draw
-                </Link>
+                </NavLink>
               </li>
               <li>
-                <Link to="/results" onClick={closeMenu}>
+                <NavLink to="/results" onClick={closeMenu}>
                   Results
-                </Link>
+                </NavLink>
               </li>
               {user && (
                 <li>
-                  <Link to="/submit" onClick={closeMenu}>
+                  <NavLink to="/submit" onClick={closeMenu}>
                     Submit Match
-                  </Link>
+                  </NavLink>
                 </li>
               )}
               {user && (
                 <li>
-                  <Link to="/profile" onClick={closeMenu}>
+                  <NavLink to="/profile" onClick={closeMenu}>
                     Profile
-                  </Link>
+                  </NavLink>
                 </li>
               )}
               {user && user.is_admin && (
                 <li>
-                  <Link to="/admin" onClick={closeMenu}>
+                  <NavLink to="/admin" onClick={closeMenu}>
                     Admin
-                  </Link>
+                  </NavLink>
                 </li>
               )}
               {user ? (
@@ -102,9 +102,9 @@ function App() {
                 </li>
               ) : (
                 <li>
-                  <Link to="/login" onClick={closeMenu}>
+                  <NavLink to="/login" onClick={closeMenu}>
                     Login
-                  </Link>
+                  </NavLink>
                 </li>
               )}
             </ul>
