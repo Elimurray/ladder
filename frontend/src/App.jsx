@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, NavLink } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, NavLink, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "./context/AuthContext";
 import Home from "./pages/Home";
@@ -13,9 +13,10 @@ import logo from "./assets/logo.png";
 
 import "./App.css";
 
-function App() {
+function AppContent() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { user, logout, loading } = useAuth();
+  const navigate = useNavigate();
 
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
@@ -25,109 +26,116 @@ function App() {
     setMenuOpen(false);
   };
 
+  const handleLogout = () => {
+    logout();
+    closeMenu();
+    navigate("/login");
+  };
+
   if (loading) {
     return <div className="page loading">Loading...</div>;
   }
 
   return (
-    <Router>
-      <div className="app">
-        <nav className="navbar">
-          <div className="nav-container">
-            <NavLink to="/" className="nav-logo" style={{ background: 'none' }}>
-              <img src={logo} alt="Ladder Logo" className="nav-logo-img" />
-            </NavLink>
+    <div className="app">
+      <nav className="navbar">
+        <div className="nav-container">
+          <NavLink to="/" className="nav-logo" style={{ background: 'none' }}>
+            <img src={logo} alt="Ladder Logo" className="nav-logo-img" />
+          </NavLink>
 
-            <button
-              className="menu-toggle"
-              onClick={toggleMenu}
-              aria-label="Toggle menu"
-            >
-              {menuOpen ? "✕" : "☰"}
-            </button>
+          <button
+            className="menu-toggle"
+            onClick={toggleMenu}
+            aria-label="Toggle menu"
+          >
+            {menuOpen ? "✕" : "☰"}
+          </button>
 
-            <ul className={`nav-menu ${menuOpen ? "active" : ""}`}>
+          <ul className={`nav-menu ${menuOpen ? "active" : ""}`}>
+            <li>
+              <NavLink to="/" onClick={closeMenu}>
+                Home
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/ladder" onClick={closeMenu}>
+                Ladder
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/draw" onClick={closeMenu}>
+                Draw
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/results" onClick={closeMenu}>
+                Results
+              </NavLink>
+            </li>
+            {user && (
               <li>
-                <NavLink to="/" onClick={closeMenu}>
-                  Home
+                <NavLink to="/submit" onClick={closeMenu}>
+                  Submit Match
                 </NavLink>
               </li>
+            )}
+            {user && (
               <li>
-                <NavLink to="/ladder" onClick={closeMenu}>
-                  Ladder
+                <NavLink to="/profile" onClick={closeMenu}>
+                  Profile
                 </NavLink>
               </li>
+            )}
+            {user && user.is_admin && (
               <li>
-                <NavLink to="/draw" onClick={closeMenu}>
-                  Draw
+                <NavLink to="/admin" onClick={closeMenu}>
+                  Admin
                 </NavLink>
               </li>
+            )}
+            {user ? (
               <li>
-                <NavLink to="/results" onClick={closeMenu}>
-                  Results
+                <button onClick={handleLogout}>
+                  Logout ({user.full_name})
+                </button>
+              </li>
+            ) : (
+              <li>
+                <NavLink to="/login" onClick={closeMenu}>
+                  Login
                 </NavLink>
               </li>
-              {user && (
-                <li>
-                  <NavLink to="/submit" onClick={closeMenu}>
-                    Submit Match
-                  </NavLink>
-                </li>
-              )}
-              {user && (
-                <li>
-                  <NavLink to="/profile" onClick={closeMenu}>
-                    Profile
-                  </NavLink>
-                </li>
-              )}
-              {user && user.is_admin && (
-                <li>
-                  <NavLink to="/admin" onClick={closeMenu}>
-                    Admin
-                  </NavLink>
-                </li>
-              )}
-              {user ? (
-                <li>
-                  <button
-                    onClick={() => {
-                      logout();
-                      closeMenu();
-                    }}
-                  >
-                    Logout ({user.full_name})
-                  </button>
-                </li>
-              ) : (
-                <li>
-                  <NavLink to="/login" onClick={closeMenu}>
-                    Login
-                  </NavLink>
-                </li>
-              )}
-            </ul>
-          </div>
-        </nav>
-
-        <div
-          className={`nav-overlay ${menuOpen ? "active" : ""}`}
-          onClick={closeMenu}
-        />
-
-        <div className="content">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/ladder" element={<Ladder />} />
-            <Route path="/submit" element={<SubmitMatch />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/draw" element={<Draw />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/results" element={<Results />} />
-          </Routes>
+            )}
+          </ul>
         </div>
+      </nav>
+
+      <div
+        className={`nav-overlay ${menuOpen ? "active" : ""}`}
+        onClick={closeMenu}
+      />
+
+      <div className="content">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/ladder" element={<Ladder />} />
+          <Route path="/submit" element={<SubmitMatch />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/draw" element={<Draw />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/results" element={<Results />} />
+        </Routes>
       </div>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 }
