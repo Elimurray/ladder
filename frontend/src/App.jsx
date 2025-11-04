@@ -94,7 +94,6 @@ function App() {
                     onClick={() => {
                       logout();
                       closeMenu();
-                      window.location.href = "/login";
                     }}
                   >
                     Logout ({user.full_name})

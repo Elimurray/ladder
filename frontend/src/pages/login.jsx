@@ -36,7 +36,7 @@ function Login() {
           formData.squash_grade
         );
       }
-      navigate("/ladder");
+      navigate("/profile");
     } catch (err) {
       console.error("Error response:", err.response?.data); // Debug log
       setError(err.response?.data?.error || "An error occurred");
