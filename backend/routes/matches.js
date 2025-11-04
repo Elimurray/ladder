@@ -397,40 +397,48 @@ router.post(
         const result = match.result;
 
         let movement = 0;
-        if (result === "3") movement = -6; // Won - move UP 6
-        else if (result === "2") movement = -3; // Won 2 - move UP 3
-        else if (result === "1") movement = 0; // Won 1 - stay
-        else if (result === "0") movement = 1; // Lost 0-3 - move DOWN 1
-        else if (result === "~") movement = 0; // Didn't play - stay
-        else if (result === "D") movement = 1; // Default - move DOWN 1
+        if (result === "3") movement = 6; // Won 3-0 - ADD 6 points
+        else if (result === "2") movement = 3; // Won 2-1 - ADD 3 points
+        else if (result === "1") movement = 0; // Won narrow - no change
+        else if (result === "0") movement = -1; // Lost 0-3 - SUBTRACT 1 point
+        else if (result === "~") movement = 0; // Didn't play - no change
+        else if (result === "D") movement = -1; // Default - SUBTRACT 1 point
 
         positionChanges[playerId] = movement;
       });
 
-      console.log("Position changes:", positionChanges); // Debug
+      console.log("Position changes:", positionChanges);
 
-      // Build new ladder order
+      // Get total number of players on ladder
+      const totalPlayers = currentLadder.rows.length;
+
+      // Build new ladder using INVERSE METHOD
       const newLadder = currentLadder.rows.map((entry) => {
         const movement = positionChanges[entry.user_id] || 0;
-        const newPosition = Math.max(1, entry.position + movement);
+
+        // Invert the position: position 1 becomes totalPlayers, position 2 becomes totalPlayers-1, etc.
+        const invertedPosition = totalPlayers - entry.position + 1;
+
+        // Add movement to inverted position (higher score = better)
+        const score = invertedPosition + movement;
 
         return {
           ...entry,
-          newPosition: newPosition,
+          score: score,
           oldPosition: entry.position,
         };
       });
 
-      // Sort by new position (lower number = higher rank)
+      // Sort by score DESCENDING (highest score = position 1)
       newLadder.sort((a, b) => {
-        if (a.newPosition !== b.newPosition) {
-          return a.newPosition - b.newPosition;
+        if (a.score !== b.score) {
+          return b.score - a.score; // Descending
         }
-        // If tied, keep original order
+        // If tied, keep original order (lower original position wins)
         return a.oldPosition - b.oldPosition;
       });
 
-      console.log("New ladder order:", newLadder); // Debug
+      console.log("New ladder order:", newLadder);
 
       // Assign final positions (1, 2, 3, 4, ...)
       for (let i = 0; i < newLadder.length; i++) {
