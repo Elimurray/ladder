@@ -246,6 +246,97 @@ function Profile() {
             </div>
           </div>
 
+
+
+          {/* Status Management */}
+          <div
+            style={{
+              background: "white",
+              border: "2px solid #e2e8f0",
+              borderRadius: "12px",
+              padding: "2rem",
+              marginBottom: "2rem",
+            }}
+          >
+            <h3 style={{ marginBottom: "1rem", color: "#2d3748" }}>
+              Availability Status for Week Starting {getNextMonday()}
+            </h3>
+            <p
+              style={{
+                color: "#718096",
+                marginBottom: "1.5rem",
+                fontSize: "0.9rem",
+              }}
+            >
+              Set your status for the upcoming week.
+            </p>
+
+            <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+              <button
+                onClick={() => handleUpdateStatus("active")}
+                style={{
+                  padding: "0.75rem 1.5rem",
+                  background:
+                    profile.status === "active" ? "#48bb78" : "#e2e8f0",
+                  color: profile.status === "active" ? "white" : "#4a5568",
+                  border: "none",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  fontWeight: "600",
+                }}
+              >
+                ✓ Active
+              </button>
+              <button
+                onClick={() => handleUpdateStatus("no_play")}
+                style={{
+                  padding: "0.75rem 1.5rem",
+                  background:
+                    profile.status === "no_play" ? "#ed8936" : "#e2e8f0",
+                  color: profile.status === "no_play" ? "white" : "#4a5568",
+                  border: "none",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  fontWeight: "600",
+                }}
+              >
+                ⏸ No Play This Week
+              </button>
+              <button
+                onClick={handleWithdraw}
+                style={{
+                  padding: "0.75rem 1.5rem",
+                  background: "#e53e3e",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  fontWeight: "600",
+                }}
+              >
+                🚫 Withdraw From Ladder
+              </button>
+            </div>
+
+            <div
+              style={{
+                marginTop: "1rem",
+                padding: "1rem",
+                background: "#f7fafc",
+                borderRadius: "8px",
+                fontSize: "0.875rem",
+                color: "#4a5568",
+              }}
+            >
+              <strong>Status Options:</strong>
+              <ul style={{ marginTop: "0.5rem", paddingLeft: "1.5rem" }}>
+                <li><strong>Active:</strong> Available to play this week - included in draw</li>
+                <li><strong>No Play This Week:</strong> Skip this week's draw but stay on ladder</li>
+                <li><strong>Withdraw:</strong> Permanently removes you from the ladder (can be re-added by admin)</li>
+              </ul>
+            </div>
+          </div>
+
           {/* Stats Card */}
           {stats && stats.total_matches > 0 && (
             <div
@@ -338,94 +429,6 @@ function Profile() {
             </div>
           )}
 
-          {/* Status Management */}
-          <div
-            style={{
-              background: "white",
-              border: "2px solid #e2e8f0",
-              borderRadius: "12px",
-              padding: "2rem",
-              marginBottom: "2rem",
-            }}
-          >
-            <h3 style={{ marginBottom: "1rem", color: "#2d3748" }}>
-              Availability Status for Week Starting {getNextMonday()}
-            </h3>
-            <p
-              style={{
-                color: "#718096",
-                marginBottom: "1.5rem",
-                fontSize: "0.9rem",
-              }}
-            >
-              Set your status for the upcoming week.
-            </p>
-
-            <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-              <button
-                onClick={() => handleUpdateStatus("active")}
-                style={{
-                  padding: "0.75rem 1.5rem",
-                  background:
-                    profile.status === "active" ? "#48bb78" : "#e2e8f0",
-                  color: profile.status === "active" ? "white" : "#4a5568",
-                  border: "none",
-                  borderRadius: "8px",
-                  cursor: "pointer",
-                  fontWeight: "600",
-                }}
-              >
-                ✓ Active
-              </button>
-              <button
-                onClick={() => handleUpdateStatus("no_play")}
-                style={{
-                  padding: "0.75rem 1.5rem",
-                  background:
-                    profile.status === "no_play" ? "#ed8936" : "#e2e8f0",
-                  color: profile.status === "no_play" ? "white" : "#4a5568",
-                  border: "none",
-                  borderRadius: "8px",
-                  cursor: "pointer",
-                  fontWeight: "600",
-                }}
-              >
-                ⏸ No Play This Week
-              </button>
-              <button
-                onClick={handleWithdraw}
-                style={{
-                  padding: "0.75rem 1.5rem",
-                  background: "#e53e3e",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "8px",
-                  cursor: "pointer",
-                  fontWeight: "600",
-                }}
-              >
-                🚫 Withdraw From Ladder
-              </button>
-            </div>
-
-            <div
-              style={{
-                marginTop: "1rem",
-                padding: "1rem",
-                background: "#f7fafc",
-                borderRadius: "8px",
-                fontSize: "0.875rem",
-                color: "#4a5568",
-              }}
-            >
-              <strong>Status Options:</strong>
-              <ul style={{ marginTop: "0.5rem", paddingLeft: "1.5rem" }}>
-                <li><strong>Active:</strong> Available to play this week - included in draw</li>
-                <li><strong>No Play This Week:</strong> Skip this week's draw but stay on ladder</li>
-                <li><strong>Withdraw:</strong> Permanently removes you from the ladder (can be re-added by admin)</li>
-              </ul>
-            </div>
-          </div>
           {/* Squash Levels */}
           <div
             style={{

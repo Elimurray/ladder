@@ -125,7 +125,7 @@ function Results() {
                     <th>Player 1</th>
                     <th>Score</th>
                     <th>Player 2</th>
-                    <th>Winner</th>
+                    {/* <th>Winner</th> */}
                     <th>Sets</th>
                   </tr>
                 </thead>
@@ -192,7 +192,7 @@ function Results() {
                           {match.player2_name}
                         </span>
                       </td>
-                      <td>
+                      {/* <td>
                         <span
                           style={{
                             padding: "0.25rem 0.75rem",
@@ -206,7 +206,7 @@ function Results() {
                         >
                           {match.winner}
                         </span>
-                      </td>
+                      </td> */}
                       <td>
                         {match.player1_set_scores?.sets ? (
                           <div
