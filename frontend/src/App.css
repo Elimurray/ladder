@@ -1165,11 +1165,9 @@ td:first-child {
   }
 
   .results-table {
-    margin-left: -1.5rem;
-    margin-right: -1.5rem;
-    border-radius: 0;
     border-left: none;
     border-right: none;
+    border-radius: 8px;
   }
 
   .results-table th,
