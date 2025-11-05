@@ -67,7 +67,21 @@ function Draw() {
     );
 
   const groupedDraw = groupByTimeSlot();
-  const timeSlots = Object.keys(groupedDraw).sort();
+  const timeToMinutes = (timeStr) => {
+    if (!timeStr) return 0;
+    const match = timeStr.match(/(\d+):(\d+)(am|pm)/i);
+    if (!match) return 0;
+    let hours = parseInt(match[1], 10);
+    const minutes = parseInt(match[2], 10);
+    const period = match[3].toLowerCase();
+    if (period === "pm" && hours !== 12) hours += 12;
+    if (period === "am" && hours === 12) hours = 0;
+    return hours * 60 + minutes;
+  };
+
+  const timeSlots = Object.keys(groupedDraw).sort((a, b) => {
+    return timeToMinutes(a) - timeToMinutes(b);
+  });
 
   return (
     <div className="page">
