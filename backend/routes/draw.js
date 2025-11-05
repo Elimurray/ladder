@@ -154,6 +154,8 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
       "8:30pm",
       "9:00pm",
       "9:30pm",
+      "10:00pm",
+      "10:30pm",
     ];
 
     // Auto-assign time slots

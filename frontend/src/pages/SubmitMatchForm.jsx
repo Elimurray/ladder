@@ -354,7 +354,7 @@ function SubmitMatchForm() {
                                     }}
                                     required
                                 >
-                                    <option value="">-- Select Player --</option>
+                                    <option value="">-- Select Winner --</option>
                                     <option value="player1">{match.player1_name}</option>
                                     <option value="player2">{match.player2_name}</option>
                                 </select>
