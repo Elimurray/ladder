@@ -44,10 +44,28 @@ function SubmitMatch() {
   };
 
   if (loading) return <div className="page loading">Loading matches...</div>;
-  if (error) return <div className="page"><div className="error">{error}</div></div>;
+  if (error)
+    return (
+      <div className="page">
+        <div className="error">{error}</div>
+      </div>
+    );
 
   const groupedDraw = groupByTimeSlot();
-  const timeSlots = Object.keys(groupedDraw).sort();
+  const timeToMinutes = (timeStr) => {
+    if (!timeStr) return 0;
+    const match = timeStr.match(/(\d+):(\d+)(am|pm)/i);
+    if (!match) return 0;
+    let hours = parseInt(match[1], 10);
+    const minutes = parseInt(match[2], 10);
+    const period = match[3].toLowerCase();
+    if (period === "pm" && hours !== 12) hours += 12;
+    if (period === "am" && hours === 12) hours = 0;
+    return hours * 60 + minutes;
+  };
+  const timeSlots = Object.keys(groupedDraw).sort((a, b) => {
+    return timeToMinutes(a) - timeToMinutes(b);
+  });
 
   return (
     <div className="page">
@@ -72,13 +90,21 @@ function SubmitMatch() {
                     className="draw-match-card"
                     onClick={() => handleMatchClick(pairing.id)}
                     style={{ cursor: "pointer", transition: "transform 0.2s" }}
-                    onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.02)"}
-                    onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.transform = "scale(1.02)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.transform = "scale(1)")
+                    }
                   >
                     <div className="match-players">
                       <div className="player">
-                        <span className="position-badge">#{pairing.player1_position}</span>
-                        <span className="player-name">{pairing.player1_name}</span>
+                        <span className="position-badge">
+                          #{pairing.player1_position}
+                        </span>
+                        <span className="player-name">
+                          {pairing.player1_name}
+                        </span>
                       </div>
 
                       <span className="vs">VS</span>
@@ -86,21 +112,27 @@ function SubmitMatch() {
                       <div className="player">
                         {pairing.player2_id ? (
                           <>
-                            <span className="position-badge">#{pairing.player2_position}</span>
-                            <span className="player-name">{pairing.player2_name}</span>
+                            <span className="position-badge">
+                              #{pairing.player2_position}
+                            </span>
+                            <span className="player-name">
+                              {pairing.player2_name}
+                            </span>
                           </>
                         ) : (
                           <span className="bye">BYE</span>
                         )}
                       </div>
                     </div>
-                    <div style={{
-                      marginTop: "0.5rem",
-                      textAlign: "center",
-                      fontSize: "0.875rem",
-                      color: "#4299e1",
-                      fontWeight: "600"
-                    }}>
+                    <div
+                      style={{
+                        marginTop: "0.5rem",
+                        textAlign: "center",
+                        fontSize: "0.875rem",
+                        color: "#4299e1",
+                        fontWeight: "600",
+                      }}
+                    >
                       Click to submit →
                     </div>
                   </div>
