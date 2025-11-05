@@ -3,7 +3,6 @@ import { profileAPI, ladderAPI } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
-
 function Profile() {
   const [profile, setProfile] = useState(null);
   const [stats, setStats] = useState(null);
@@ -11,6 +10,12 @@ function Profile() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
   // Preferences state
 
@@ -98,7 +103,11 @@ function Profile() {
   };
 
   const handleWithdraw = async () => {
-    if (!confirm("Are you sure you want to withdraw from the ladder? This will remove you completely and an admin will need to add you back.")) {
+    if (
+      !confirm(
+        "Are you sure you want to withdraw from the ladder? This will remove you completely and an admin will need to add you back."
+      )
+    ) {
       return;
     }
 
@@ -138,6 +147,40 @@ function Profile() {
       fetchProfile();
     } catch (err) {
       setError(err.response?.data?.error || "Failed to update status");
+    }
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    setPasswordError("");
+    setError(null);
+
+    // Validation
+    if (newPassword.length < 6) {
+      setPasswordError("New password must be at least 6 characters");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError("New passwords do not match");
+      return;
+    }
+
+    try {
+      await profileAPI.changePassword({
+        currentPassword,
+        newPassword,
+      });
+      setSuccess("Password changed successfully!");
+      setShowPasswordForm(false);
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      setPasswordError(
+        err.response?.data?.error || "Failed to change password"
+      );
     }
   };
 
@@ -246,8 +289,6 @@ function Profile() {
             </div>
           </div>
 
-
-
           {/* Status Management */}
           <div
             style={{
@@ -330,9 +371,18 @@ function Profile() {
             >
               <strong>Status Options:</strong>
               <ul style={{ marginTop: "0.5rem", paddingLeft: "1.5rem" }}>
-                <li><strong>Active:</strong> Available to play this week - included in draw</li>
-                <li><strong>No Play This Week:</strong> Skip this week's draw but stay on ladder</li>
-                <li><strong>Withdraw:</strong> Permanently removes you from the ladder (can be re-added by admin)</li>
+                <li>
+                  <strong>Active:</strong> Available to play this week -
+                  included in draw
+                </li>
+                <li>
+                  <strong>No Play This Week:</strong> Skip this week's draw but
+                  stay on ladder
+                </li>
+                <li>
+                  <strong>Withdraw:</strong> Permanently removes you from the
+                  ladder (can be re-added by admin)
+                </li>
               </ul>
             </div>
           </div>
@@ -503,6 +553,120 @@ function Profile() {
             </div>
           </div>
 
+          {/* Password Change */}
+          <div
+            style={{
+              background: "white",
+              border: "2px solid #e2e8f0",
+              borderRadius: "12px",
+              padding: "2rem",
+              marginBottom: "2rem",
+            }}
+          >
+            <h3 style={{ marginBottom: "1rem", color: "#2d3748" }}>
+              Change Password
+            </h3>
+
+            {!showPasswordForm ? (
+              <button
+                onClick={() => setShowPasswordForm(true)}
+                style={{
+                  padding: "0.75rem 1.5rem",
+                  background:
+                    "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  fontWeight: "600",
+                }}
+              >
+                🔒 Change Password
+              </button>
+            ) : (
+              <form onSubmit={handleChangePassword}>
+                {passwordError && (
+                  <div
+                    style={{
+                      background: "#fed7d7",
+                      borderLeft: "4px solid #e53e3e",
+                      color: "#742a2a",
+                      padding: "1rem 1.5rem",
+                      borderRadius: "8px",
+                      marginBottom: "1rem",
+                      fontWeight: "500",
+                    }}
+                  >
+                    ✗ {passwordError}
+                  </div>
+                )}
+
+                <div className="form-group">
+                  <label>Current Password:</label>
+                  <input
+                    type="password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    placeholder="Enter current password"
+                    required
+                    minLength="6"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>New Password:</label>
+                  <input
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Enter new password (min 6 characters)"
+                    required
+                    minLength="6"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Confirm New Password:</label>
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Confirm new password"
+                    required
+                    minLength="6"
+                  />
+                </div>
+
+                <div style={{ display: "flex", gap: "1rem" }}>
+                  <button type="submit" className="btn-primary">
+                    Save New Password
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowPasswordForm(false);
+                      setCurrentPassword("");
+                      setNewPassword("");
+                      setConfirmPassword("");
+                      setPasswordError("");
+                    }}
+                    style={{
+                      padding: "0.75rem 1.5rem",
+                      background: "#718096",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "8px",
+                      cursor: "pointer",
+                      fontWeight: "600",
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+
           {/* Time Preferences */}
           <div
             style={{
@@ -556,14 +720,14 @@ function Profile() {
                   <option value="">Any time</option>
                   {(profile.is_junior
                     ? timeSlots.filter((t) => {
-                      // Only show times before 7:30pm for juniors
-                      const hour = parseInt(t.split(":")[0]);
-                      const isPM = t.includes("pm");
-                      const time24 = isPM && hour !== 12 ? hour + 12 : hour;
-                      return (
-                        time24 < 19 || (time24 === 19 && t.includes("7:00"))
-                      );
-                    })
+                        // Only show times before 7:30pm for juniors
+                        const hour = parseInt(t.split(":")[0]);
+                        const isPM = t.includes("pm");
+                        const time24 = isPM && hour !== 12 ? hour + 12 : hour;
+                        return (
+                          time24 < 19 || (time24 === 19 && t.includes("7:00"))
+                        );
+                      })
                     : timeSlots
                   ).map((time) => (
                     <option key={time} value={time}>
@@ -640,31 +804,31 @@ function Profile() {
                                 match.result === "3"
                                   ? "#c6f6d5"
                                   : match.result === "2"
-                                    ? "#bee3f8"
-                                    : match.result === "1"
-                                      ? "#feebc8"
-                                      : "#fed7d7",
+                                  ? "#bee3f8"
+                                  : match.result === "1"
+                                  ? "#feebc8"
+                                  : "#fed7d7",
                               color:
                                 match.result === "3"
                                   ? "#22543d"
                                   : match.result === "2"
-                                    ? "#2c5282"
-                                    : match.result === "1"
-                                      ? "#7c2d12"
-                                      : "#742a2a",
+                                  ? "#2c5282"
+                                  : match.result === "1"
+                                  ? "#7c2d12"
+                                  : "#742a2a",
                             }}
                           >
                             {match.result === "3"
                               ? "Won"
                               : match.result === "2"
-                                ? "Won 2"
-                                : match.result === "1"
-                                  ? "Won 1"
-                                  : match.result === "0"
-                                    ? "Lost"
-                                    : match.result === "~"
-                                      ? "No Play"
-                                      : "Default"}
+                              ? "Won 2"
+                              : match.result === "1"
+                              ? "Won 1"
+                              : match.result === "0"
+                              ? "Lost"
+                              : match.result === "~"
+                              ? "No Play"
+                              : "Default"}
                           </span>
                         </td>
                       </tr>

@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://100.115.180.68:5000";
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "http://100.115.180.68:5000";
 
 const api = axios.create({
   baseURL: `${API_BASE_URL}/api`,
@@ -72,8 +73,10 @@ export const profileAPI = {
     api.put("/profile/preferences", preferences),
   updateStatus: (status) => api.patch("/profile/status", { status }),
   updateSquashLevels: (play_for_levels) =>
-    api.patch("/profile/squash-levels", { play_for_levels }), // ADD THIS LINE
+    api.patch("/profile/squash-levels", { play_for_levels }),
   getAllPreferences: () => api.get("/profile/all-preferences"),
+  changePassword: (passwordData) =>
+    api.put("/auth/change-password", passwordData),
 };
 
 export const resultsAPI = {
