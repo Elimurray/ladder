@@ -758,6 +758,54 @@ td:first-child {
   font-style: italic;
 }
 
+/* Horizontal Sticky Navigation */
+.admin-sidebar {
+  position: sticky;
+  top: 90px;
+  z-index: 100;
+  width: 100%;
+  background: white;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.admin-sidebar h3 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1.1rem;
+  color: #2d3748;
+  text-align: center;
+}
+
+.admin-nav {
+  display: flex;
+  flex-direction: row;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.admin-nav a {
+  padding: 0.65rem 1rem;
+  border-radius: 8px;
+  text-decoration: none;
+  color: black;
+  font-weight: 600;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.admin-nav a:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
 .status-badge {
   padding: 0.25rem 0.75rem;
   border-radius: 20px;
@@ -978,6 +1026,7 @@ td:first-child {
     padding: 5rem 0 2rem;
     box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
     transition: right 0.3s ease;
+    z-index: 101;
   }
 
   .nav-menu.active {
@@ -1126,5 +1175,31 @@ td:first-child {
   .results-table td {
     padding: 0.75rem 0.5rem;
     font-size: 0.9rem;
+  }
+  .admin-sidebar {
+    display: none;
+  }
+
+  .admin-nav {
+    display: none;
+    flex-direction: row;
+    gap: 0.3rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .admin-nav a {
+    padding: 0.65rem 1rem;
+    border-radius: 8px;
+    text-decoration: none;
+    color: black;
+    font-weight: 600;
+    font-size: 0.5rem;
+    transition: all 0.2s;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
   }
 }
