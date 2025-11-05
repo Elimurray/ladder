@@ -130,7 +130,7 @@ body {
 .page h1 {
   font-size: 2rem;
   margin-bottom: 1.5rem;
-  color: #1a202c;
+  color: black;
   font-weight: 700;
 }
 
@@ -163,7 +163,7 @@ body {
 
 .card h3 {
   margin-bottom: 0.75rem;
-  color: #2d3748;
+  color: black;
   font-size: 1.25rem;
   font-weight: 600;
 }
@@ -273,7 +273,6 @@ td:first-child {
 .btn-primary:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 14px rgba(249, 115, 22, 0.5);
-
 }
 
 .btn-primary:active {
@@ -302,14 +301,14 @@ td:first-child {
 .ladder-rules-section h2 {
   margin-top: 0;
   margin-bottom: 1rem;
-  color: #2d3748;
+  color: black;
   padding-bottom: 0.5rem;
 }
 
 .rules-list {
   line-height: 1.8;
   padding-left: 1.5rem;
-  color: #4a5568;
+  color: black;
 }
 
 .warning-text {
@@ -718,10 +717,6 @@ td:first-child {
   transition: all 0.2s;
 }
 
-
-
-
-
 .btn-save {
   background: #48bb78;
   color: white;
@@ -960,7 +955,6 @@ td:first-child {
 }
 
 @media (max-width: 768px) {
-
   /* Show hamburger menu */
   .menu-toggle {
     display: block;

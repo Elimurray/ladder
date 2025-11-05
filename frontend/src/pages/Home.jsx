@@ -4,131 +4,106 @@ function Home() {
   return (
     <div className="page">
       <div className="home-title">
-
-        <h1>Franklin Squash Club</h1>
-        <p>Track your standings, view draws and results</p>
+        <h1>Franklin Squash Club Ladder</h1>
       </div>
-      {/* General Info Section */}
+      {/* About Ladder Section */}
       <div className="ladder-rules-section">
-        <h2>Club Ladder</h2>
+        <h2>About Ladder</h2>
         <p className="info-intro">
-          Ladder is a FREE club competition held on a Thursday evening for ALL
-          financial club members.
+          Ladder is a FREE club competition held on Thursday evenings from
+          5:30pm for ALL financial club members.
         </p>
-        <ul className="rules-list">
+        <p>
+          Players are initially given a position on the ladder (based on grading
+          or past ladder results). A draw is generated weekly (By Monday),
+          pairing up those closest on the ladder starting from position #1, and
+          matches played that Thursday night. Players will move up and down the
+          ladder based on the week's match result.
+        </p>
+        <br />
+
+        <p>
+          Ladder is a fantastic way to meet other club members and enjoy our
+          fantastic bar and kitchen facilities. You can learn how to score
+          squash in a friendly environment with senior members there to assist
+          if needed. You can also choose to play for Squash Levels!
+        </p>
+      </div>
+
+      {/* How to Join Ladder Section */}
+      <div className="ladder-rules-section">
+        <h2>How to join ladder:</h2>
+        <ol className="rules-list">
           <li>
-            Please complete the form below or email{" "}
-            <a href="mailto:fscladder@gmail.com" className="email-link">
-              fscladder@gmail.com
-            </a>{" "}
-            to join the ladder or be left off the draw for certain rounds.
-          </li>
-          <li>
-            All ladder entries/exits, comments must be in by 5pm each Sunday so
-            they can be included the following week. Please read the ladder rules
-            below.
-          </li>
-          <li>
-            If you cannot play your scheduled time, then you may contact your
-            opponent to play at another agreeable time. The game must be played and
-            scores submitted online at Submit Ladder Scores or emailed to{" "}
-            <a href="mailto:fscladder@gmail.com" className="email-link">
-              fscladder@gmail.com
-            </a>{" "}
-            before Sunday 5pm.
-          </li>
-          <li>
-            <strong>Times:</strong> Ladder is played on Thursday nights from
-            5:30pm onwards. Time requests cannot be actioned due to large numbers
-            participating.
-          </li>
-          <li>
-            Weekly Ladder draw and standings are posted here on the club website
-            and a link emailed to current ladder participants.
-          </li>
-          <li>
-            Ladder is a fantastic way to meet other club members and enjoy our bar
-            and kitchen facilities.
-          </li>
-          <li>
-            Learn how to score squash in a friendly environment. Ask a senior
-            member to help you out!
-          </li>
-          <li>
-            Simple system - if you win your match you move up the ladder!
-          </li>
-          <li>View your & other players match histories.</li>
-          <li>
-            The Ladder Coordinator controls the ladder. Any queries, please contact
-            them via the ladder online entry system or email{" "}
+            Complete the Ladder Requests Form on our Club Website or email{" "}
             <a href="mailto:fscladder@gmail.com" className="email-link">
               fscladder@gmail.com
             </a>
-            .
           </li>
-        </ul>
+          <li>
+            Once you have been registered on the ladder, an account login will
+            be created for you to go and change your password and complete your
+            profile details.
+          </li>
+          <li style={{ marginBottom: "1rem" }}>
+            You can then be added to the next draw!
+          </li>
+        </ol>
+        <p>
+          <strong>Note:</strong> Only Registered players can be added to the
+          draw, submit scores, and view other player phone numbers.
+        </p>
       </div>
 
-      {/* Rules Section */}
+      {/* Once Registered Section */}
       <div className="ladder-rules-section">
-        <h2>Ladder Rules</h2>
-        <ul className="rules-list">
+        <h2>Once registered, players should:</h2>
+        <ol className="rules-list">
           <li>
-            By signing up for the ladder you are signing up to play a social squash
-            match on a Thursday night. You will play junior or senior players of
-            your ability level. If you know you are not going to be available to
-            play, make sure you leave the ladder for that week. You can do it
-            online. You need to do this before Sunday evening at 5pm.
-          </li>
-          <li>
-            If you can&apos;t make your scheduled game, you need to get in touch with
-            your opponent. Find their contact details on the ladder draw or online
-            by logging in through Hello Club &apos;book now&apos; and clicking on &apos;directory&apos;.
-          </li>
-          <li>
-            <strong className="warning-text">
-              No shows will be stood down from the ladder for a TWO (2) week
-              period.
-            </strong>
-          </li>
-          <li>
-            If you can&apos;t make your scheduled game, your opponent is not obliged to
-            play at another time – they can choose to take the win instead. Default
-            matches will be scored 3-0.
-          </li>
-          <li>
-            You are responsible for ensuring your match result is submitted using
-            the online form Submit Ladder Scores or by emailing{" "}
-            <a href="mailto:fscladder@gmail.com" className="rules-email-link">
-              fscladder@gmail.com
-            </a>{" "}
-            before Sunday 5pm.
+            Before 5 pm the Sunday prior:
+            <ol
+              type="a"
+              style={{
+                marginTop: "0.5rem",
+                marginLeft: "2rem",
+                marginBottom: "0.5rem",
+              }}
+            >
+              <li>
+                Check your status for next Thursday is correct. If not available
+                for 1 week, check that box, if unavailable for 3 or more weeks,
+                use the withdraw button and email the ladder controller when you
+                wish to return. If remaining active, then no change is
+                necessary.
+              </li>
+              <li>
+                Check that your match score has been submitted correctly -
+                especially if for squash levels.
+              </li>
+            </ol>
           </li>
           <li>
-            If you win your game, it is squash etiquette that you offer to buy your
-            opponent a drink. Juniors cannot buy alcoholic beverages for senior
-            players.
+            If you cannot play your scheduled time, then you may contact your
+            opponent to play at another agreeable time. The game must be played
+            and scores submitted online before Sunday 5pm. Advise the ladder
+            Coordinator.
           </li>
           <li>
-            <strong className="warning-text">
-              You are required to mark/referee a game on the night regardless of
-              your ability level.
-            </strong>{" "}
-            This will usually be the game directly after you&apos;ve played (on the
-            court you&apos;ve come off). Failure to do so may see you stood down for TWO
-            (2) weeks.
+            Turn up 15 minutes before your scheduled match time, referee the
+            subsequent match, and enter match results online.
           </li>
-          <li className="conduct-text">
-            The Squash Auckland Code of Conduct applies during all ladder games - a
-            copy of which can be found on the notice board downstairs. Bad
-            behaviour and poor sportsmanship will not be tolerated at our club -
-            any incidence reported to the Ladder Controller or Committee will
-            result in further action being taken, with the alleged incident being
-            investigated and possibly resulting in official warnings, enforced
-            stand-down periods or full expulsion from the ladder - as the committee
-            see fit.
+          <li style={{ marginBottom: "1rem" }}>
+            Please follow this link for the complete Ladder Rules and etiquette.
           </li>
-        </ul>
+        </ol>
+        <p>
+          The Ladder Coordinator controls the ladder. Any queries, please
+          contact them via the ladder online entry system or email{" "}
+          <a href="mailto:fscladder@gmail.com" className="email-link">
+            fscladder@gmail.com
+          </a>
+          .
+        </p>
       </div>
 
       <div className="home-cards">
