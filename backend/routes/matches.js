@@ -6,9 +6,7 @@ const { authMiddleware, adminMiddleware } = require("../middleware/auth");
 // Submit match result (authenticated users only)
 router.post("/submit", authMiddleware, async (req, res) => {
   try {
-    const { draw_id, opponent_id, games_won, games_lost, result, set_scores } =
-      req.body;
-    const player_id = req.user.id;
+    const { draw_id, opponent_id, games_won, games_lost, result, set_scores, player_id } = req.body; // Add player_id here
 
     // Validate result
     const validResults = ["3", "2", "1", "0", "~", "D"];
@@ -28,10 +26,10 @@ router.post("/submit", authMiddleware, async (req, res) => {
     const draw = drawInfo.rows[0];
     const week_date = draw.week_date;
 
-    // Check if player is part of this match
-    if (draw.player1_id !== player_id && draw.player2_id !== player_id) {
-      return res.status(403).json({ error: "You are not part of this match" });
-    }
+    // // Check if player is part of this match
+    // if (draw.player1_id !== player_id && draw.player2_id !== player_id) {
+    //   return res.status(403).json({ error: "You are not part of this match" });
+    // }
 
     // Check if result already submitted by EITHER player
     const existingResult = await pool.query(

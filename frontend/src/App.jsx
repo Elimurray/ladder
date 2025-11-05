@@ -4,6 +4,7 @@ import { useAuth } from "./context/AuthContext";
 import Home from "./pages/Home";
 import Ladder from "./pages/Ladder";
 import SubmitMatch from "./pages/SubmitMatch";
+import SubmitMatchForm from "./pages/SubmitMatchForm";
 import Login from "./pages/login";
 import Admin from "./pages/Admin";
 import Draw from "./pages/Draw";
@@ -121,6 +122,7 @@ function AppContent() {
           <Route path="/" element={<Home />} />
           <Route path="/ladder" element={<Ladder />} />
           <Route path="/submit" element={<SubmitMatch />} />
+          <Route path="/submit/:drawId" element={<SubmitMatchForm />} />
           <Route path="/login" element={<Login />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/draw" element={<Draw />} />
