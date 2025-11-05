@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import {
   ladderAPI,
   usersAPI,
+  authAPI,
   drawAPI,
   matchesAPI,
   profileAPI,
@@ -18,6 +19,15 @@ function Admin() {
   const [successMessage, setSuccessMessage] = useState(null);
   const [drawWeek, setDrawWeek] = useState("");
   const [processWeekDate, setProcessWeekDate] = useState("");
+
+  // Register User
+  const [newUserData, setNewUserData] = useState({
+    email: "",
+    full_name: "",
+    password: "",
+    phone_number: "",
+    squash_grade: "",
+  });
 
   // Add user to ladder state
   const [selectedUser, setSelectedUser] = useState("");
@@ -447,6 +457,105 @@ function Admin() {
           </div>
         </form>
       </div>
+      {/* Register New User Section */}
+      <div className="admin-section">
+        <h2>Register New User</h2>
+        <form
+          onSubmit={async (e) => {
+            e.preventDefault();
+            try {
+              await authAPI.register(newUserData);
+              showSuccess("User registered successfully!");
+              setNewUserData({
+                email: "",
+                full_name: "",
+                password: "",
+                phone_number: "",
+                squash_grade: "",
+              });
+              fetchData(); // Refresh users list
+            } catch (err) {
+              showError(err.response?.data?.error || "Failed to register user");
+            }
+          }}
+          className="admin-form"
+        >
+          <div className="form-group">
+            <label>Full Name:</label>
+            <input
+              type="text"
+              placeholder="John Doe"
+              value={newUserData.full_name}
+              onChange={(e) =>
+                setNewUserData({ ...newUserData, full_name: e.target.value })
+              }
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Email:</label>
+            <input
+              type="email"
+              placeholder="john.doe@example.com"
+              value={newUserData.email}
+              onChange={(e) =>
+                setNewUserData({ ...newUserData, email: e.target.value })
+              }
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Phone Number:</label>
+            <input
+              type="tel"
+              placeholder="+64 21 123 4567"
+              value={newUserData.phone_number}
+              onChange={(e) =>
+                setNewUserData({ ...newUserData, phone_number: e.target.value })
+              }
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Squash Grade:</label>
+            <select
+              value={newUserData.squash_grade}
+              onChange={(e) =>
+                setNewUserData({ ...newUserData, squash_grade: e.target.value })
+              }
+              required
+            >
+              <option value="">-- Select Grade --</option>
+              <option value="A">A Grade</option>
+              <option value="B">B Grade</option>
+              <option value="C">C Grade</option>
+              <option value="D">D Grade</option>
+              <option value="E">E Grade</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>Password:</label>
+            <input
+              type="password"
+              placeholder="••••••••"
+              value={newUserData.password}
+              onChange={(e) =>
+                setNewUserData({ ...newUserData, password: e.target.value })
+              }
+              required
+              minLength="6"
+            />
+          </div>
+
+          <button type="submit" className="btn-primary">
+            Register User
+          </button>
+        </form>
+      </div>
       {/* User Time Preferences */}
       <div className="admin-section">
         <div
@@ -623,11 +732,18 @@ function Admin() {
                     <div className="match-date">
                       Week of {new Date(match.week_date).toLocaleDateString()}
                     </div>
-                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "0.5rem",
+                        alignItems: "center",
+                      }}
+                    >
                       {match.player1_levels && match.player2_levels && (
                         <div
                           style={{
-                            background: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+                            background:
+                              "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
                             color: "white",
                             padding: "0.25rem 0.75rem",
                             borderRadius: "20px",
@@ -642,7 +758,6 @@ function Admin() {
                       {match.time_slot && (
                         <div className="match-time">🕐 {match.time_slot}</div>
                       )}
-
                     </div>
                   </div>
 
@@ -683,11 +798,19 @@ function Admin() {
                           fontSize: "0.875rem",
                         }}
                       >
-                        <strong style={{ color: "#4a5568", display: "block", marginBottom: "0.5rem" }}>
+                        <strong
+                          style={{
+                            color: "#4a5568",
+                            display: "block",
+                            marginBottom: "0.5rem",
+                          }}
+                        >
                           Set Scores:
                         </strong>
-                        <div style={{ color: "#2d3748", fontFamily: "monospace" }}>
-                          {(typeof match.player1_set_scores === 'string'
+                        <div
+                          style={{ color: "#2d3748", fontFamily: "monospace" }}
+                        >
+                          {(typeof match.player1_set_scores === "string"
                             ? JSON.parse(match.player1_set_scores)
                             : match.player1_set_scores
                           ).sets.join(", ")}
