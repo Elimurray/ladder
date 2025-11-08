@@ -17,6 +17,10 @@ function Profile() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
+  const [isEditingContact, setIsEditingContact] = useState(false);
+  const [editEmail, setEditEmail] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+
   // Preferences state
 
   const [earliestTime, setEarliestTime] = useState("");
@@ -66,6 +70,8 @@ function Profile() {
     try {
       const response = await profileAPI.getProfile();
       setProfile(response.data);
+      setEditEmail(response.data.email);
+      setEditPhone(response.data.phone_number || "");
       setEarliestTime(response.data.earliest_time || "");
       setNotes(response.data.notes || "");
       setLoading(false);
@@ -184,6 +190,26 @@ function Profile() {
     }
   };
 
+  const handleSaveContact = async (e) => {
+    e.preventDefault();
+    setError(null);
+
+    try {
+      await profileAPI.updateContact({
+        email: editEmail,
+        phone_number: editPhone,
+      });
+      setSuccess("Contact information updated successfully!");
+      setTimeout(() => setSuccess(null), 3000);
+      setIsEditingContact(false);
+      fetchProfile();
+    } catch (err) {
+      setError(
+        err.response?.data?.error || "Failed to update contact information"
+      );
+    }
+  };
+
   const calculateWinRate = () => {
     if (!stats || stats.total_matches === 0) return "0";
     return ((stats.wins / stats.total_matches) * 100).toFixed(1);
@@ -244,13 +270,28 @@ function Profile() {
             >
               <div>
                 <div style={{ fontSize: "0.875rem", opacity: 0.8 }}>Email</div>
-                <div style={{ fontWeight: "bold" }}>{profile.email}</div>
+                {isEditingContact ? (
+                  <input
+                    type="email"
+                    value={editEmail}
+                    onChange={(e) => setEditEmail(e.target.value)}
+                    style={{
+                      fontWeight: "bold",
+                      padding: "0.5rem",
+                      border: "2px solid #e2e8f0",
+                      borderRadius: "4px",
+                      width: "100%",
+                    }}
+                  />
+                ) : (
+                  <div style={{ fontWeight: "bold" }}>{profile.email}</div>
+                )}
               </div>
               <div>
                 <div style={{ fontSize: "0.875rem", opacity: 0.8 }}>
                   Ladder Position
                 </div>
-                <div style={{ fontWeight: "bold", fontSize: "1.5rem" }}>
+                <div style={{ fontWeight: "bold", fontSize: "16px" }}>
                   {profile.position ? `#${profile.position}` : "Not on ladder"}
                 </div>
               </div>
@@ -264,7 +305,7 @@ function Profile() {
               </div>
               <div>
                 <div style={{ fontSize: "0.875rem", opacity: 0.8 }}>
-                  Member Since
+                  Joined Ladder
                 </div>
                 <div style={{ fontWeight: "bold" }}>
                   {new Date(profile.created_at).toLocaleDateString()}
@@ -274,9 +315,24 @@ function Profile() {
                 <div style={{ fontSize: "0.875rem", opacity: 0.8 }}>
                   Phone Number
                 </div>
-                <div style={{ fontWeight: "bold" }}>
-                  {profile.phone_number || "Not provided"}
-                </div>
+                {isEditingContact ? (
+                  <input
+                    type="tel"
+                    value={editPhone}
+                    onChange={(e) => setEditPhone(e.target.value)}
+                    style={{
+                      fontWeight: "bold",
+                      padding: "0.5rem",
+                      border: "2px solid #e2e8f0",
+                      borderRadius: "4px",
+                      width: "100%",
+                    }}
+                  />
+                ) : (
+                  <div style={{ fontWeight: "bold" }}>
+                    {profile.phone_number || "Not provided"}
+                  </div>
+                )}
               </div>
               <div>
                 <div style={{ fontSize: "0.875rem", opacity: 0.8 }}>
@@ -286,6 +342,59 @@ function Profile() {
                   {profile.squash_grade || "Not set"}
                 </div>
               </div>
+            </div>
+            <div style={{ marginTop: "1.5rem", display: "flex", gap: "1rem" }}>
+              {!isEditingContact ? (
+                <button
+                  onClick={() => setIsEditingContact(true)}
+                  style={{
+                    padding: "0.75rem 1.5rem",
+                    background: "#4299e1",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                    fontWeight: "600",
+                  }}
+                >
+                  ✏️ Edit Contact Info
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={handleSaveContact}
+                    style={{
+                      padding: "0.75rem 1.5rem",
+                      background: "#48bb78",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "8px",
+                      cursor: "pointer",
+                      fontWeight: "600",
+                    }}
+                  >
+                    ✓ Save Changes
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsEditingContact(false);
+                      setEditEmail(profile.email);
+                      setEditPhone(profile.phone_number || "");
+                    }}
+                    style={{
+                      padding: "0.75rem 1.5rem",
+                      background: "#718096",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "8px",
+                      cursor: "pointer",
+                      fontWeight: "600",
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </>
+              )}
             </div>
           </div>
 

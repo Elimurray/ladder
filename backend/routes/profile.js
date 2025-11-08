@@ -101,6 +101,39 @@ router.put("/preferences", authMiddleware, async (req, res) => {
   }
 });
 
+// Update contact information
+router.put("/contact", authMiddleware, async (req, res) => {
+  try {
+    const { email, phone_number } = req.body;
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: "Invalid email format" });
+    }
+
+    // Check if email is already taken by another user
+    const existingUser = await pool.query(
+      "SELECT id FROM users WHERE email = $1 AND id != $2",
+      [email, req.user.id]
+    );
+
+    if (existingUser.rows.length > 0) {
+      return res.status(400).json({ error: "Email already in use" });
+    }
+
+    const result = await pool.query(
+      "UPDATE users SET email = $1, phone_number = $2 WHERE id = $3 RETURNING id, email, full_name, phone_number, is_member, is_admin",
+      [email, phone_number, req.user.id]
+    );
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 // Update my ladder status (withdraw/active)
 router.patch("/status", authMiddleware, async (req, res) => {
   try {

@@ -40,7 +40,7 @@ function Ladder() {
   const getPositionClass = (position) => {
     if (position === 1) return "position-first";
     if (position <= 3) return "position-top3";
-    if (position <= 10) return "position-top10";
+    if (position <= 100) return "position-top100";
     return "";
   };
 
@@ -94,7 +94,9 @@ function Ladder() {
           <h2 style={{ margin: "0 0 0.5rem 0", fontSize: "1.25rem" }}>
             Your Position
           </h2>
-          <div style={{ fontSize: "3rem", fontWeight: "bold", color: "#f97316" }}>
+          <div
+            style={{ fontSize: "3rem", fontWeight: "bold", color: "#f97316" }}
+          >
             #{myPosition.position}
           </div>
           <div style={{ marginTop: "0.5rem" }}>
@@ -117,14 +119,15 @@ function Ladder() {
             {ladder.map((entry) => (
               <tr
                 key={entry.id}
-                className={`${getPositionClass(entry.position)} ${user && entry.user_id === user.id ? "my-row" : ""
-                  }`}
+                className={`${getPositionClass(entry.position)} ${
+                  user && entry.user_id === user.id ? "my-row" : ""
+                }`}
                 style={
                   user && entry.user_id === user.id
                     ? {
-                      background: "#f0f4ff",
-                      fontWeight: "bold",
-                    }
+                        background: "#f0f4ff",
+                        fontWeight: "bold",
+                      }
                     : {}
                 }
               >

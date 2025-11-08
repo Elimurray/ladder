@@ -77,6 +77,7 @@ export const profileAPI = {
   getAllPreferences: () => api.get("/profile/all-preferences"),
   changePassword: (passwordData) =>
     api.put("/auth/change-password", passwordData),
+  updateContact: (contactData) => api.put("/profile/contact", contactData),
 };
 
 export const resultsAPI = {

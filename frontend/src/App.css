@@ -207,7 +207,11 @@ td {
   border-bottom: 1px solid #e2e8f0;
   color: #2d3748;
 }
-
+.position-first td,
+.position-top3 td,
+.position-top100 td {
+  padding: 0.4rem;
+}
 tr:last-child td {
   border-bottom: none;
 }
@@ -1227,5 +1231,11 @@ td:first-child {
     align-items: center;
     gap: 0.5rem;
     white-space: nowrap;
+  }
+}
+
+@media (min-width: 768px) {
+  .login-link {
+    display: none;
   }
 }
