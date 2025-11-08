@@ -5,6 +5,9 @@ function Home() {
     <div className="page">
       <div className="home-title">
         <h1>Franklin Squash Club Ladder</h1>
+        <Link to="/login" className="login-link">
+          Login
+        </Link>
       </div>
       {/* About Ladder Section */}
       <div className="ladder-rules-section">
@@ -35,7 +38,14 @@ function Home() {
         <h2>How to join ladder:</h2>
         <ol className="rules-list">
           <li>
-            Complete the Ladder Requests Form on our Club Website or email{" "}
+            Complete the Ladder Requests Form on our{" "}
+            <a
+              href="https://www.franklinsquash.org.nz/club-ladder/"
+              className="email-link"
+            >
+              Club Website
+            </a>{" "}
+            or email{" "}
             <a href="mailto:fscladder@gmail.com" className="email-link">
               fscladder@gmail.com
             </a>
@@ -93,7 +103,14 @@ function Home() {
             subsequent match, and enter match results online.
           </li>
           <li style={{ marginBottom: "1rem" }}>
-            Please follow this link for the complete Ladder Rules and etiquette.
+            Please follow this link for the complete{" "}
+            <a
+              href="https://www.franklinsquash.org.nz/club-ladder/"
+              className="email-link"
+            >
+              Ladder Rules
+            </a>{" "}
+            and etiquette.
           </li>
         </ol>
         <p>
@@ -119,12 +136,15 @@ function Home() {
             <p>Report your match results</p>
           </div>
         </Link>
-        <Link to="/" style={{ textDecoration: "none", color: "inherit" }}>
+        <a
+          href="https://www.franklinsquash.org.nz/club-ladder/"
+          style={{ textDecoration: "none", color: "inherit" }}
+        >
           <div className="card">
-            <h3>Your Profile</h3>
-            <p>Check your stats and history</p>
+            <h3>Franklin Squash</h3>
+            <p>Ladder page</p>
           </div>
-        </Link>
+        </a>
       </div>
     </div>
   );

@@ -281,6 +281,30 @@ td:first-child {
   transform: translateY(0);
 }
 
+.home-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.login-link {
+  border: none;
+  color: black;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  text-decoration: underline;
+}
+
+.login-link:hover {
+  background: #d3d3d3;
+}
+
 .home-title p {
   padding-bottom: 20px;
 }
@@ -317,6 +341,9 @@ td:first-child {
   color: #e53e3e;
 }
 
+.email-link {
+  color: #667eea;
+}
 .rules-email-link {
   color: #667eea;
   text-decoration: underline;
