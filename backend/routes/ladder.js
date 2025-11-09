@@ -115,39 +115,28 @@ router.patch("/status", authMiddleware, async (req, res) => {
 });
 
 // Withdraw from ladder (removes user completely)
-router.delete("/withdraw/:userId?", authMiddleware, async (req, res) => {
+router.delete("/withdraw", authMiddleware, async (req, res) => {
   const client = await pool.connect();
 
   try {
     await client.query("BEGIN");
 
-    // Admin can withdraw any user, regular users can only withdraw themselves
-    const targetUserId = req.params.userId
-      ? parseInt(req.params.userId)
-      : req.user.id;
-
-    // Check if admin is trying to withdraw someone else
-    if (req.params.userId && !req.user.is_admin) {
-      await client.query("ROLLBACK");
-      return res.status(403).json({ error: "Unauthorized" });
-    }
-
     // Get user's current position
     const currentPos = await client.query(
       "SELECT position FROM ladder_positions WHERE user_id = $1",
-      [targetUserId]
+      [req.user.id]
     );
 
     if (currentPos.rows.length === 0) {
       await client.query("ROLLBACK");
-      return res.status(404).json({ error: "User is not on the ladder" });
+      return res.status(404).json({ error: "You are not on the ladder" });
     }
 
     const position = currentPos.rows[0].position;
 
     // Delete user from ladder
     await client.query("DELETE FROM ladder_positions WHERE user_id = $1", [
-      targetUserId,
+      req.user.id,
     ]);
 
     // Move everyone below up one position
