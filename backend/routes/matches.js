@@ -374,6 +374,17 @@ router.post(
         [date]
       );
 
+      // Save current ladder positions to history BEFORE processing
+      const ladderSnapshot = await client.query(
+        `INSERT INTO ladder_history (user_id, week_date, position)
+   SELECT user_id, $1, position
+   FROM ladder_positions
+   ON CONFLICT (user_id, week_date) DO NOTHING`,
+        [date]
+      );
+
+      console.log("Saved ladder snapshot to history");
+
       if (matches.rows.length === 0) {
         await client.query("ROLLBACK");
         return res

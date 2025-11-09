@@ -125,7 +125,6 @@ function Results() {
                     <th>Player 1</th>
                     <th>Score</th>
                     <th>Player 2</th>
-                    {/* <th>Winner</th> */}
                     <th>Sets</th>
                   </tr>
                 </thead>
@@ -133,20 +132,57 @@ function Results() {
                   {results.map((match, index) => (
                     <tr key={index}>
                       <td>
-                        <span
+                        <div
                           style={{
-                            fontWeight:
-                              match.winner === match.player1_name
-                                ? "bold"
-                                : "normal",
-                            color:
-                              match.winner === match.player1_name
-                                ? "#2d3748"
-                                : "#718096",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.5rem",
                           }}
                         >
-                          {match.player1_name}
-                        </span>
+                          {match.player1_position && (
+                            <span
+                              style={{
+                                padding: "0.25rem 0.5rem",
+                                background: "#e2e8f0",
+                                borderRadius: "4px",
+                                fontSize: "0.75rem",
+                                fontWeight: "600",
+                                color: "#4a5568",
+                              }}
+                            >
+                              #{match.player1_position}
+                            </span>
+                          )}
+                          <span
+                            style={{
+                              fontWeight:
+                                match.winner === match.player1_name
+                                  ? "bold"
+                                  : "normal",
+                              color:
+                                match.winner === match.player1_name
+                                  ? "#2d3748"
+                                  : "#718096",
+                            }}
+                          >
+                            {match.player1_name}
+                          </span>
+                          {match.player1_levels && (
+                            <span
+                              style={{
+                                padding: "0.25rem 0.5rem",
+                                background:
+                                  "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+                                color: "white",
+                                borderRadius: "12px",
+                                fontSize: "0.7rem",
+                                fontWeight: "bold",
+                              }}
+                            >
+                              🏆
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td
                         style={{
@@ -177,36 +213,58 @@ function Results() {
                         </span>
                       </td>
                       <td>
-                        <span
+                        <div
                           style={{
-                            fontWeight:
-                              match.winner === match.player2_name
-                                ? "bold"
-                                : "normal",
-                            color:
-                              match.winner === match.player2_name
-                                ? "#2d3748"
-                                : "#718096",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.5rem",
                           }}
                         >
-                          {match.player2_name}
-                        </span>
+                          {match.player2_position && (
+                            <span
+                              style={{
+                                padding: "0.25rem 0.5rem",
+                                background: "#e2e8f0",
+                                borderRadius: "4px",
+                                fontSize: "0.75rem",
+                                fontWeight: "600",
+                                color: "#4a5568",
+                              }}
+                            >
+                              #{match.player2_position}
+                            </span>
+                          )}
+                          <span
+                            style={{
+                              fontWeight:
+                                match.winner === match.player2_name
+                                  ? "bold"
+                                  : "normal",
+                              color:
+                                match.winner === match.player2_name
+                                  ? "#2d3748"
+                                  : "#718096",
+                            }}
+                          >
+                            {match.player2_name}
+                          </span>
+                          {match.player2_levels && (
+                            <span
+                              style={{
+                                padding: "0.25rem 0.5rem",
+                                background:
+                                  "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+                                color: "white",
+                                borderRadius: "12px",
+                                fontSize: "0.7rem",
+                                fontWeight: "bold",
+                              }}
+                            >
+                              🏆
+                            </span>
+                          )}
+                        </div>
                       </td>
-                      {/* <td>
-                        <span
-                          style={{
-                            padding: "0.25rem 0.75rem",
-                            background:
-                              "linear-gradient(135deg, #48bb78 0%, #38a169 100%)",
-                            color: "white",
-                            borderRadius: "20px",
-                            fontSize: "0.875rem",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          {match.winner}
-                        </span>
-                      </td> */}
                       <td>
                         {match.player1_set_scores?.sets ? (
                           <div
