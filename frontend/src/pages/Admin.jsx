@@ -1575,36 +1575,30 @@ function Admin() {
                             )}
                           </td>
                           <td className="admin-actions">
-                            {editingId === entry.id ? (
+                            {editingDrawId === pairing.id ? (
                               <div className="admin-edit-buttons">
                                 <button
-                                  onClick={() => handleSavePosition(entry.id)}
+                                  onClick={() =>
+                                    handleSaveDrawPairing(pairing.id)
+                                  }
                                   className="btn-save"
                                 >
                                   Save
                                 </button>
                                 <button
-                                  onClick={handleCancelEdit}
+                                  onClick={handleCancelEditDraw}
                                   className="btn-cancel"
                                 >
                                   Cancel
                                 </button>
                               </div>
                             ) : (
-                              <div
-                                style={{
-                                  display: "flex",
-                                  gap: "0.5rem",
-                                  justifyContent: "flex-end",
-                                }}
+                              <button
+                                onClick={() => handleStartEditDraw(pairing)}
+                                className="btn-edit"
                               >
-                                <button
-                                  onClick={() => handleStartEdit(entry)}
-                                  className="btn-edit"
-                                >
-                                  Edit Position
-                                </button>
-                              </div>
+                                Edit
+                              </button>
                             )}
                           </td>
                         </tr>
