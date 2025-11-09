@@ -335,7 +335,6 @@ router.patch("/:id", authMiddleware, adminMiddleware, async (req, res) => {
 });
 
 // Admin: Delete a draw (for regenerating)
-// Admin: Delete a draw (for regenerating)
 router.delete(
   "/week/:date",
   authMiddleware,
@@ -369,5 +368,79 @@ router.delete(
     }
   }
 );
+
+// Admin: Delete a specific pairing
+router.delete("/:id", authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Delete any matches associated with this draw first
+    await pool.query("DELETE FROM matches WHERE draw_id = $1", [id]);
+
+    // Delete the pairing
+    const result = await pool.query(
+      "DELETE FROM draws WHERE id = $1 RETURNING *",
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Pairing not found" });
+    }
+
+    res.json({ message: "Pairing deleted successfully" });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Admin: Create a new pairing
+router.post("/pairing", authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const { week_date, player1_id, player2_id, time_slot } = req.body;
+
+    // Get player positions
+    const player1Pos = await pool.query(
+      "SELECT position FROM ladder_positions WHERE user_id = $1",
+      [player1_id]
+    );
+
+    if (player1Pos.rows.length === 0) {
+      return res.status(404).json({ error: "Player 1 not found on ladder" });
+    }
+
+    let player2Position = null;
+    if (player2_id) {
+      const player2Pos = await pool.query(
+        "SELECT position FROM ladder_positions WHERE user_id = $1",
+        [player2_id]
+      );
+
+      if (player2Pos.rows.length === 0) {
+        return res.status(404).json({ error: "Player 2 not found on ladder" });
+      }
+      player2Position = player2Pos.rows[0].position;
+    }
+
+    const result = await pool.query(
+      `INSERT INTO draws (week_date, player1_id, player2_id, player1_position, player2_position, time_slot)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING *`,
+      [
+        week_date,
+        player1_id,
+        player2_id,
+        player1Pos.rows[0].position,
+        player2Position,
+        time_slot,
+      ]
+    );
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Server error" });
+  }
+});
 
 module.exports = router;

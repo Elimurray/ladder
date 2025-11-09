@@ -56,6 +56,12 @@ function Admin() {
   const [editGamesLost, setEditGamesLost] = useState("");
   const [editSetScores, setEditSetScores] = useState([]);
 
+  // Creating match
+  const [showCreateMatch, setShowCreateMatch] = useState(false);
+  const [newMatchPlayer1, setNewMatchPlayer1] = useState("");
+  const [newMatchPlayer2, setNewMatchPlayer2] = useState("");
+  const [newMatchTimeSlot, setNewMatchTimeSlot] = useState("");
+
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -453,6 +459,53 @@ function Admin() {
       fetchData();
     } catch (err) {
       showError(err.response?.data?.error || "Failed to withdraw player");
+    }
+  };
+
+  // Create and delete match handlers
+  const handleDeletePairing = async (pairingId, player1Name, player2Name) => {
+    if (
+      !confirm(
+        `Are you sure you want to delete the match between ${player1Name} and ${
+          player2Name || "BYE"
+        }?`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      await drawAPI.deletePairing(pairingId);
+      showSuccess("Match deleted successfully!");
+      fetchDrawByDate(selectedDrawDate);
+    } catch (err) {
+      showError(err.response?.data?.error || "Failed to delete match");
+    }
+  };
+
+  const handleCreateMatch = async (e) => {
+    e.preventDefault();
+
+    if (!newMatchPlayer1) {
+      showError("Please select Player 1");
+      return;
+    }
+
+    try {
+      await drawAPI.createPairing({
+        week_date: selectedDrawDate,
+        player1_id: parseInt(newMatchPlayer1),
+        player2_id: newMatchPlayer2 ? parseInt(newMatchPlayer2) : null,
+        time_slot: newMatchTimeSlot || null,
+      });
+      showSuccess("Match created successfully!");
+      setShowCreateMatch(false);
+      setNewMatchPlayer1("");
+      setNewMatchPlayer2("");
+      setNewMatchTimeSlot("");
+      fetchDrawByDate(selectedDrawDate);
+    } catch (err) {
+      showError(err.response?.data?.error || "Failed to create match");
     }
   };
 
@@ -1331,23 +1384,163 @@ function Admin() {
               </div>
 
               {selectedDrawDate && (
-                <button
-                  onClick={handleDeleteSelectedDraw}
-                  style={{
-                    background: "#e53e3e",
-                    color: "white",
-                    padding: "0.75rem 1.5rem",
-                    border: "none",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                    fontWeight: "600",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  Delete This Draw
-                </button>
+                <>
+                  <button
+                    onClick={() => setShowCreateMatch(!showCreateMatch)}
+                    style={{
+                      background: "#48bb78",
+                      color: "white",
+                      padding: "0.75rem 1.5rem",
+                      border: "none",
+                      borderRadius: "8px",
+                      cursor: "pointer",
+                      fontWeight: "600",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    + Create Match
+                  </button>
+                  <button
+                    onClick={handleDeleteSelectedDraw}
+                    style={{
+                      background: "#e53e3e",
+                      color: "white",
+                      padding: "0.75rem 1.5rem",
+                      border: "none",
+                      borderRadius: "8px",
+                      cursor: "pointer",
+                      fontWeight: "600",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    Delete This Draw
+                  </button>
+                </>
               )}
             </div>
+            {/* Create Match Form */}
+            {showCreateMatch && selectedDrawDate && (
+              <div
+                style={{
+                  background: "#f7fafc",
+                  border: "2px solid #e2e8f0",
+                  borderRadius: "8px",
+                  padding: "1.5rem",
+                  marginBottom: "1.5rem",
+                }}
+              >
+                <h3 style={{ marginBottom: "1rem" }}>Create New Match</h3>
+                <form onSubmit={handleCreateMatch}>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr 1fr",
+                      gap: "1rem",
+                    }}
+                  >
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label>Player 1 (required):</label>
+                      <select
+                        value={newMatchPlayer1}
+                        onChange={(e) => setNewMatchPlayer1(e.target.value)}
+                        style={{
+                          width: "100%",
+                          padding: "0.75rem",
+                          border: "2px solid #e2e8f0",
+                          borderRadius: "8px",
+                        }}
+                        required
+                      >
+                        <option value="">-- Select Player --</option>
+                        {ladder
+                          .filter((l) => l.status === "active")
+                          .map((player) => (
+                            <option key={player.user_id} value={player.user_id}>
+                              #{player.position} {player.full_name}
+                            </option>
+                          ))}
+                      </select>
+                    </div>
+
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label>Player 2 (optional - leave empty for BYE):</label>
+                      <select
+                        value={newMatchPlayer2}
+                        onChange={(e) => setNewMatchPlayer2(e.target.value)}
+                        style={{
+                          width: "100%",
+                          padding: "0.75rem",
+                          border: "2px solid #e2e8f0",
+                          borderRadius: "8px",
+                        }}
+                      >
+                        <option value="">-- BYE --</option>
+                        {ladder
+                          .filter(
+                            (l) =>
+                              l.status === "active" &&
+                              l.user_id !== parseInt(newMatchPlayer1)
+                          )
+                          .map((player) => (
+                            <option key={player.user_id} value={player.user_id}>
+                              #{player.position} {player.full_name}
+                            </option>
+                          ))}
+                      </select>
+                    </div>
+
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label>Time Slot (optional):</label>
+                      <select
+                        value={newMatchTimeSlot}
+                        onChange={(e) => setNewMatchTimeSlot(e.target.value)}
+                        style={{
+                          width: "100%",
+                          padding: "0.75rem",
+                          border: "2px solid #e2e8f0",
+                          borderRadius: "8px",
+                        }}
+                      >
+                        <option value="">-- Select Time --</option>
+                        {timeSlots.map((slot) => (
+                          <option key={slot} value={slot}>
+                            {slot}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div
+                    style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}
+                  >
+                    <button type="submit" className="btn-primary">
+                      Create Match
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowCreateMatch(false);
+                        setNewMatchPlayer1("");
+                        setNewMatchPlayer2("");
+                        setNewMatchTimeSlot("");
+                      }}
+                      style={{
+                        padding: "0.75rem 1.5rem",
+                        background: "#718096",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "8px",
+                        cursor: "pointer",
+                        fontWeight: "600",
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
 
             {currentDraw.length > 0 ? (
               <div className="draw-admin-table">
@@ -1622,12 +1815,41 @@ function Admin() {
                                   </button>
                                 </div>
                               ) : (
-                                <button
-                                  onClick={() => handleStartEditDraw(pairing)}
-                                  className="btn-edit"
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    gap: "0.5rem",
+                                    justifyContent: "flex-end",
+                                  }}
                                 >
-                                  Edit
-                                </button>
+                                  <button
+                                    onClick={() => handleStartEditDraw(pairing)}
+                                    className="btn-edit"
+                                  >
+                                    Edit
+                                  </button>
+                                  <button
+                                    onClick={() =>
+                                      handleDeletePairing(
+                                        pairing.id,
+                                        pairing.player1_name,
+                                        pairing.player2_name
+                                      )
+                                    }
+                                    style={{
+                                      padding: "0.5rem 1rem",
+                                      background: "#e53e3e",
+                                      color: "white",
+                                      border: "none",
+                                      borderRadius: "6px",
+                                      cursor: "pointer",
+                                      fontWeight: "600",
+                                      fontSize: "0.875rem",
+                                    }}
+                                  >
+                                    Delete
+                                  </button>
+                                </div>
                               )}
                             </td>
                           </tr>
