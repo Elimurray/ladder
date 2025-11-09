@@ -79,7 +79,13 @@ function Draw() {
     return hours * 60 + minutes;
   };
 
+  // Replace the timeSlots sorting section with this:
   const timeSlots = Object.keys(groupedDraw).sort((a, b) => {
+    // "Reschedule" should always be last
+    if (a === "Reschedule") return 1;
+    if (b === "Reschedule") return -1;
+
+    // Sort other times normally
     return timeToMinutes(a) - timeToMinutes(b);
   });
 
@@ -117,8 +123,9 @@ function Draw() {
                 {groupedDraw[slot].map((pairing) => (
                   <div
                     key={pairing.id}
-                    className={`draw-match-card ${isMyMatch(pairing) ? "my-match" : ""
-                      }`}
+                    className={`draw-match-card ${
+                      isMyMatch(pairing) ? "my-match" : ""
+                    }`}
                   >
                     <div className="match-players">
                       <div className="player">
@@ -178,6 +185,27 @@ function Draw() {
                         )}
                       </div>
                     </div>
+
+                    {/* Show reschedule notes for Reschedule time slot */}
+                    {pairing.time_slot === "Reschedule" &&
+                      pairing.reschedule_notes && (
+                        <div
+                          style={{
+                            marginTop: "1rem",
+                            padding: "0.75rem",
+                            background: "#fffbeb",
+                            border: "2px solid #fbbf24",
+                            borderRadius: "8px",
+                            fontSize: "0.875rem",
+                            color: "#78350f",
+                          }}
+                        >
+                          <strong>📅 Reschedule Details:</strong>
+                          <div style={{ marginTop: "0.25rem" }}>
+                            {pairing.reschedule_notes}
+                          </div>
+                        </div>
+                      )}
 
                     {pairing.bar_duty && (
                       <div className="bar-duty">

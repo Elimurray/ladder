@@ -64,6 +64,11 @@ function SubmitMatch() {
     return hours * 60 + minutes;
   };
   const timeSlots = Object.keys(groupedDraw).sort((a, b) => {
+    // "Reschedule" should always be last
+    if (a === "Reschedule") return 1;
+    if (b === "Reschedule") return -1;
+
+    // Sort other times normally
     return timeToMinutes(a) - timeToMinutes(b);
   });
 
