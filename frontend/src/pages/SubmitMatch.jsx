@@ -89,15 +89,39 @@ function SubmitMatch() {
                     key={pairing.id}
                     className="draw-match-card"
                     onClick={() => handleMatchClick(pairing.id)}
-                    style={{ cursor: "pointer", transition: "transform 0.2s" }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.transform = "scale(1.02)")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.transform = "scale(1)")
-                    }
+                    style={{
+                      cursor: "pointer",
+                      position: "relative",
+                    }}
                   >
-                    <div className="match-players">
+                    {pairing.submitted && (
+                      <div
+                        style={{
+                          position: "absolute",
+                          top: "0.5rem",
+                          right: "0.5rem",
+                          backgroundColor: "#48bb78",
+                          color: "white",
+                          padding: "0.25rem 0.5rem",
+                          borderRadius: "0.25rem",
+                          fontSize: "0.75rem",
+                          fontWeight: "600",
+                          zIndex: 10, // Add this to ensure it's on top
+                        }}
+                      >
+                        ✓ Submitted
+                      </div>
+                    )}
+                    <div
+                      className="match-players"
+                      style={{ transition: "transform 0.2s" }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.transform = "scale(1.02)")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.transform = "scale(1)")
+                      }
+                    >
                       <div className="player">
                         <span className="position-badge">
                           #{pairing.player1_position}
@@ -124,23 +148,7 @@ function SubmitMatch() {
                         )}
                       </div>
                     </div>
-                    {pairing.submitted && (
-                      <div
-                        style={{
-                          position: "absolute",
-                          top: "0.5rem",
-                          right: "0.5rem",
-                          backgroundColor: "#48bb78",
-                          color: "white",
-                          padding: "0.25rem 0.5rem",
-                          borderRadius: "0.25rem",
-                          fontSize: "0.75rem",
-                          fontWeight: "600",
-                        }}
-                      >
-                        ✓ Submitted
-                      </div>
-                    )}
+
                     <div
                       style={{
                         marginTop: "0.5rem",

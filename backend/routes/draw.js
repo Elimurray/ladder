@@ -35,7 +35,6 @@ router.get("/week/:date", async (req, res) => {
 });
 
 // Get current week's draw
-// Get current week's draw
 router.get("/current", async (req, res) => {
   try {
     // Get the most recent draw
@@ -58,12 +57,27 @@ router.get("/current", async (req, res) => {
     // Check which matches have been submitted
     const drawIds = result.rows.map((d) => d.id);
     if (drawIds.length > 0) {
+      // Check for submissions using EITHER draw_id OR by matching player pairs and week_date
+      const weekDate = result.rows[0].week_date;
+
       const submissions = await pool.query(
-        `SELECT DISTINCT draw_id FROM matches WHERE draw_id = ANY($1)`,
-        [drawIds]
+        `SELECT DISTINCT 
+          COALESCE(m.draw_id, 
+            (SELECT d.id FROM draws d 
+             WHERE d.week_date = m.week_date 
+             AND ((d.player1_id = m.player_id AND d.player2_id = m.opponent_id) 
+                  OR (d.player1_id = m.opponent_id AND d.player2_id = m.player_id))
+             LIMIT 1)
+          ) as draw_id
+         FROM matches m 
+         WHERE m.week_date = $1 
+         AND (m.draw_id = ANY($2) OR m.draw_id IS NULL)`,
+        [weekDate, drawIds]
       );
 
-      const submittedDrawIds = new Set(submissions.rows.map((s) => s.draw_id));
+      const submittedDrawIds = new Set(
+        submissions.rows.map((s) => s.draw_id).filter((id) => id !== null)
+      );
 
       // Add submitted flag to each draw item
       result.rows.forEach((draw) => {
