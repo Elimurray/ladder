@@ -1453,7 +1453,18 @@ function Admin() {
                       >
                         <option value="">-- Select Player --</option>
                         {ladder
-                          .filter((l) => l.status === "active")
+                          .filter((l) => {
+                            // Only show active players
+                            if (l.status !== "active") return false;
+
+                            // Filter out players already in a match in this draw
+                            const isInMatch = currentDraw.some(
+                              (match) =>
+                                match.player1_id === l.user_id ||
+                                match.player2_id === l.user_id
+                            );
+                            return !isInMatch;
+                          })
                           .map((player) => (
                             <option key={player.user_id} value={player.user_id}>
                               #{player.position} {player.full_name}
@@ -1476,11 +1487,22 @@ function Admin() {
                       >
                         <option value="">-- BYE --</option>
                         {ladder
-                          .filter(
-                            (l) =>
-                              l.status === "active" &&
-                              l.user_id !== parseInt(newMatchPlayer1)
-                          )
+                          .filter((l) => {
+                            // Only show active players
+                            if (l.status !== "active") return false;
+
+                            // Filter out the selected Player 1
+                            if (l.user_id === parseInt(newMatchPlayer1))
+                              return false;
+
+                            // Filter out players already in a match in this draw
+                            const isInMatch = currentDraw.some(
+                              (match) =>
+                                match.player1_id === l.user_id ||
+                                match.player2_id === l.user_id
+                            );
+                            return !isInMatch;
+                          })
                           .map((player) => (
                             <option key={player.user_id} value={player.user_id}>
                               #{player.position} {player.full_name}
