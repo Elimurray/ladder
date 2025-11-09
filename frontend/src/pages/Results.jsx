@@ -125,6 +125,7 @@ function Results() {
                     <th>Player 1</th>
                     <th>Score</th>
                     <th>Player 2</th>
+                    <th>Levels</th>
                     <th>Sets</th>
                   </tr>
                 </thead>
@@ -167,21 +168,6 @@ function Results() {
                           >
                             {match.player1_name}
                           </span>
-                          {match.player1_levels && (
-                            <span
-                              style={{
-                                padding: "0.25rem 0.5rem",
-                                background:
-                                  "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
-                                color: "white",
-                                borderRadius: "12px",
-                                fontSize: "0.7rem",
-                                fontWeight: "bold",
-                              }}
-                            >
-                              🏆
-                            </span>
-                          )}
                         </div>
                       </td>
                       <td
@@ -248,22 +234,31 @@ function Results() {
                           >
                             {match.player2_name}
                           </span>
-                          {match.player2_levels && (
-                            <span
-                              style={{
-                                padding: "0.25rem 0.5rem",
-                                background:
-                                  "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
-                                color: "white",
-                                borderRadius: "12px",
-                                fontSize: "0.7rem",
-                                fontWeight: "bold",
-                              }}
-                            >
-                              🏆
-                            </span>
-                          )}
                         </div>
+                      </td>
+                      <td style={{ textAlign: "center" }}>
+                        {match.player1_levels || match.player2_levels ? (
+                          <span
+                            style={{
+                              padding: "0.25rem 0.75rem",
+                              background:
+                                "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+                              color: "white",
+                              borderRadius: "12px",
+                              fontSize: "0.75rem",
+                              fontWeight: "bold",
+                              display: "inline-block",
+                            }}
+                          >
+                            🏆 LEVELS
+                          </span>
+                        ) : (
+                          <span
+                            style={{ color: "#a0aec0", fontSize: "0.875rem" }}
+                          >
+                            -
+                          </span>
+                        )}
                       </td>
                       <td>
                         {match.player1_set_scores?.sets ? (

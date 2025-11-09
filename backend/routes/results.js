@@ -76,8 +76,8 @@ router.get("/week/:date", async (req, res) => {
           player1_set_scores: row.set_scores,
           player2_id: row.opponent_id,
           player2_name: row.opponent_name,
-          player2_position: opponentResult?.player2_position,
-          player2_levels: opponentResult?.player2_levels,
+          player2_position: row.player2_position, // Changed from opponentResult?.player2_position
+          player2_levels: row.player2_levels, // Changed from opponentResult?.player2_levels
           player2_score: opponentResult?.match_score || "0-0",
           player2_games_won: opponentResult?.games_won || 0,
           player2_set_scores: opponentResult?.set_scores,
