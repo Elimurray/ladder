@@ -373,8 +373,8 @@ function Admin() {
 
   const handleStartEditMatch = (match) => {
     setEditingMatchId(match.match_id);
-    setEditGamesWon(match.player1_games_won);
-    setEditGamesLost(match.player1_games_lost);
+    setEditGamesWon(match.player1_games_won.toString());
+    setEditGamesLost(match.player1_games_lost.toString());
 
     // Load existing set scores if available
     if (match.player1_set_scores) {
@@ -1074,60 +1074,58 @@ function Admin() {
                           </div>
 
                           {/* Set Scores Input */}
-                          {editGamesWon && editGamesLost && (
-                            <div style={{ marginTop: "1rem" }}>
-                              <label
-                                style={{
-                                  display: "block",
-                                  marginBottom: "0.5rem",
-                                  fontWeight: "600",
-                                  fontSize: "0.875rem",
-                                }}
-                              >
-                                Set Scores (optional):
-                              </label>
-                              <div
-                                style={{
-                                  display: "grid",
-                                  gridTemplateColumns:
-                                    "repeat(auto-fit, minmax(100px, 1fr))",
-                                  gap: "0.5rem",
-                                }}
-                              >
-                                {editSetScores.map((score, index) => (
-                                  <div key={index}>
-                                    <label
-                                      style={{
-                                        fontSize: "0.75rem",
-                                        color: "#4a5568",
-                                        display: "block",
-                                        marginBottom: "0.25rem",
-                                      }}
-                                    >
-                                      Set {index + 1}:
-                                    </label>
-                                    <input
-                                      type="text"
-                                      placeholder="15-10"
-                                      value={score}
-                                      onChange={(e) => {
-                                        const newScores = [...editSetScores];
-                                        newScores[index] = e.target.value;
-                                        setEditSetScores(newScores);
-                                      }}
-                                      style={{
-                                        width: "100%",
-                                        padding: "0.5rem",
-                                        border: "2px solid #e2e8f0",
-                                        borderRadius: "6px",
-                                        textAlign: "center",
-                                      }}
-                                    />
-                                  </div>
-                                ))}
-                              </div>
+                          <div style={{ marginTop: "1rem" }}>
+                            <label
+                              style={{
+                                display: "block",
+                                marginBottom: "0.5rem",
+                                fontWeight: "600",
+                                fontSize: "0.875rem",
+                              }}
+                            >
+                              Set Scores (optional):
+                            </label>
+                            <div
+                              style={{
+                                display: "grid",
+                                gridTemplateColumns:
+                                  "repeat(auto-fit, minmax(100px, 1fr))",
+                                gap: "0.5rem",
+                              }}
+                            >
+                              {editSetScores.map((score, index) => (
+                                <div key={index}>
+                                  <label
+                                    style={{
+                                      fontSize: "0.75rem",
+                                      color: "#4a5568",
+                                      display: "block",
+                                      marginBottom: "0.25rem",
+                                    }}
+                                  >
+                                    Set {index + 1}:
+                                  </label>
+                                  <input
+                                    type="text"
+                                    placeholder="15-10"
+                                    value={score}
+                                    onChange={(e) => {
+                                      const newScores = [...editSetScores];
+                                      newScores[index] = e.target.value;
+                                      setEditSetScores(newScores);
+                                    }}
+                                    style={{
+                                      width: "100%",
+                                      padding: "0.5rem",
+                                      border: "2px solid #e2e8f0",
+                                      borderRadius: "6px",
+                                      textAlign: "center",
+                                    }}
+                                  />
+                                </div>
+                              ))}
                             </div>
-                          )}
+                          </div>
                         </div>
                         <div style={{ display: "flex", gap: "0.5rem" }}>
                           <button
@@ -1163,6 +1161,7 @@ function Admin() {
                               setEditingMatchId(match.match_id);
                               setEditGamesWon(match.player1_games_won);
                               setEditGamesLost(match.player1_games_lost);
+                              handleStartEditMatch(match);
                             }}
                             style={{
                               flex: 1,
