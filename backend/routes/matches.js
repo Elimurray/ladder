@@ -592,7 +592,7 @@ router.put(
 
     try {
       const { matchId } = req.params;
-      const { player1_games_won, player1_games_lost } = req.body;
+      const { player1_games_won, player1_games_lost, set_scores } = req.body;
       const [player1Id, player2Id] = matchId
         .split("-")
         .map((id) => parseInt(id));
@@ -618,13 +618,15 @@ router.put(
        SET games_won = $1, 
            games_lost = $2, 
            result = $3, 
-           match_score = $4
-       WHERE player_id = $5 AND opponent_id = $6`,
+           match_score = $4,
+           set_scores = $5
+       WHERE player_id = $6 AND opponent_id = $7`,
         [
           player1_games_won,
           player1_games_lost,
           player1Result,
           `${player1_games_won}-${player1_games_lost}`,
+          set_scores ? JSON.stringify(set_scores) : null,
           player1Id,
           player2Id,
         ]
@@ -636,13 +638,21 @@ router.put(
        SET games_won = $1, 
            games_lost = $2, 
            result = $3, 
-           match_score = $4
-       WHERE player_id = $5 AND opponent_id = $6`,
+           match_score = $4,
+           set_scores = $5
+       WHERE player_id = $6 AND opponent_id = $7`,
         [
           player1_games_lost,
           player1_games_won,
           player2Result,
           `${player1_games_lost}-${player1_games_won}`,
+          set_scores
+            ? JSON.stringify({
+                sets: set_scores.sets.map((s) =>
+                  s.split("-").reverse().join("-")
+                ),
+              })
+            : null,
           player2Id,
           player1Id,
         ]
