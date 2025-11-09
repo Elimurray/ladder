@@ -84,7 +84,7 @@ function Ladder() {
           style={{
             background: "white",
             color: "black",
-            padding: "1.5rem",
+            padding: "0.6rem",
             borderRadius: "8px",
             border: "2px solid rgb(226, 232, 240)",
             marginBottom: "2rem",
@@ -95,7 +95,7 @@ function Ladder() {
             Your Position
           </h2>
           <div
-            style={{ fontSize: "3rem", fontWeight: "bold", color: "#f97316" }}
+            style={{ fontSize: "1.8rem", fontWeight: "bold", color: "#f97316" }}
           >
             #{myPosition.position}
           </div>
