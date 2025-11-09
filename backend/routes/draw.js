@@ -35,24 +35,41 @@ router.get("/week/:date", async (req, res) => {
 });
 
 // Get current week's draw
+// Get current week's draw
 router.get("/current", async (req, res) => {
   try {
     // Get the most recent draw
     const result = await pool.query(`
-  SELECT 
-    d.*,
-    u1.full_name as player1_name,
-    u1.email as player1_email,
-    u1.play_for_levels as player1_levels,
-    u2.full_name as player2_name,
-    u2.email as player2_email,
-    u2.play_for_levels as player2_levels
-  FROM draws d
-  LEFT JOIN users u1 ON d.player1_id = u1.id
-  LEFT JOIN users u2 ON d.player2_id = u2.id
-  WHERE d.week_date = (SELECT MAX(week_date) FROM draws)
-  ORDER BY d.time_slot, d.player1_position
-`);
+      SELECT 
+        d.*,
+        u1.full_name as player1_name,
+        u1.email as player1_email,
+        u1.play_for_levels as player1_levels,
+        u2.full_name as player2_name,
+        u2.email as player2_email,
+        u2.play_for_levels as player2_levels
+      FROM draws d
+      LEFT JOIN users u1 ON d.player1_id = u1.id
+      LEFT JOIN users u2 ON d.player2_id = u2.id
+      WHERE d.week_date = (SELECT MAX(week_date) FROM draws)
+      ORDER BY d.time_slot, d.player1_position
+    `);
+
+    // Check which matches have been submitted
+    const drawIds = result.rows.map((d) => d.id);
+    if (drawIds.length > 0) {
+      const submissions = await pool.query(
+        `SELECT DISTINCT draw_id FROM matches WHERE draw_id = ANY($1)`,
+        [drawIds]
+      );
+
+      const submittedDrawIds = new Set(submissions.rows.map((s) => s.draw_id));
+
+      // Add submitted flag to each draw item
+      result.rows.forEach((draw) => {
+        draw.submitted = submittedDrawIds.has(draw.id);
+      });
+    }
 
     res.json(result.rows);
   } catch (err) {

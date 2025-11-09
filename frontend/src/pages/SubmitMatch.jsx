@@ -124,6 +124,23 @@ function SubmitMatch() {
                         )}
                       </div>
                     </div>
+                    {pairing.submitted && (
+                      <div
+                        style={{
+                          position: "absolute",
+                          top: "0.5rem",
+                          right: "0.5rem",
+                          backgroundColor: "#48bb78",
+                          color: "white",
+                          padding: "0.25rem 0.5rem",
+                          borderRadius: "0.25rem",
+                          fontSize: "0.75rem",
+                          fontWeight: "600",
+                        }}
+                      >
+                        ✓ Submitted
+                      </div>
+                    )}
                     <div
                       style={{
                         marginTop: "0.5rem",
