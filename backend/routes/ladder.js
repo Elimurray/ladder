@@ -157,6 +157,56 @@ router.delete("/withdraw", authMiddleware, async (req, res) => {
   }
 });
 
+// Admin: Withdraw a user from ladder
+router.delete(
+  "/withdraw/:userId",
+  authMiddleware,
+  adminMiddleware,
+  async (req, res) => {
+    const client = await pool.connect();
+
+    try {
+      await client.query("BEGIN");
+
+      const targetUserId = parseInt(req.params.userId);
+
+      // Get user's current position
+      const currentPos = await client.query(
+        "SELECT position FROM ladder_positions WHERE user_id = $1",
+        [targetUserId]
+      );
+
+      if (currentPos.rows.length === 0) {
+        await client.query("ROLLBACK");
+        return res.status(404).json({ error: "User is not on the ladder" });
+      }
+
+      const position = currentPos.rows[0].position;
+
+      // Delete user from ladder
+      await client.query("DELETE FROM ladder_positions WHERE user_id = $1", [
+        targetUserId,
+      ]);
+
+      // Move everyone below up one position
+      await client.query(
+        "UPDATE ladder_positions SET position = position - 1 WHERE position > $1",
+        [position]
+      );
+
+      await client.query("COMMIT");
+
+      res.json({ message: "Successfully withdrawn from ladder" });
+    } catch (err) {
+      await client.query("ROLLBACK");
+      console.error(err.message);
+      res.status(500).json({ error: "Server error" });
+    } finally {
+      client.release();
+    }
+  }
+);
+
 // Admin: Add new user to ladder at specific position
 router.post("/add", authMiddleware, adminMiddleware, async (req, res) => {
   try {
