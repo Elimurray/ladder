@@ -6,7 +6,15 @@ const { authMiddleware, adminMiddleware } = require("../middleware/auth");
 // Submit match result (authenticated users only)
 router.post("/submit", authMiddleware, async (req, res) => {
   try {
-    const { draw_id, opponent_id, games_won, games_lost, result, set_scores, player_id } = req.body; // Add player_id here
+    const {
+      draw_id,
+      opponent_id,
+      games_won,
+      games_lost,
+      result,
+      set_scores,
+      player_id,
+    } = req.body; // Add player_id here
 
     // Validate result
     const validResults = ["3", "2", "1", "0", "~", "D"];
@@ -31,10 +39,13 @@ router.post("/submit", authMiddleware, async (req, res) => {
     //   return res.status(403).json({ error: "You are not part of this match" });
     // }
 
-    // Check if result already submitted by EITHER player
+    // Check if result already submitted by EITHER player (check both by draw_id AND week_date)
     const existingResult = await pool.query(
-      "SELECT * FROM matches WHERE draw_id = $1 AND (player_id = $2 OR player_id = $3)",
-      [draw_id, player_id, opponent_id]
+      `SELECT * FROM matches 
+   WHERE week_date = $1 
+   AND ((player_id = $2 AND opponent_id = $3) 
+        OR (player_id = $3 AND opponent_id = $2))`,
+      [week_date, player_id, opponent_id]
     );
 
     if (existingResult.rows.length > 0) {
@@ -103,10 +114,10 @@ router.post("/submit", authMiddleware, async (req, res) => {
           opponentMatchScore,
           set_scores
             ? JSON.stringify({
-              sets: set_scores.sets.map((s) =>
-                s.split("-").reverse().join("-")
-              ),
-            })
+                sets: set_scores.sets.map((s) =>
+                  s.split("-").reverse().join("-")
+                ),
+              })
             : null, // Reverse scores for opponent
         ]
       );
