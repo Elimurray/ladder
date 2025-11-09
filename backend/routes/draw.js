@@ -46,10 +46,12 @@ router.get("/current", async (req, res) => {
         u1.play_for_levels as player1_levels,
         u2.full_name as player2_name,
         u2.email as player2_email,
-        u2.play_for_levels as player2_levels
+        u2.play_for_levels as player2_levels,
+        m.match_score
       FROM draws d
       LEFT JOIN users u1 ON d.player1_id = u1.id
       LEFT JOIN users u2 ON d.player2_id = u2.id
+      LEFT JOIN matches m ON m.draw_id = d.id AND m.player_id = d.player1_id
       WHERE d.week_date = (SELECT MAX(week_date) FROM draws)
       ORDER BY d.time_slot, d.player1_position
     `);

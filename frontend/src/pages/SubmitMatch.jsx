@@ -111,10 +111,11 @@ function SubmitMatch() {
                           borderRadius: "0.25rem",
                           fontSize: "0.75rem",
                           fontWeight: "600",
-                          zIndex: 10, // Add this to ensure it's on top
+                          zIndex: 10,
                         }}
                       >
                         ✓ Submitted
+                        {pairing.match_score ? `: ${pairing.match_score}` : ""}
                       </div>
                     )}
                     <div
