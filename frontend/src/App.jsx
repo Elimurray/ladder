@@ -1,4 +1,10 @@
-import { BrowserRouter as Router, Routes, Route, NavLink, useNavigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  NavLink,
+  useNavigate,
+} from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "./context/AuthContext";
 import Home from "./pages/Home";
@@ -41,7 +47,7 @@ function AppContent() {
     <div className="app">
       <nav className="navbar">
         <div className="nav-container">
-          <NavLink to="/" className="nav-logo" style={{ background: 'none' }}>
+          <NavLink to="/" className="nav-logo" style={{ background: "none" }}>
             <img src={logo} alt="Ladder Logo" className="nav-logo-img" />
           </NavLink>
 
@@ -130,6 +136,33 @@ function AppContent() {
           <Route path="/results" element={<Results />} />
         </Routes>
       </div>
+
+      {/* Footer */}
+      <footer
+        style={{
+          background: "#f7fafc",
+          borderTop: "2px solid #e2e8f0",
+          padding: "3rem 1rem",
+          marginTop: "4rem",
+          textAlign: "center",
+        }}
+      >
+        <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+          <p style={{ margin: "0.5rem 0", fontSize: "0.875rem" }}>
+            Franklin Squash Club Ladder System
+          </p>
+
+          <p style={{ margin: "0.5rem 0", fontSize: "0.75rem", opacity: 0.7 }}>
+            © {new Date().getFullYear()} Developed by Eli Murray |{" "}
+            <a
+              href="mailto:eli.murr04@gmail.com"
+              style={{ textDecoration: "underline" }}
+            >
+              eli.murr04@gmail.com
+            </a>
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
