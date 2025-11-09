@@ -1511,26 +1511,6 @@ function Admin() {
                                 >
                                   Edit Position
                                 </button>
-                                <button
-                                  onClick={() =>
-                                    handleWithdrawPlayer(
-                                      entry.user_id,
-                                      entry.full_name
-                                    )
-                                  }
-                                  style={{
-                                    padding: "0.5rem 1rem",
-                                    background: "#e53e3e",
-                                    color: "white",
-                                    border: "none",
-                                    borderRadius: "6px",
-                                    cursor: "pointer",
-                                    fontWeight: "600",
-                                    fontSize: "0.875rem",
-                                  }}
-                                >
-                                  Withdraw
-                                </button>
                               </div>
                             )}
                           </td>
@@ -1662,12 +1642,40 @@ function Admin() {
                           </button>
                         </div>
                       ) : (
-                        <button
-                          onClick={() => handleStartEdit(entry)}
-                          className="btn-edit"
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "0.5rem",
+                            justifyContent: "flex-end",
+                          }}
                         >
-                          Edit Position
-                        </button>
+                          <button
+                            onClick={() => handleStartEdit(entry)}
+                            className="btn-edit"
+                          >
+                            Edit Position
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleWithdrawPlayer(
+                                entry.user_id,
+                                entry.full_name
+                              )
+                            }
+                            style={{
+                              padding: "0.5rem 1rem",
+                              background: "#e53e3e",
+                              color: "white",
+                              border: "none",
+                              borderRadius: "6px",
+                              cursor: "pointer",
+                              fontWeight: "600",
+                              fontSize: "0.875rem",
+                            }}
+                          >
+                            Withdraw
+                          </button>
+                        </div>
                       )}
                     </td>
                   </tr>
