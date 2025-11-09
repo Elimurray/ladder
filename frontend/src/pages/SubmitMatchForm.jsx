@@ -200,7 +200,7 @@ function SubmitMatchForm() {
       !confirm(
         `Are you sure ${
           submittingFor === "player1" ? match.player1_name : match.player2_name
-        } defaulted?`
+        } won by default?`
       )
     )
       return;
@@ -215,11 +215,11 @@ function SubmitMatchForm() {
         draw_id: match.id,
         player_id: playerId,
         opponent_id: opponentId,
-        games_won: 0,
-        games_lost: 3,
-        result: "D",
+        games_won: 3, // Winner gets 3 games
+        games_lost: 0, // Winner loses 0 games
+        result: "3", // Winner gets result "3"
       });
-      setSuccess("Match marked as defaulted.");
+      setSuccess("Match marked as won by default.");
       setTimeout(() => navigate("/submit"), 2000);
     } catch (err) {
       setError(err.response?.data?.error || "Failed to submit");
@@ -558,7 +558,7 @@ function SubmitMatchForm() {
                       cursor: "pointer",
                     }}
                   >
-                    Defaulted (D)
+                    Won by default (D)
                   </button>
                 </div>
               </div>
