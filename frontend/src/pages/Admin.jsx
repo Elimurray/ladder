@@ -62,6 +62,9 @@ function Admin() {
   const [newMatchPlayer2, setNewMatchPlayer2] = useState("");
   const [newMatchTimeSlot, setNewMatchTimeSlot] = useState("");
 
+  const [editRescheduleNotes, setEditRescheduleNotes] = useState("");
+  const [newMatchRescheduleNotes, setNewMatchRescheduleNotes] = useState("");
+
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -78,6 +81,7 @@ function Admin() {
     "9:30pm",
     "10:00pm",
     "10:30pm",
+    "Reschedule",
   ];
 
   useEffect(() => {
@@ -231,6 +235,7 @@ function Admin() {
     setEditTimeSlot(pairing.time_slot || "");
     setEditBarDuty(pairing.bar_duty || "");
     setEditNotes(pairing.notes || "");
+    setEditRescheduleNotes(pairing.reschedule_notes || "");
   };
 
   const handleCancelEditDraw = () => {
@@ -238,6 +243,7 @@ function Admin() {
     setEditTimeSlot("");
     setEditBarDuty("");
     setEditNotes("");
+    setEditRescheduleNotes("");
   };
 
   const handleSaveDrawPairing = async (id) => {
@@ -246,12 +252,15 @@ function Admin() {
         time_slot: editTimeSlot,
         bar_duty: editBarDuty,
         notes: editNotes,
+        reschedule_notes:
+          editTimeSlot === "Reschedule" ? editRescheduleNotes : null,
       });
       showSuccess("Pairing updated successfully!");
       setEditingDrawId(null);
       setEditTimeSlot("");
       setEditBarDuty("");
       setEditNotes("");
+      setEditRescheduleNotes("");
       fetchData();
     } catch (err) {
       showError(err.response?.data?.error || "Failed to update pairing");
@@ -491,18 +500,26 @@ function Admin() {
       return;
     }
 
+    if (newMatchTimeSlot === "Reschedule" && !newMatchRescheduleNotes) {
+      showError("Please provide reschedule notes");
+      return;
+    }
+
     try {
       await drawAPI.createPairing({
         week_date: selectedDrawDate,
         player1_id: parseInt(newMatchPlayer1),
         player2_id: newMatchPlayer2 ? parseInt(newMatchPlayer2) : null,
         time_slot: newMatchTimeSlot || null,
+        reschedule_notes:
+          newMatchTimeSlot === "Reschedule" ? newMatchRescheduleNotes : null,
       });
       showSuccess("Match created successfully!");
       setShowCreateMatch(false);
       setNewMatchPlayer1("");
       setNewMatchPlayer2("");
       setNewMatchTimeSlot("");
+      setNewMatchRescheduleNotes("");
       fetchDrawByDate(selectedDrawDate);
     } catch (err) {
       showError(err.response?.data?.error || "Failed to create match");
@@ -1530,6 +1547,32 @@ function Admin() {
                           </option>
                         ))}
                       </select>
+                      {newMatchTimeSlot === "Reschedule" && (
+                        <div
+                          className="form-group"
+                          style={{ marginBottom: 0, gridColumn: "1 / -1" }}
+                        >
+                          <label>Reschedule Notes (required):</label>
+                          <textarea
+                            value={newMatchRescheduleNotes}
+                            onChange={(e) =>
+                              setNewMatchRescheduleNotes(e.target.value)
+                            }
+                            placeholder="e.g., Players will arrange time directly - contact John at 021 XXX XXXX"
+                            rows="2"
+                            style={{
+                              width: "100%",
+                              padding: "0.75rem",
+                              border: "2px solid #e2e8f0",
+                              borderRadius: "8px",
+                              fontSize: "1rem",
+                              fontFamily: "inherit",
+                              resize: "vertical",
+                            }}
+                            required
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -1764,26 +1807,67 @@ function Admin() {
                             </td>
                             <td>
                               {editingDrawId === pairing.id ? (
-                                <select
-                                  value={editTimeSlot}
-                                  onChange={(e) =>
-                                    setEditTimeSlot(e.target.value)
-                                  }
-                                  style={{ width: "100%", padding: "0.5rem" }}
-                                >
-                                  <option value="">-- Select Time --</option>
-                                  {timeSlots.map((slot) => (
-                                    <option key={slot} value={slot}>
-                                      {slot}
-                                    </option>
-                                  ))}
-                                </select>
+                                <>
+                                  <select
+                                    value={editTimeSlot}
+                                    onChange={(e) =>
+                                      setEditTimeSlot(e.target.value)
+                                    }
+                                    style={{
+                                      width: "100%",
+                                      padding: "0.5rem",
+                                      marginBottom: "0.5rem",
+                                    }}
+                                  >
+                                    <option value="">-- Select Time --</option>
+                                    {timeSlots.map((slot) => (
+                                      <option key={slot} value={slot}>
+                                        {slot}
+                                      </option>
+                                    ))}
+                                  </select>
+                                  {editTimeSlot === "Reschedule" && (
+                                    <textarea
+                                      value={editRescheduleNotes}
+                                      onChange={(e) =>
+                                        setEditRescheduleNotes(e.target.value)
+                                      }
+                                      placeholder="Reschedule details..."
+                                      rows="2"
+                                      style={{
+                                        width: "100%",
+                                        padding: "0.5rem",
+                                        border: "2px solid #e2e8f0",
+                                        borderRadius: "4px",
+                                        fontSize: "0.875rem",
+                                      }}
+                                    />
+                                  )}
+                                </>
                               ) : (
-                                pairing.time_slot || (
-                                  <span style={{ color: "#a0aec0" }}>
-                                    Not set
-                                  </span>
-                                )
+                                <>
+                                  {pairing.time_slot || (
+                                    <span style={{ color: "#a0aec0" }}>
+                                      Not set
+                                    </span>
+                                  )}
+                                  {pairing.time_slot === "Reschedule" &&
+                                    pairing.reschedule_notes && (
+                                      <div
+                                        style={{
+                                          marginTop: "0.5rem",
+                                          padding: "0.5rem",
+                                          background: "#fffbeb",
+                                          border: "1px solid #fde68a",
+                                          borderRadius: "4px",
+                                          fontSize: "0.75rem",
+                                          color: "#78350f",
+                                        }}
+                                      >
+                                        📅 {pairing.reschedule_notes}
+                                      </div>
+                                    )}
+                                </>
                               )}
                             </td>
                             <td>

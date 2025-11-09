@@ -316,11 +316,11 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
 router.patch("/:id", authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
-    const { time_slot, bar_duty, notes } = req.body;
+    const { time_slot, bar_duty, notes, reschedule_notes } = req.body;
 
     const result = await pool.query(
-      "UPDATE draws SET time_slot = $1, bar_duty = $2, notes = $3 WHERE id = $4 RETURNING *",
-      [time_slot, bar_duty, notes, id]
+      "UPDATE draws SET time_slot = $1, bar_duty = $2, notes = $3, reschedule_notes = $4 WHERE id = $5 RETURNING *",
+      [time_slot, bar_duty, notes, reschedule_notes, id]
     );
 
     if (result.rows.length === 0) {
@@ -397,7 +397,8 @@ router.delete("/:id", authMiddleware, adminMiddleware, async (req, res) => {
 // Admin: Create a new pairing
 router.post("/pairing", authMiddleware, adminMiddleware, async (req, res) => {
   try {
-    const { week_date, player1_id, player2_id, time_slot } = req.body;
+    const { week_date, player1_id, player2_id, time_slot, reschedule_notes } =
+      req.body;
 
     // Get player positions
     const player1Pos = await pool.query(
@@ -423,8 +424,8 @@ router.post("/pairing", authMiddleware, adminMiddleware, async (req, res) => {
     }
 
     const result = await pool.query(
-      `INSERT INTO draws (week_date, player1_id, player2_id, player1_position, player2_position, time_slot)
-       VALUES ($1, $2, $3, $4, $5, $6)
+      `INSERT INTO draws (week_date, player1_id, player2_id, player1_position, player2_position, time_slot, reschedule_notes)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING *`,
       [
         week_date,
@@ -433,6 +434,7 @@ router.post("/pairing", authMiddleware, adminMiddleware, async (req, res) => {
         player1Pos.rows[0].position,
         player2Position,
         time_slot,
+        reschedule_notes,
       ]
     );
 
