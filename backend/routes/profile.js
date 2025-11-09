@@ -35,7 +35,8 @@ router.get("/history", authMiddleware, async (req, res) => {
       `SELECT 
         m.*,
         u.full_name as opponent_name,
-        lh.position
+        lh.position,
+        TO_CHAR(m.week_date, 'YYYY-MM-DD') as week_date
        FROM matches m
        LEFT JOIN users u ON m.opponent_id = u.id
        LEFT JOIN ladder_history lh ON lh.user_id = m.player_id AND lh.week_date = m.week_date
