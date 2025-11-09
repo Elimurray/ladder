@@ -888,7 +888,8 @@ function Profile() {
                 <table>
                   <thead>
                     <tr>
-                      <th>Date</th>
+                      <th>Week</th>
+                      <th>Position</th>
                       <th>Opponent</th>
                       <th>Score</th>
                       <th>Result</th>
@@ -898,7 +899,33 @@ function Profile() {
                     {history.map((match) => (
                       <tr key={match.id}>
                         <td>
-                          {new Date(match.week_date).toLocaleDateString()}
+                          {match.week_date
+                            ? new Date(
+                                match.week_date + "T00:00:00"
+                              ).toLocaleDateString("en-NZ", {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                              })
+                            : "N/A"}
+                        </td>
+                        <td>
+                          {match.position ? (
+                            <span
+                              style={{
+                                padding: "0.25rem 0.5rem",
+                                background: "#e2e8f0",
+                                borderRadius: "4px",
+                                fontSize: "0.875rem",
+                                fontWeight: "600",
+                                color: "#4a5568",
+                              }}
+                            >
+                              #{match.position}
+                            </span>
+                          ) : (
+                            <span style={{ color: "#a0aec0" }}>-</span>
+                          )}
                         </td>
                         <td>{match.opponent_name || "BYE"}</td>
                         <td>{match.match_score}</td>

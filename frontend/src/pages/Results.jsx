@@ -237,7 +237,7 @@ function Results() {
                         </div>
                       </td>
                       <td style={{ textAlign: "center" }}>
-                        {match.player1_levels || match.player2_levels ? (
+                        {match.player1_levels && match.player2_levels ? (
                           <span
                             style={{
                               padding: "0.25rem 0.75rem",

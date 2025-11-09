@@ -35,13 +35,12 @@ router.get("/history", authMiddleware, async (req, res) => {
       `SELECT 
         m.*,
         u.full_name as opponent_name,
-        d.week_date,
-        d.time_slot
+        lh.position
        FROM matches m
        LEFT JOIN users u ON m.opponent_id = u.id
-       LEFT JOIN draws d ON m.draw_id = d.id
+       LEFT JOIN ladder_history lh ON lh.user_id = m.player_id AND lh.week_date = m.week_date
        WHERE m.player_id = $1 AND m.admin_approved = true
-       ORDER BY d.week_date DESC
+       ORDER BY m.week_date DESC
        LIMIT 20`,
       [req.user.id]
     );
