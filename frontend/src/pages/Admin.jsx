@@ -418,6 +418,24 @@ function Admin() {
     }
   };
 
+  const handleWithdrawPlayer = async (userId, playerName) => {
+    if (
+      !confirm(
+        `Are you sure you want to withdraw ${playerName} from the ladder? This will remove them completely and move everyone below up one position.`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      await ladderAPI.removeFromLadder(userId);
+      showSuccess(`${playerName} has been withdrawn from the ladder`);
+      fetchData();
+    } catch (err) {
+      showError(err.response?.data?.error || "Failed to withdraw player");
+    }
+  };
+
   // Get users not on ladder
   const usersOnLadder = new Set(ladder.map((l) => l.user_id));
   const availableUsers = users.filter((u) => !usersOnLadder.has(u.id));
@@ -1464,30 +1482,56 @@ function Admin() {
                             )}
                           </td>
                           <td className="admin-actions">
-                            {editingDrawId === pairing.id ? (
+                            {editingId === entry.id ? (
                               <div className="admin-edit-buttons">
                                 <button
-                                  onClick={() =>
-                                    handleSaveDrawPairing(pairing.id)
-                                  }
+                                  onClick={() => handleSavePosition(entry.id)}
                                   className="btn-save"
                                 >
                                   Save
                                 </button>
                                 <button
-                                  onClick={handleCancelEditDraw}
+                                  onClick={handleCancelEdit}
                                   className="btn-cancel"
                                 >
                                   Cancel
                                 </button>
                               </div>
                             ) : (
-                              <button
-                                onClick={() => handleStartEditDraw(pairing)}
-                                className="btn-edit"
+                              <div
+                                style={{
+                                  display: "flex",
+                                  gap: "0.5rem",
+                                  justifyContent: "flex-end",
+                                }}
                               >
-                                Edit
-                              </button>
+                                <button
+                                  onClick={() => handleStartEdit(entry)}
+                                  className="btn-edit"
+                                >
+                                  Edit Position
+                                </button>
+                                <button
+                                  onClick={() =>
+                                    handleWithdrawPlayer(
+                                      entry.user_id,
+                                      entry.full_name
+                                    )
+                                  }
+                                  style={{
+                                    padding: "0.5rem 1rem",
+                                    background: "#e53e3e",
+                                    color: "white",
+                                    border: "none",
+                                    borderRadius: "6px",
+                                    cursor: "pointer",
+                                    fontWeight: "600",
+                                    fontSize: "0.875rem",
+                                  }}
+                                >
+                                  Withdraw
+                                </button>
+                              </div>
                             )}
                           </td>
                         </tr>

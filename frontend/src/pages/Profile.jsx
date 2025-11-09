@@ -681,8 +681,7 @@ function Profile() {
                 onClick={() => setShowPasswordForm(true)}
                 style={{
                   padding: "0.75rem 1.5rem",
-                  background:
-                    "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                  background: "rgb(66, 153, 225)",
                   color: "white",
                   border: "none",
                   borderRadius: "8px",

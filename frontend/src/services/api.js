@@ -38,6 +38,7 @@ export const ladderAPI = {
   getUserPosition: (userId) => api.get(`/ladder/user/${userId}`),
   updateStatus: (status) => api.patch("/ladder/status", { status }),
   withdrawFromLadder: () => api.delete("/ladder/withdraw"),
+  removeFromLadder: (userId) => api.delete(`/ladder/withdraw/${userId}`), // Add this line
   addToLadder: (user_id, position) =>
     api.post("/ladder/add", { user_id, position }),
   updatePosition: (id, position) => api.put(`/ladder/${id}`, { position }),
