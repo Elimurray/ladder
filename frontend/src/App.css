@@ -1009,8 +1009,9 @@ td:first-child {
 
 .results-table th,
 .results-table td {
-  padding: 1rem;
+  padding: 0.7rem;
   text-align: left;
+  font-size: 16px;
 }
 
 /* .results-table th {

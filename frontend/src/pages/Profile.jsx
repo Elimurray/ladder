@@ -17,6 +17,8 @@ function Profile() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
+  const [editIsJunior, setEditIsJunior] = useState(false);
+
   const [isEditingContact, setIsEditingContact] = useState(false);
   const [editEmail, setEditEmail] = useState("");
   const [editPhone, setEditPhone] = useState("");
@@ -75,6 +77,7 @@ function Profile() {
       setEarliestTime(response.data.earliest_time || "");
       setNotes(response.data.notes || "");
       setLoading(false);
+      setEditIsJunior(response.data.is_junior || false);
     } catch (err) {
       setError("Failed to load profile");
       setLoading(false);
@@ -198,6 +201,7 @@ function Profile() {
       await profileAPI.updateContact({
         email: editEmail,
         phone_number: editPhone,
+        is_junior: editIsJunior,
       });
       setSuccess("Contact information updated successfully!");
       setTimeout(() => setSuccess(null), 3000);
@@ -342,6 +346,29 @@ function Profile() {
                   {profile.squash_grade || "Not set"}
                 </div>
               </div>
+              <div>
+                <div style={{ fontSize: "0.875rem", opacity: 0.8 }}>Junior</div>
+                {isEditingContact ? (
+                  <select
+                    value={editIsJunior}
+                    onChange={(e) => setEditIsJunior(e.target.value === "true")}
+                    style={{
+                      fontWeight: "bold",
+                      padding: "0.5rem",
+                      border: "2px solid #e2e8f0",
+                      borderRadius: "4px",
+                      width: "100%",
+                    }}
+                  >
+                    <option value="false">No</option>
+                    <option value="true">Yes</option>
+                  </select>
+                ) : (
+                  <div style={{ fontWeight: "bold" }}>
+                    {profile.is_junior ? "Yes" : "No"}
+                  </div>
+                )}
+              </div>
             </div>
             <div style={{ marginTop: "1.5rem", display: "flex", gap: "1rem" }}>
               {!isEditingContact ? (
@@ -380,6 +407,7 @@ function Profile() {
                       setIsEditingContact(false);
                       setEditEmail(profile.email);
                       setEditPhone(profile.phone_number || "");
+                      setEditIsJunior(profile.is_junior || false);
                     }}
                     style={{
                       padding: "0.75rem 1.5rem",
