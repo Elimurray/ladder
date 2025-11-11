@@ -215,9 +215,10 @@ function SubmitMatchForm() {
         draw_id: match.id,
         player_id: playerId,
         opponent_id: opponentId,
-        games_won: 3, // Winner gets 3 games
-        games_lost: 0, // Winner loses 0 games
-        result: "3", // Winner gets result "3"
+        games_won: 3,
+        games_lost: 0,
+        result: "3",
+        set_scores: { sets: ["Won by default"] },
       });
       setSuccess("Match marked as won by default.");
       setTimeout(() => navigate("/submit"), 2000);

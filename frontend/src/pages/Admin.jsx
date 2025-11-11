@@ -752,6 +752,8 @@ function Admin() {
                 <option value="C">C Grade</option>
                 <option value="D">D Grade</option>
                 <option value="E">E Grade</option>
+                <option value="F">F Grade</option>
+                <option value="J">J Grade</option>
               </select>
             </div>
 
