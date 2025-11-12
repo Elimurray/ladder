@@ -168,7 +168,9 @@ function Ladder() {
                   </td>
                 )}
 
-                <td>{getStatusBadge(entry.status)}</td>
+                <td style={{ textAlign: "center" }}>
+                  {getStatusBadge(entry.status)}
+                </td>
                 {/* <td>{entry.is_member ? "✓" : "✗"}</td> */}
               </tr>
             ))}
