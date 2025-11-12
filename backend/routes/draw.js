@@ -95,6 +95,73 @@ router.get("/current", async (req, res) => {
   }
 });
 
+// ADMIN: Get all draws including unpublished
+router.get("/admin/all", authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        d.*,
+        u1.full_name as player1_name,
+        u1.email as player1_email,
+        u1.play_for_levels as player1_levels,
+        u2.full_name as player2_name,
+        u2.email as player2_email,
+        u2.play_for_levels as player2_levels
+      FROM draws d
+      LEFT JOIN users u1 ON d.player1_id = u1.id
+      LEFT JOIN users u2 ON d.player2_id = u2.id
+      ORDER BY d.week_date DESC, d.time_slot, d.player1_position
+    `);
+
+    // Get unique week dates
+    const uniqueDates = [...new Set(result.rows.map((d) => d.week_date))];
+
+    res.json({
+      draws: result.rows,
+      weeks: uniqueDates,
+    });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// ADMIN: Get draw for specific week (including unpublished)
+router.get(
+  "/admin/week/:date",
+  authMiddleware,
+  adminMiddleware,
+  async (req, res) => {
+    try {
+      const { date } = req.params;
+
+      const result = await pool.query(
+        `
+      SELECT 
+        d.*,
+        u1.full_name as player1_name,
+        u1.email as player1_email,
+        u1.play_for_levels as player1_levels,
+        u2.full_name as player2_name,
+        u2.email as player2_email,
+        u2.play_for_levels as player2_levels
+      FROM draws d
+      LEFT JOIN users u1 ON d.player1_id = u1.id
+      LEFT JOIN users u2 ON d.player2_id = u2.id
+      WHERE d.week_date = $1
+      ORDER BY d.time_slot, d.player1_position
+    `,
+        [date]
+      );
+
+      res.json(result.rows);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ error: "Server error" });
+    }
+  }
+);
+
 // Admin: Generate draw for a week
 router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
   const client = await pool.connect();

@@ -123,14 +123,11 @@ function Admin() {
         setUserPreferences([]);
       }
 
-      // Fetch all available draws
+      // Fetch all available draws using ADMIN route
       try {
-        const allDrawsRes = await drawAPI.getCurrentDraw();
-        if (allDrawsRes.data.length > 0) {
-          // Get unique week dates from draws
-          const uniqueDates = [
-            ...new Set(allDrawsRes.data.map((d) => d.week_date)),
-          ];
+        const allDrawsRes = await drawAPI.getAllDrawsAdmin();
+        if (allDrawsRes.data.weeks.length > 0) {
+          const uniqueDates = allDrawsRes.data.weeks;
           setAvailableDraws(
             uniqueDates.sort((a, b) => new Date(b) - new Date(a))
           );
