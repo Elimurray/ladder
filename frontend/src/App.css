@@ -1194,6 +1194,7 @@ td:first-child {
 
   .vs {
     transform: rotate(90deg);
+    font-size: 0.8rem;
   }
 
   .results-table {

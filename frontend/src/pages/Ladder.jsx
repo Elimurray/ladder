@@ -112,6 +112,7 @@ function Ladder() {
               <th>Rank</th>
               <th>Name</th>
               {user && <th>Phone</th>}
+              {user && <th>Levels</th>}
               <th>Status</th>
             </tr>
           </thead>
@@ -142,6 +143,27 @@ function Ladder() {
                   {user && entry.user_id === user.id && " (You)"}
                 </td>
                 {user && <td>{entry.phone_number || "Not provided"}</td>}
+                {user && entry.play_for_levels && (
+                  <td>
+                    <span
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+                        color: "white",
+                        padding: "0.25rem 0.75rem",
+                        borderRadius: "20px",
+                        fontSize: "0.7rem",
+                        fontWeight: "bold",
+                        boxShadow: "0 2px 8px rgba(245, 158, 11, 0.3)",
+                        whiteSpace: "nowrap",
+                        display: "inline-block",
+                      }}
+                    >
+                      🏆 LEVELS
+                    </span>
+                  </td>
+                )}
+
                 <td>{getStatusBadge(entry.status)}</td>
                 {/* <td>{entry.is_member ? "✓" : "✗"}</td> */}
               </tr>

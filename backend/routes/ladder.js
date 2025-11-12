@@ -15,6 +15,7 @@ router.get("/", async (req, res) => {
     u.full_name,
     u.phone_number,
     u.is_member,
+    u.play_for_levels,
     lp.updated_at
   FROM ladder_positions lp
   JOIN users u ON lp.user_id = u.id
