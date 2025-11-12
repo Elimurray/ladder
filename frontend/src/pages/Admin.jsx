@@ -1433,8 +1433,8 @@ function Admin() {
                     }}
                   >
                     {currentDraw[0]?.is_published
-                      ? "📝 Unpublish Draw"
-                      : " Publish Draw"}
+                      ? "Unpublish Draw"
+                      : "Publish Draw"}
                   </button>
                   <button
                     onClick={() => setShowCreateMatch(!showCreateMatch)}
