@@ -113,7 +113,7 @@ function Ladder() {
               <th>Name</th>
               {user && <th>Phone</th>}
               {user && user.is_admin && <th>Levels</th>}
-              <th>Status (Next draw)</th>
+              <th style={{ textAlign: "center" }}>Status (Next draw)</th>
             </tr>
           </thead>
           <tbody>
