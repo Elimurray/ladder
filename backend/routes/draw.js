@@ -427,18 +427,16 @@ router.post("/pairing", authMiddleware, adminMiddleware, async (req, res) => {
       player2Position = player2Pos.rows[0].position;
     }
 
-    const result = await pool.query(
-      `INSERT INTO draws (week_date, player1_id, player2_id, player1_position, player2_position, time_slot, reschedule_notes)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
-       RETURNING *`,
+    await client.query(
+      "INSERT INTO draws (week_date, player1_id, player2_id, player1_position, player2_position, time_slot, is_published) VALUES ($1, $2, $3, $4, $5, $6, $7)",
       [
         week_date,
-        player1_id,
-        player2_id,
-        player1Pos.rows[0].position,
-        player2Position,
-        time_slot,
-        reschedule_notes,
+        pairing.player1_id,
+        pairing.player2_id,
+        pairing.player1_position,
+        pairing.player2_position,
+        pairing.time_slot,
+        false,
       ]
     );
 
