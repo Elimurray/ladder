@@ -95,7 +95,7 @@ function Admin() {
 
   const fetchDrawByDate = async (date) => {
     try {
-      const drawRes = await drawAPI.getWeekDraw(date);
+      const drawRes = await drawAPI.getWeekDrawAdmin(date);
       setCurrentDraw(drawRes.data);
     } catch (err) {
       setCurrentDraw([]);
