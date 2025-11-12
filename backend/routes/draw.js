@@ -95,6 +95,22 @@ AND d.is_published = TRUE
   }
 });
 
+// ADMIN: Get all draws (including unpublished) for dropdown
+router.get("/admin/all", authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT DISTINCT week_date, is_published
+      FROM draws
+      ORDER BY week_date DESC
+    `);
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 // Admin: Generate draw for a week
 router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
   const client = await pool.connect();
@@ -280,7 +296,7 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
     for (const slot of timeSlots) {
       for (const pairing of timeSlotAssignments[slot]) {
         await client.query(
-          "INSERT INTO draws (week_date, player1_id, player2_id, player1_position, player2_position, time_slot) VALUES ($1, $2, $3, $4, $5, $6)",
+          "INSERT INTO draws (week_date, player1_id, player2_id, player1_position, player2_position, time_slot, is_published) VALUES ($1, $2, $3, $4, $5, $6, $7)",
           [
             week_date,
             pairing.player1_id,

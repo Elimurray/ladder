@@ -94,10 +94,13 @@ function Admin() {
   }, [user, navigate]);
 
   const fetchDrawByDate = async (date) => {
+    console.log("Fetching draw for date:", date); // ADD THIS
     try {
       const drawRes = await drawAPI.getWeekDrawAdmin(date);
+      console.log("Draw response:", drawRes.data); // ADD THIS
       setCurrentDraw(drawRes.data);
     } catch (err) {
+      console.error("Error fetching draw by date:", err); // ADD THIS
       setCurrentDraw([]);
     }
   };
@@ -125,15 +128,13 @@ function Admin() {
 
       // Fetch all available draws
       try {
-        const allDrawsRes = await drawAPI.getCurrentDraw();
+        const allDrawsRes = await drawAPI.getAllDrawsAdmin(); // CHANGE THIS LINE
+        console.log("All draws response:", allDrawsRes.data);
         if (allDrawsRes.data.length > 0) {
           // Get unique week dates from draws
-          const uniqueDates = [
-            ...new Set(allDrawsRes.data.map((d) => d.week_date)),
-          ];
-          setAvailableDraws(
-            uniqueDates.sort((a, b) => new Date(b) - new Date(a))
-          );
+          const uniqueDates = allDrawsRes.data.map((d) => d.week_date);
+          console.log("Unique dates:", uniqueDates);
+          setAvailableDraws(uniqueDates);
 
           // Auto-select most recent if none selected
           if (!selectedDrawDate && uniqueDates.length > 0) {
@@ -144,6 +145,7 @@ function Admin() {
           }
         }
       } catch (err) {
+        console.error("Error fetching draws:", err);
         setCurrentDraw([]);
         setAvailableDraws([]);
       }

@@ -46,6 +46,7 @@ export const ladderAPI = {
 
 export const drawAPI = {
   getCurrentDraw: () => api.get("/draw/current"),
+  getAllDrawsAdmin: () => api.get("/draw/admin/all"),
   getWeekDraw: (date) => api.get(`/draw/week/${date}`),
   getWeekDrawAdmin: (date) => api.get(`/draw/admin/week/${date}`),
   generateDraw: (week_date) => api.post("/draw/generate", { week_date }),
