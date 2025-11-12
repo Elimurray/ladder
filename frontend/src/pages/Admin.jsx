@@ -127,20 +127,18 @@ function Admin() {
       try {
         const allDrawsRes = await drawAPI.getAllDrawsAdmin();
         if (allDrawsRes.data.weeks.length > 0) {
-          const uniqueDates = allDrawsRes.data.weeks;
-          setAvailableDraws(
-            uniqueDates.sort((a, b) => new Date(b) - new Date(a))
-          );
+          setAvailableDraws(allDrawsRes.data.weeks); // Already sorted by the backend
 
           // Auto-select most recent if none selected
-          if (!selectedDrawDate && uniqueDates.length > 0) {
-            setSelectedDrawDate(uniqueDates[0]);
-            fetchDrawByDate(uniqueDates[0]);
+          if (!selectedDrawDate && allDrawsRes.data.weeks.length > 0) {
+            setSelectedDrawDate(allDrawsRes.data.weeks[0].week_date);
+            fetchDrawByDate(allDrawsRes.data.weeks[0].week_date);
           } else if (selectedDrawDate) {
             fetchDrawByDate(selectedDrawDate);
           }
         }
       } catch (err) {
+        console.error("Failed to load draws:", err);
         setCurrentDraw([]);
         setAvailableDraws([]);
       }
@@ -1399,20 +1397,51 @@ function Admin() {
                 </select>
               </div>
 
-              {selectedDrawDate && (
+              {selectedDrawDate && currentDraw.length > 0 && (
                 <>
+                  {/* Show publish status */}
+                  <div
+                    style={{
+                      marginBottom: "1rem",
+                      padding: "0.75rem",
+                      background: availableDraws.find(
+                        (d) => d.week_date === selectedDrawDate
+                      )?.is_published
+                        ? "#d4edda"
+                        : "#fff3cd",
+                      border: `2px solid ${
+                        availableDraws.find(
+                          (d) => d.week_date === selectedDrawDate
+                        )?.is_published
+                          ? "#28a745"
+                          : "#ffc107"
+                      }`,
+                      borderRadius: "8px",
+                      fontWeight: "600",
+                      textAlign: "center",
+                    }}
+                  >
+                    {availableDraws.find(
+                      (d) => d.week_date === selectedDrawDate
+                    )?.is_published
+                      ? "✅ This draw is PUBLISHED and visible to all users"
+                      : "📝 This draw is DRAFT - only admins can see it"}
+                  </div>
+
                   <button
                     onClick={async () => {
                       try {
-                        const draw = currentDraw[0];
-                        if (draw.is_published) {
+                        const isPublished = availableDraws.find(
+                          (d) => d.week_date === selectedDrawDate
+                        )?.is_published;
+                        if (isPublished) {
                           await drawAPI.unpublishDraw(selectedDrawDate);
                           showSuccess("Draw unpublished - hidden from users");
                         } else {
                           await drawAPI.publishDraw(selectedDrawDate);
                           showSuccess("Draw published - now visible to users!");
                         }
-                        fetchDrawByDate(selectedDrawDate);
+                        fetchData(); // Refresh everything including the availableDraws
                       } catch (err) {
                         showError(
                           err.response?.data?.error || "Failed to update draw"
@@ -1420,7 +1449,9 @@ function Admin() {
                       }
                     }}
                     style={{
-                      background: currentDraw[0]?.is_published
+                      background: availableDraws.find(
+                        (d) => d.week_date === selectedDrawDate
+                      )?.is_published
                         ? "#ed8936"
                         : "#48bb78",
                       color: "white",
@@ -1432,9 +1463,11 @@ function Admin() {
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {currentDraw[0]?.is_published
-                      ? "Unpublish Draw"
-                      : "Publish Draw"}
+                    {availableDraws.find(
+                      (d) => d.week_date === selectedDrawDate
+                    )?.is_published
+                      ? "📝 Unpublish Draw"
+                      : "✅ Publish Draw"}
                   </button>
                   <button
                     onClick={() => setShowCreateMatch(!showCreateMatch)}

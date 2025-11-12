@@ -135,27 +135,19 @@ router.get("/current", async (req, res) => {
 // ADMIN: Get all draws including unpublished
 router.get("/admin/all", authMiddleware, adminMiddleware, async (req, res) => {
   try {
+    // Get unique week dates with published status
     const result = await pool.query(`
-      SELECT 
-        d.*,
-        u1.full_name as player1_name,
-        u1.email as player1_email,
-        u1.play_for_levels as player1_levels,
-        u2.full_name as player2_name,
-        u2.email as player2_email,
-        u2.play_for_levels as player2_levels
-      FROM draws d
-      LEFT JOIN users u1 ON d.player1_id = u1.id
-      LEFT JOIN users u2 ON d.player2_id = u2.id
-      ORDER BY d.week_date DESC, d.time_slot, d.player1_position
+      SELECT DISTINCT
+        week_date,
+        MAX(CASE WHEN is_published = TRUE THEN 1 ELSE 0 END) > 0 as is_published,
+        COUNT(*) as pairing_count
+      FROM draws
+      GROUP BY week_date
+      ORDER BY week_date DESC
     `);
 
-    // Get unique week dates
-    const uniqueDates = [...new Set(result.rows.map((d) => d.week_date))];
-
     res.json({
-      draws: result.rows,
-      weeks: uniqueDates,
+      weeks: result.rows,
     });
   } catch (err) {
     console.error(err.message);
