@@ -75,11 +75,6 @@ function AppContent() {
                 Draw
               </NavLink>
             </li>
-            <li>
-              <NavLink to="/results" onClick={closeMenu}>
-                Results
-              </NavLink>
-            </li>
             {user && (
               <li>
                 <NavLink to="/submit" onClick={closeMenu}>
@@ -87,6 +82,12 @@ function AppContent() {
                 </NavLink>
               </li>
             )}
+            <li>
+              <NavLink to="/results" onClick={closeMenu}>
+                Results
+              </NavLink>
+            </li>
+
             {user && (
               <li>
                 <NavLink to="/profile" onClick={closeMenu}>
