@@ -112,8 +112,8 @@ function Ladder() {
               <th>Rank</th>
               <th>Name</th>
               {user && <th>Phone</th>}
-              {user && <th>Levels</th>}
-              <th>Status</th>
+              {user && user.is_admin && <th>Levels</th>}
+              <th>Status (Next draw)</th>
             </tr>
           </thead>
           <tbody>
@@ -143,7 +143,7 @@ function Ladder() {
                   {user && entry.user_id === user.id && " (You)"}
                 </td>
                 {user && <td>{entry.phone_number || "Not provided"}</td>}
-                {user && (
+                {user && user.is_admin && (
                   <td>
                     {entry.play_for_levels ? (
                       <span
