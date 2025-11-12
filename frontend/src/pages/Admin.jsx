@@ -1402,6 +1402,46 @@ function Admin() {
                 </select>
               </div>
 
+              {selectedDrawDate && currentDraw.length > 0 && (
+                <button
+                  onClick={async () => {
+                    try {
+                      // Check if draw is currently published by looking at first pairing
+                      const isPublished = currentDraw[0]?.is_published;
+
+                      if (isPublished) {
+                        await drawAPI.unpublishDraw(selectedDrawDate);
+                        showSuccess("Draw unpublished - hidden from users");
+                      } else {
+                        await drawAPI.publishDraw(selectedDrawDate);
+                        showSuccess("Draw published - now visible to users!");
+                      }
+                      fetchDrawByDate(selectedDrawDate);
+                    } catch (err) {
+                      showError(
+                        err.response?.data?.error || "Failed to update draw"
+                      );
+                    }
+                  }}
+                  style={{
+                    background: currentDraw[0]?.is_published
+                      ? "#ed8936"
+                      : "#48bb78",
+                    color: "white",
+                    padding: "0.75rem 1.5rem",
+                    border: "none",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                    fontWeight: "600",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {currentDraw[0]?.is_published
+                    ? "Unpublish Draw"
+                    : "Publish Draw"}
+                </button>
+              )}
+
               {selectedDrawDate && (
                 <>
                   <button
