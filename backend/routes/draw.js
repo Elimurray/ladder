@@ -52,7 +52,8 @@ router.get("/current", async (req, res) => {
       LEFT JOIN users u1 ON d.player1_id = u1.id
       LEFT JOIN users u2 ON d.player2_id = u2.id
       LEFT JOIN matches m ON m.draw_id = d.id AND m.player_id = d.player1_id
-      WHERE d.week_date = (SELECT MAX(week_date) FROM draws)
+      WHERE d.week_date = (SELECT MAX(week_date) FROM draws WHERE is_published = TRUE)
+      AND d.is_published = TRUE
       ORDER BY d.time_slot, d.player1_position
     `);
 
@@ -279,7 +280,7 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
     for (const slot of timeSlots) {
       for (const pairing of timeSlotAssignments[slot]) {
         await client.query(
-          "INSERT INTO draws (week_date, player1_id, player2_id, player1_position, player2_position, time_slot) VALUES ($1, $2, $3, $4, $5, $6)",
+          "INSERT INTO draws (week_date, player1_id, player2_id, player1_position, player2_position, time_slot, is_published) VALUES ($1, $2, $3, $4, $5, $6, $7)",
           [
             week_date,
             pairing.player1_id,
@@ -287,6 +288,7 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
             pairing.player1_position,
             pairing.player2_position,
             pairing.time_slot,
+            false,
           ]
         );
       }
@@ -446,5 +448,63 @@ router.post("/pairing", authMiddleware, adminMiddleware, async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
+
+// Admin: Publish a draw (make it visible to users)
+router.patch(
+  "/week/:date/publish",
+  authMiddleware,
+  adminMiddleware,
+  async (req, res) => {
+    try {
+      const { date } = req.params;
+
+      const result = await pool.query(
+        "UPDATE draws SET is_published = TRUE WHERE week_date = $1 RETURNING *",
+        [date]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: "Draw not found" });
+      }
+
+      res.json({
+        message: "Draw published successfully",
+        published: result.rows.length,
+      });
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ error: "Server error" });
+    }
+  }
+);
+
+// Admin: Unpublish a draw
+router.patch(
+  "/week/:date/unpublish",
+  authMiddleware,
+  adminMiddleware,
+  async (req, res) => {
+    try {
+      const { date } = req.params;
+
+      const result = await pool.query(
+        "UPDATE draws SET is_published = FALSE WHERE week_date = $1 RETURNING *",
+        [date]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: "Draw not found" });
+      }
+
+      res.json({
+        message: "Draw unpublished successfully",
+        unpublished: result.rows.length,
+      });
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ error: "Server error" });
+    }
+  }
+);
 
 module.exports = router;

@@ -52,6 +52,8 @@ export const drawAPI = {
   deleteDraw: (date) => api.delete(`/draw/week/${date}`),
   deletePairing: (pairingId) => api.delete(`/draw/${pairingId}`),
   createPairing: (data) => api.post("/draw/pairing", data),
+  publishDraw: (date) => api.patch(`/draw/week/${date}/publish`),
+  unpublishDraw: (date) => api.patch(`/draw/week/${date}/unpublish`),
 };
 
 export const matchesAPI = {
