@@ -137,7 +137,34 @@ function SubmitMatch() {
                         </span>
                       </div>
 
-                      <span className="vs">VS</span>
+                      {/* SQUASH LEVELS BADGE HERE */}
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          gap: "0.5rem",
+                        }}
+                      >
+                        {pairing.player1_levels && pairing.player2_levels && (
+                          <div
+                            style={{
+                              background:
+                                "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+                              color: "white",
+                              padding: "0.25rem 0.75rem",
+                              borderRadius: "20px",
+                              fontSize: "0.7rem",
+                              fontWeight: "bold",
+                              boxShadow: "0 2px 8px rgba(245, 158, 11, 0.3)",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            🏆 LEVELS
+                          </div>
+                        )}
+                        <span className="vs">VS</span>
+                      </div>
 
                       <div className="player">
                         {pairing.player2_id ? (
