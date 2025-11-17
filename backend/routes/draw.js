@@ -327,57 +327,86 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
       }
     }
 
-    // 3. Assign everyone else randomly to valid slots after their earliest time
+    // 3. Assign everyone else to 6:00pm+ slots (fill early slots to max, randomly selected)
     const availableSlots = timeSlots.filter((slot) => slot !== "5:30pm");
 
-    for (const pairing of shuffledRegular) {
-      let assigned = false;
+    // Group regular pairings by their earliest valid slot
+    const regularByEarliestSlot = {};
+    availableSlots.forEach((slot) => (regularByEarliestSlot[slot] = []));
 
-      // Determine earliest possible slot for this pairing
+    for (const pairing of shuffledRegular) {
       const earliestTime = Math.max(
         timeToMinutes(pairing.player1_earliest || "5:30pm"),
         timeToMinutes(pairing.player2_earliest || "5:30pm")
       );
 
-      // Filter slots that are valid (after earliest time) AND have space
-      const validSlotsWithSpace = availableSlots.filter(
-        (slot) =>
-          timeToMinutes(slot) >= earliestTime &&
-          timeSlotAssignments[slot].length < 4
+      // Find first valid slot for this pairing
+      const firstValidSlot = availableSlots.find(
+        (slot) => timeToMinutes(slot) >= earliestTime
       );
-
-      if (validSlotsWithSpace.length > 0) {
-        // Randomly pick one of the valid slots with space
-        const randomSlot =
-          validSlotsWithSpace[
-            Math.floor(Math.random() * validSlotsWithSpace.length)
-          ];
-        timeSlotAssignments[randomSlot].push({
-          ...pairing,
-          time_slot: randomSlot,
-        });
-        assigned = true;
+      if (firstValidSlot) {
+        regularByEarliestSlot[firstValidSlot].push(pairing);
       }
+    }
 
-      if (!assigned) {
-        // Fallback: find ANY slot after their earliest time
-        const validSlots = availableSlots.filter(
-          (slot) => timeToMinutes(slot) >= earliestTime
-        );
+    // Calculate how many slots to max out
+    const totalRegularPairings = shuffledRegular.length;
+    const fullSlots = Math.floor(totalRegularPairings / 4);
+    const remainder = totalRegularPairings % 4;
 
-        for (const slot of validSlots) {
-          timeSlotAssignments[slot].push({ ...pairing, time_slot: slot });
-          assigned = true;
-          break;
+    console.log(
+      `Regular pairings: ${totalRegularPairings}, Full slots: ${fullSlots}, Remainder: ${remainder}`
+    );
+
+    // Assign regular pairings slot by slot, randomly selecting from available
+    for (let i = 0; i < availableSlots.length; i++) {
+      const slot = availableSlots[i];
+      const slotTime = timeToMinutes(slot);
+
+      // Collect all pairings that CAN go in this slot or later
+      const availablePairings = [];
+      for (const checkSlot of availableSlots) {
+        if (timeToMinutes(checkSlot) >= slotTime) {
+          availablePairings.push(...regularByEarliestSlot[checkSlot]);
         }
       }
 
-      if (!assigned) {
-        // Last resort
-        timeSlotAssignments[availableSlots[availableSlots.length - 1]].push({
-          ...pairing,
-          time_slot: availableSlots[availableSlots.length - 1],
-        });
+      if (availablePairings.length === 0) continue;
+
+      // Determine how many to assign to this slot
+      let targetCount;
+      if (i < fullSlots) {
+        targetCount = 4; // Max out early slots
+      } else if (i === fullSlots) {
+        targetCount = remainder; // Partial fill for the last slot with matches
+      } else {
+        targetCount = 0; // Don't fill later slots
+      }
+
+      // Randomly shuffle and take the target count
+      const shuffledAvailable = shuffleArray(availablePairings);
+      const toAssign = shuffledAvailable.slice(
+        0,
+        Math.min(targetCount, shuffledAvailable.length)
+      );
+
+      for (const pairing of toAssign) {
+        timeSlotAssignments[slot].push({ ...pairing, time_slot: slot });
+
+        // Remove from the earliest slot list
+        const earliestTime = Math.max(
+          timeToMinutes(pairing.player1_earliest || "5:30pm"),
+          timeToMinutes(pairing.player2_earliest || "5:30pm")
+        );
+        const firstValidSlot = availableSlots.find(
+          (s) => timeToMinutes(s) >= earliestTime
+        );
+        if (firstValidSlot) {
+          const index = regularByEarliestSlot[firstValidSlot].indexOf(pairing);
+          if (index > -1) {
+            regularByEarliestSlot[firstValidSlot].splice(index, 1);
+          }
+        }
       }
     }
 
