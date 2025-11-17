@@ -268,6 +268,7 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
 
     // 1. Assign juniors to slots before 7:30pm (randomly)
     const juniorSlots = ["5:30pm", "6:00pm", "6:30pm", "7:00pm"];
+
     for (const pairing of shuffledJuniors) {
       let assigned = false;
 
@@ -277,12 +278,17 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
         timeToMinutes(pairing.player2_earliest || "5:30pm")
       );
 
-      // Try to find available junior slot that respects their earliest time
-      for (const slot of juniorSlots) {
-        const slotTime = timeToMinutes(slot);
+      // Filter valid junior slots
+      const validJuniorSlots = juniorSlots.filter(
+        (slot) => timeToMinutes(slot) >= earliestTime
+      );
 
-        // Check if slot is after their earliest time AND has space
-        if (slotTime >= earliestTime && timeSlotAssignments[slot].length < 4) {
+      // Shuffle them
+      const shuffledValidJuniorSlots = shuffleArray(validJuniorSlots);
+
+      // Try to find available junior slot in random order
+      for (const slot of shuffledValidJuniorSlots) {
+        if (timeSlotAssignments[slot].length < 4) {
           timeSlotAssignments[slot].push({ ...pairing, time_slot: slot });
           assigned = true;
           break;
@@ -291,9 +297,12 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
 
       if (!assigned) {
         console.warn(
-          "Could not fit junior pairing, assigning to 5:30pm anyway"
+          "Could not fit junior pairing, assigning to first valid slot"
         );
-        timeSlotAssignments["5:30pm"].push({ ...pairing, time_slot: "5:30pm" });
+        timeSlotAssignments[validJuniorSlots[0]].push({
+          ...pairing,
+          time_slot: validJuniorSlots[0],
+        });
       }
     }
 
@@ -313,18 +322,23 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
     for (const pairing of shuffledRegular) {
       let assigned = false;
 
-      // Determine earliest possible slot for this pairing (latest of the two players)
+      // Determine earliest possible slot for this pairing
       const earliestTime = Math.max(
         timeToMinutes(pairing.player1_earliest || "5:30pm"),
         timeToMinutes(pairing.player2_earliest || "5:30pm")
       );
 
-      // Try to fill earliest available slot that's AFTER their preference
-      for (const slot of availableSlots) {
-        const slotTime = timeToMinutes(slot);
+      // Filter slots that are valid for this pairing (after earliest time)
+      const validSlots = availableSlots.filter(
+        (slot) => timeToMinutes(slot) >= earliestTime
+      );
 
-        // Check if slot is after their earliest time AND has space
-        if (slotTime >= earliestTime && timeSlotAssignments[slot].length < 4) {
+      // Shuffle the valid slots to randomize assignment
+      const shuffledValidSlots = shuffleArray(validSlots);
+
+      // Try slots in random order
+      for (const slot of shuffledValidSlots) {
+        if (timeSlotAssignments[slot].length < 4) {
           timeSlotAssignments[slot].push({ ...pairing, time_slot: slot });
           assigned = true;
           break;
@@ -332,23 +346,12 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
       }
 
       if (!assigned) {
-        // Fallback: find ANY slot after their earliest time
-        for (const slot of availableSlots) {
-          const slotTime = timeToMinutes(slot);
-          if (slotTime >= earliestTime) {
-            timeSlotAssignments[slot].push({ ...pairing, time_slot: slot });
-            assigned = true;
-            break;
-          }
+        // Fallback: add to any valid slot
+        for (const slot of validSlots) {
+          timeSlotAssignments[slot].push({ ...pairing, time_slot: slot });
+          assigned = true;
+          break;
         }
-      }
-
-      if (!assigned) {
-        // Last resort: add to last slot (should never happen)
-        timeSlotAssignments[availableSlots[availableSlots.length - 1]].push({
-          ...pairing,
-          time_slot: availableSlots[availableSlots.length - 1],
-        });
       }
     }
 
