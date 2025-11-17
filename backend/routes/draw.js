@@ -349,19 +349,18 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
       }
     }
 
-    // Calculate how many slots to max out
-    const totalRegularPairings = shuffledRegular.length;
-    const fullSlots = Math.floor(totalRegularPairings / 4);
-    const remainder = totalRegularPairings % 4;
-
-    console.log(
-      `Regular pairings: ${totalRegularPairings}, Full slots: ${fullSlots}, Remainder: ${remainder}`
-    );
+    console.log(`Regular pairings to assign: ${shuffledRegular.length}`);
 
     // Assign regular pairings slot by slot, randomly selecting from available
     for (let i = 0; i < availableSlots.length; i++) {
       const slot = availableSlots[i];
       const slotTime = timeToMinutes(slot);
+
+      // Check how much space is left in this slot (accounting for juniors/5:30 already placed)
+      const currentSlotCount = timeSlotAssignments[slot].length;
+      const spaceLeft = 4 - currentSlotCount;
+
+      if (spaceLeft <= 0) continue; // Slot is full, skip it
 
       // Collect all pairings that CAN go in this slot or later
       const availablePairings = [];
@@ -373,21 +372,11 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
 
       if (availablePairings.length === 0) continue;
 
-      // Determine how many to assign to this slot
-      let targetCount;
-      if (i < fullSlots) {
-        targetCount = 4; // Max out early slots
-      } else if (i === fullSlots) {
-        targetCount = remainder; // Partial fill for the last slot with matches
-      } else {
-        targetCount = 0; // Don't fill later slots
-      }
-
-      // Randomly shuffle and take the target count
+      // Take up to the space left in this slot
       const shuffledAvailable = shuffleArray(availablePairings);
       const toAssign = shuffledAvailable.slice(
         0,
-        Math.min(targetCount, shuffledAvailable.length)
+        Math.min(spaceLeft, shuffledAvailable.length)
       );
 
       for (const pairing of toAssign) {
