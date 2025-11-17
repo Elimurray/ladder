@@ -283,10 +283,10 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
         (slot) => timeToMinutes(slot) >= earliestTime
       );
 
-      // Shuffle them
+      // Shuffle valid slots for random assignment
       const shuffledValidJuniorSlots = shuffleArray(validJuniorSlots);
 
-      // Try to find available junior slot in random order
+      // Try slots in random order
       for (const slot of shuffledValidJuniorSlots) {
         if (timeSlotAssignments[slot].length < 4) {
           timeSlotAssignments[slot].push({ ...pairing, time_slot: slot });
@@ -296,8 +296,19 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
       }
 
       if (!assigned) {
+        // Fallback: add to first valid slot
+        for (const slot of validJuniorSlots) {
+          if (timeSlotAssignments[slot].length < 4) {
+            timeSlotAssignments[slot].push({ ...pairing, time_slot: slot });
+            assigned = true;
+            break;
+          }
+        }
+      }
+
+      if (!assigned) {
         console.warn(
-          "Could not fit junior pairing, assigning to first valid slot"
+          "Could not fit junior pairing, forcing into first valid slot"
         );
         timeSlotAssignments[validJuniorSlots[0]].push({
           ...pairing,
@@ -306,7 +317,7 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
       }
     }
 
-    // 2. Assign 5:30pm preferences to 5:30pm slot (max 4)
+    // 2. Assign 5:30pm preferences to 5:30pm slot (max 4, randomly selected)
     for (const pairing of shuffled530) {
       if (timeSlotAssignments["5:30pm"].length < 4) {
         timeSlotAssignments["5:30pm"].push({ ...pairing, time_slot: "5:30pm" });
@@ -316,7 +327,7 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
       }
     }
 
-    // 3. Assign everyone else to 6:00pm+ slots, respecting earliest time preferences
+    // 3. Assign everyone else randomly to valid slots after their earliest time
     const availableSlots = timeSlots.filter((slot) => slot !== "5:30pm");
 
     for (const pairing of shuffledRegular) {
@@ -328,17 +339,33 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
         timeToMinutes(pairing.player2_earliest || "5:30pm")
       );
 
-      // Filter slots that are valid for this pairing (after earliest time)
-      const validSlots = availableSlots.filter(
-        (slot) => timeToMinutes(slot) >= earliestTime
+      // Filter slots that are valid (after earliest time) AND have space
+      const validSlotsWithSpace = availableSlots.filter(
+        (slot) =>
+          timeToMinutes(slot) >= earliestTime &&
+          timeSlotAssignments[slot].length < 4
       );
 
-      // Shuffle the valid slots to randomize assignment
-      const shuffledValidSlots = shuffleArray(validSlots);
+      if (validSlotsWithSpace.length > 0) {
+        // Randomly pick one of the valid slots with space
+        const randomSlot =
+          validSlotsWithSpace[
+            Math.floor(Math.random() * validSlotsWithSpace.length)
+          ];
+        timeSlotAssignments[randomSlot].push({
+          ...pairing,
+          time_slot: randomSlot,
+        });
+        assigned = true;
+      }
 
-      // Try slots in random order
-      for (const slot of shuffledValidSlots) {
-        if (timeSlotAssignments[slot].length < 4) {
+      if (!assigned) {
+        // Fallback: find ANY slot after their earliest time
+        const validSlots = availableSlots.filter(
+          (slot) => timeToMinutes(slot) >= earliestTime
+        );
+
+        for (const slot of validSlots) {
           timeSlotAssignments[slot].push({ ...pairing, time_slot: slot });
           assigned = true;
           break;
@@ -346,12 +373,11 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
       }
 
       if (!assigned) {
-        // Fallback: add to any valid slot
-        for (const slot of validSlots) {
-          timeSlotAssignments[slot].push({ ...pairing, time_slot: slot });
-          assigned = true;
-          break;
-        }
+        // Last resort
+        timeSlotAssignments[availableSlots[availableSlots.length - 1]].push({
+          ...pairing,
+          time_slot: availableSlots[availableSlots.length - 1],
+        });
       }
     }
 
