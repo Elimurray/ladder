@@ -298,17 +298,17 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
 
     // 3. Assign everyone else randomly to 6:00pm+ slots
     const availableSlots = timeSlots.filter((slot) => slot !== "5:30pm");
-    let slotIndex = 0;
 
     for (const pairing of shuffledRegular) {
       let assigned = false;
 
-      // Try to find next available slot (round-robin style for even distribution)
-      for (let i = 0; i < availableSlots.length; i++) {
-        const slot = availableSlots[(slotIndex + i) % availableSlots.length];
+      // ✅ NEW: Shuffle available slots for this pairing to get random order
+      const randomizedSlots = shuffleArray([...availableSlots]);
+
+      // ✅ NEW: Try slots in random order
+      for (const slot of randomizedSlots) {
         if (timeSlotAssignments[slot].length < 4) {
           timeSlotAssignments[slot].push({ ...pairing, time_slot: slot });
-          slotIndex = (slotIndex + i + 1) % availableSlots.length;
           assigned = true;
           break;
         }
