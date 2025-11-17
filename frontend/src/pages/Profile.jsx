@@ -32,17 +32,7 @@ function Profile() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const timeSlots = [
-    "5:30pm",
-    "6:00pm",
-    "6:30pm",
-    "7:00pm",
-    "7:30pm",
-    "8:00pm",
-    "8:30pm",
-    "9:00pm",
-    "9:30pm",
-  ];
+  const timeSlots = ["5:30pm", "6:00pm", "6:30pm", "7:00pm", "7:30pm"];
 
   const getNextMonday = () => {
     const today = new Date();
@@ -853,7 +843,6 @@ function Profile() {
                   value={earliestTime}
                   onChange={(e) => setEarliestTime(e.target.value)}
                 >
-                  <option value="">Any time</option>
                   {(profile.is_junior
                     ? timeSlots.filter((t) => {
                         // Only show times before 7:30pm for juniors
