@@ -327,76 +327,62 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
       }
     }
 
-    // 3. Assign everyone else to 6:00pm+ slots (fill early slots to max, randomly selected)
+    // 3. Assign everyone else to 6:00pm+ slots (fill slots sequentially, random selection)
     const availableSlots = timeSlots.filter((slot) => slot !== "5:30pm");
 
-    // Group regular pairings by their earliest valid slot
-    const regularByEarliestSlot = {};
-    availableSlots.forEach((slot) => (regularByEarliestSlot[slot] = []));
+    // Create a pool of unassigned regular pairings
+    let unassignedPairings = [...shuffledRegular];
 
-    for (const pairing of shuffledRegular) {
-      const earliestTime = Math.max(
-        timeToMinutes(pairing.player1_earliest || "5:30pm"),
-        timeToMinutes(pairing.player2_earliest || "5:30pm")
-      );
+    console.log(`Regular pairings to assign: ${unassignedPairings.length}`);
 
-      // Find first valid slot for this pairing
-      const firstValidSlot = availableSlots.find(
-        (slot) => timeToMinutes(slot) >= earliestTime
-      );
-      if (firstValidSlot) {
-        regularByEarliestSlot[firstValidSlot].push(pairing);
-      }
-    }
-
-    console.log(`Regular pairings to assign: ${shuffledRegular.length}`);
-
-    // Assign regular pairings slot by slot, randomly selecting from available
-    for (let i = 0; i < availableSlots.length; i++) {
-      const slot = availableSlots[i];
+    // Go through each slot and fill it up to max 4
+    for (const slot of availableSlots) {
       const slotTime = timeToMinutes(slot);
 
-      // Check how much space is left in this slot (accounting for juniors/5:30 already placed)
+      // Check how much space is left in this slot
       const currentSlotCount = timeSlotAssignments[slot].length;
       const spaceLeft = 4 - currentSlotCount;
 
       if (spaceLeft <= 0) continue; // Slot is full, skip it
 
-      // Collect all pairings that CAN go in this slot or later
-      const availablePairings = [];
-      for (const checkSlot of availableSlots) {
-        if (timeToMinutes(checkSlot) >= slotTime) {
-          availablePairings.push(...regularByEarliestSlot[checkSlot]);
-        }
-      }
-
-      if (availablePairings.length === 0) continue;
-
-      // Take up to the space left in this slot
-      const shuffledAvailable = shuffleArray(availablePairings);
-      const toAssign = shuffledAvailable.slice(
-        0,
-        Math.min(spaceLeft, shuffledAvailable.length)
-      );
-
-      for (const pairing of toAssign) {
-        timeSlotAssignments[slot].push({ ...pairing, time_slot: slot });
-
-        // Remove from the earliest slot list
+      // Filter pairings that are eligible for this slot (their earliest time has passed)
+      const eligiblePairings = unassignedPairings.filter((pairing) => {
         const earliestTime = Math.max(
           timeToMinutes(pairing.player1_earliest || "5:30pm"),
           timeToMinutes(pairing.player2_earliest || "5:30pm")
         );
-        const firstValidSlot = availableSlots.find(
-          (s) => timeToMinutes(s) >= earliestTime
-        );
-        if (firstValidSlot) {
-          const index = regularByEarliestSlot[firstValidSlot].indexOf(pairing);
-          if (index > -1) {
-            regularByEarliestSlot[firstValidSlot].splice(index, 1);
-          }
+        return slotTime >= earliestTime;
+      });
+
+      if (eligiblePairings.length === 0) continue;
+
+      // Randomly shuffle eligible pairings and take up to spaceLeft
+      const shuffledEligible = shuffleArray(eligiblePairings);
+      const toAssign = shuffledEligible.slice(
+        0,
+        Math.min(spaceLeft, shuffledEligible.length)
+      );
+
+      // Assign them to this slot
+      for (const pairing of toAssign) {
+        timeSlotAssignments[slot].push({ ...pairing, time_slot: slot });
+
+        // Remove from unassigned pool
+        const index = unassignedPairings.indexOf(pairing);
+        if (index > -1) {
+          unassignedPairings.splice(index, 1);
         }
       }
+
+      // Stop if we've assigned everyone
+      if (unassignedPairings.length === 0) break;
+    }
+
+    // Log any unassigned pairings (shouldn't happen)
+    if (unassignedPairings.length > 0) {
+      console.warn(
+        `Warning: ${unassignedPairings.length} pairings could not be assigned!`
+      );
     }
 
     console.log(
