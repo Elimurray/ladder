@@ -212,7 +212,17 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
     const timeSlotAssignments = {};
     timeSlots.forEach((slot) => (timeSlotAssignments[slot] = []));
 
-    // Helper function to convert time to 24hr for comparison
+    // Helper function to shuffle array
+    const shuffleArray = (array) => {
+      const shuffled = [...array];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled;
+    };
+
+    // Helper function to convert time to minutes
     const timeToMinutes = (timeStr) => {
       if (!timeStr) return 0;
       const match = timeStr.match(/(\d+):(\d+)(am|pm)/);
@@ -225,54 +235,88 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
       return hours * 60 + minutes;
     };
 
-    // Sort pairings by constraints (juniors first, then by earliest time)
-    pairings.sort((a, b) => {
-      // Juniors first
-      const aHasJunior = a.player1_junior || a.player2_junior;
-      const bHasJunior = b.player1_junior || b.player2_junior;
-      if (aHasJunior && !bHasJunior) return -1;
-      if (!aHasJunior && bHasJunior) return 1;
+    // Separate pairings into categories
+    const juniorPairings = [];
+    const fiveThirtyPairings = [];
+    const regularPairings = [];
 
-      // Then by earliest time constraint
-      const aEarliest = Math.max(
-        timeToMinutes(a.player1_earliest || "5:30pm"),
-        timeToMinutes(a.player2_earliest || "5:30pm")
-      );
-      const bEarliest = Math.max(
-        timeToMinutes(b.player1_earliest || "5:30pm"),
-        timeToMinutes(b.player2_earliest || "5:30pm")
-      );
-      return aEarliest - bEarliest;
-    });
-
-    // Assign pairings to time slots
     for (const pairing of pairings) {
-      let assigned = false;
       const hasJunior = pairing.player1_junior || pairing.player2_junior;
+      const wants530 =
+        pairing.player1_earliest === "5:30pm" ||
+        pairing.player2_earliest === "5:30pm";
 
-      // Determine earliest possible slot for this pairing
-      const earliestTime = Math.max(
-        timeToMinutes(pairing.player1_earliest || "5:30pm"),
-        timeToMinutes(pairing.player2_earliest || "5:30pm")
-      );
+      if (hasJunior) {
+        juniorPairings.push(pairing);
+      } else if (wants530) {
+        fiveThirtyPairings.push(pairing);
+      } else {
+        regularPairings.push(pairing);
+      }
+    }
 
-      for (const slot of timeSlots) {
-        const slotTime = timeToMinutes(slot);
+    // Shuffle all categories
+    const shuffledJuniors = shuffleArray(juniorPairings);
+    const shuffled530 = shuffleArray(fiveThirtyPairings);
+    const shuffledRegular = shuffleArray(regularPairings);
 
-        // Check constraints
-        if (slotTime < earliestTime) continue; // Too early for their preference
-        if (hasJunior && slotTime >= timeToMinutes("7:30pm")) continue; // Junior constraint
-        if (timeSlotAssignments[slot].length >= 4) continue; // Slot full
+    console.log("Junior pairings:", shuffledJuniors.length);
+    console.log("5:30pm preference pairings:", shuffled530.length);
+    console.log("Regular pairings:", shuffledRegular.length);
 
-        // Assign to this slot
-        timeSlotAssignments[slot].push({ ...pairing, time_slot: slot });
-        assigned = true;
-        break;
+    // 1. Assign juniors to slots before 7:30pm (randomly)
+    const juniorSlots = ["5:30pm", "6:00pm", "6:30pm", "7:00pm"];
+    for (const pairing of shuffledJuniors) {
+      let assigned = false;
+
+      // Try to find available junior slot
+      for (const slot of juniorSlots) {
+        if (timeSlotAssignments[slot].length < 4) {
+          timeSlotAssignments[slot].push({ ...pairing, time_slot: slot });
+          assigned = true;
+          break;
+        }
       }
 
       if (!assigned) {
-        // Fallback: put in first available slot with space (ignoring preferences)
-        for (const slot of timeSlots) {
+        console.warn(
+          "Could not fit junior pairing, assigning to 5:30pm anyway"
+        );
+        timeSlotAssignments["5:30pm"].push({ ...pairing, time_slot: "5:30pm" });
+      }
+    }
+
+    // 2. Assign 5:30pm preferences to 5:30pm slot (max 4)
+    for (const pairing of shuffled530) {
+      if (timeSlotAssignments["5:30pm"].length < 4) {
+        timeSlotAssignments["5:30pm"].push({ ...pairing, time_slot: "5:30pm" });
+      } else {
+        // If 5:30 is full, treat as regular pairing
+        shuffledRegular.push(pairing);
+      }
+    }
+
+    // 3. Assign everyone else randomly to 6:00pm+ slots
+    const availableSlots = timeSlots.filter((slot) => slot !== "5:30pm");
+    let slotIndex = 0;
+
+    for (const pairing of shuffledRegular) {
+      let assigned = false;
+
+      // Try to find next available slot (round-robin style for even distribution)
+      for (let i = 0; i < availableSlots.length; i++) {
+        const slot = availableSlots[(slotIndex + i) % availableSlots.length];
+        if (timeSlotAssignments[slot].length < 4) {
+          timeSlotAssignments[slot].push({ ...pairing, time_slot: slot });
+          slotIndex = (slotIndex + i + 1) % availableSlots.length;
+          assigned = true;
+          break;
+        }
+      }
+
+      if (!assigned) {
+        // Fallback: just add to first slot with space
+        for (const slot of availableSlots) {
           if (timeSlotAssignments[slot].length < 4) {
             timeSlotAssignments[slot].push({ ...pairing, time_slot: slot });
             assigned = true;
@@ -282,15 +326,19 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
       }
 
       if (!assigned) {
-        // Still couldn't assign - this shouldn't happen unless >36 pairings
-        timeSlotAssignments[timeSlots[0]].push({
+        // Last resort: add to any slot
+        timeSlotAssignments[availableSlots[0]].push({
           ...pairing,
-          time_slot: timeSlots[0],
+          time_slot: availableSlots[0],
         });
       }
     }
 
-    console.log("Creating", pairings.length, "pairings with auto time slots");
+    console.log(
+      "Creating",
+      pairings.length,
+      "pairings with randomized time slots"
+    );
 
     // Insert draws with assigned time slots
     for (const slot of timeSlots) {
