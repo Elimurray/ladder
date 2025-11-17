@@ -242,13 +242,16 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
 
     for (const pairing of pairings) {
       const hasJunior = pairing.player1_junior || pairing.player2_junior;
-      const wants530 =
-        pairing.player1_earliest === "5:30pm" ||
+
+      // ✅ BOTH players must want 5:30pm
+      const bothWant530 =
+        pairing.player1_earliest === "5:30pm" &&
         pairing.player2_earliest === "5:30pm";
 
       if (hasJunior) {
         juniorPairings.push(pairing);
-      } else if (wants530) {
+      } else if (bothWant530) {
+        // Changed from wants530 to bothWant530
         fiveThirtyPairings.push(pairing);
       } else {
         regularPairings.push(pairing);
