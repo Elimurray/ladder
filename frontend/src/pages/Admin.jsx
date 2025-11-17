@@ -364,13 +364,9 @@ function Admin() {
     try {
       await drawAPI.deleteDraw(selectedDrawDate);
       showSuccess("Draw deleted successfully!");
+
       setSelectedDrawDate("");
       setCurrentDraw([]);
-
-      // Refresh page after short delay
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
     } catch (err) {
       showError(err.response?.data?.error || "Failed to delete draw");
     }
