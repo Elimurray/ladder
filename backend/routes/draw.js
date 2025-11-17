@@ -243,7 +243,7 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
     for (const pairing of pairings) {
       const hasJunior = pairing.player1_junior || pairing.player2_junior;
 
-      // ✅ BOTH players must want 5:30pm
+      // BOTH players must want 5:30pm to be eligible for that slot
       const bothWant530 =
         pairing.player1_earliest === "5:30pm" &&
         pairing.player2_earliest === "5:30pm";
@@ -251,7 +251,6 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
       if (hasJunior) {
         juniorPairings.push(pairing);
       } else if (bothWant530) {
-        // Changed from wants530 to bothWant530
         fiveThirtyPairings.push(pairing);
       } else {
         regularPairings.push(pairing);
@@ -272,9 +271,18 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
     for (const pairing of shuffledJuniors) {
       let assigned = false;
 
-      // Try to find available junior slot
+      // Determine earliest possible slot for this junior pairing
+      const earliestTime = Math.max(
+        timeToMinutes(pairing.player1_earliest || "5:30pm"),
+        timeToMinutes(pairing.player2_earliest || "5:30pm")
+      );
+
+      // Try to find available junior slot that respects their earliest time
       for (const slot of juniorSlots) {
-        if (timeSlotAssignments[slot].length < 4) {
+        const slotTime = timeToMinutes(slot);
+
+        // Check if slot is after their earliest time AND has space
+        if (slotTime >= earliestTime && timeSlotAssignments[slot].length < 4) {
           timeSlotAssignments[slot].push({ ...pairing, time_slot: slot });
           assigned = true;
           break;
@@ -299,15 +307,24 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
       }
     }
 
-    // 3. Assign everyone else to 6:00pm+ slots (fill earlier slots first)
+    // 3. Assign everyone else to 6:00pm+ slots, respecting earliest time preferences
     const availableSlots = timeSlots.filter((slot) => slot !== "5:30pm");
 
     for (const pairing of shuffledRegular) {
       let assigned = false;
 
-      // Try to fill earliest available slot
+      // Determine earliest possible slot for this pairing (latest of the two players)
+      const earliestTime = Math.max(
+        timeToMinutes(pairing.player1_earliest || "5:30pm"),
+        timeToMinutes(pairing.player2_earliest || "5:30pm")
+      );
+
+      // Try to fill earliest available slot that's AFTER their preference
       for (const slot of availableSlots) {
-        if (timeSlotAssignments[slot].length < 4) {
+        const slotTime = timeToMinutes(slot);
+
+        // Check if slot is after their earliest time AND has space
+        if (slotTime >= earliestTime && timeSlotAssignments[slot].length < 4) {
           timeSlotAssignments[slot].push({ ...pairing, time_slot: slot });
           assigned = true;
           break;
@@ -315,10 +332,22 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
       }
 
       if (!assigned) {
-        // Last resort: add to any slot
-        timeSlotAssignments[availableSlots[0]].push({
+        // Fallback: find ANY slot after their earliest time
+        for (const slot of availableSlots) {
+          const slotTime = timeToMinutes(slot);
+          if (slotTime >= earliestTime) {
+            timeSlotAssignments[slot].push({ ...pairing, time_slot: slot });
+            assigned = true;
+            break;
+          }
+        }
+      }
+
+      if (!assigned) {
+        // Last resort: add to last slot (should never happen)
+        timeSlotAssignments[availableSlots[availableSlots.length - 1]].push({
           ...pairing,
-          time_slot: availableSlots[0],
+          time_slot: availableSlots[availableSlots.length - 1],
         });
       }
     }
