@@ -236,8 +236,8 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
     };
 
     // Separate pairings into categories
-    const juniorPairings = [];
-    const fiveThirtyPairings = [];
+    const fiveThirtyPairings = []; // Juniors OR adults with BOTH wanting 5:30pm
+    const juniorPairings = []; // Juniors who DON'T both want 5:30pm
     const regularPairings = [];
 
     for (const pairing of pairings) {
@@ -248,25 +248,45 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
         pairing.player1_earliest === "5:30pm" &&
         pairing.player2_earliest === "5:30pm";
 
-      if (hasJunior) {
-        juniorPairings.push(pairing);
-      } else if (bothWant530) {
+      if (bothWant530) {
+        // Anyone (junior or adult) who both want 5:30pm goes here
         fiveThirtyPairings.push(pairing);
+      } else if (hasJunior) {
+        // Juniors who don't both want 5:30pm
+        juniorPairings.push(pairing);
       } else {
         regularPairings.push(pairing);
       }
     }
 
     // Shuffle all categories
-    const shuffledJuniors = shuffleArray(juniorPairings);
     const shuffled530 = shuffleArray(fiveThirtyPairings);
+    const shuffledJuniors = shuffleArray(juniorPairings);
     const shuffledRegular = shuffleArray(regularPairings);
 
-    console.log("Junior pairings:", shuffledJuniors.length);
-    console.log("5:30pm preference pairings:", shuffled530.length);
+    console.log(
+      "5:30pm preference pairings (including juniors):",
+      shuffled530.length
+    );
+    console.log("Junior pairings (not 5:30pm):", shuffledJuniors.length);
     console.log("Regular pairings:", shuffledRegular.length);
 
-    // 1. Assign juniors to slots before 7:30pm (randomly)
+    // 1. Assign 5:30pm preferences to 5:30pm slot FIRST (max 4, randomly selected)
+    for (const pairing of shuffled530) {
+      if (timeSlotAssignments["5:30pm"].length < 4) {
+        timeSlotAssignments["5:30pm"].push({ ...pairing, time_slot: "5:30pm" });
+      } else {
+        // If 5:30 is full, treat juniors as junior pairings, adults as regular
+        const hasJunior = pairing.player1_junior || pairing.player2_junior;
+        if (hasJunior) {
+          shuffledJuniors.push(pairing);
+        } else {
+          shuffledRegular.push(pairing);
+        }
+      }
+    }
+
+    // 2. Assign juniors to slots before 7:30pm (randomly)
     const juniorSlots = ["5:30pm", "6:00pm", "6:30pm", "7:00pm"];
 
     for (const pairing of shuffledJuniors) {
@@ -314,16 +334,6 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
           ...pairing,
           time_slot: validJuniorSlots[0],
         });
-      }
-    }
-
-    // 2. Assign 5:30pm preferences to 5:30pm slot (max 4, randomly selected)
-    for (const pairing of shuffled530) {
-      if (timeSlotAssignments["5:30pm"].length < 4) {
-        timeSlotAssignments["5:30pm"].push({ ...pairing, time_slot: "5:30pm" });
-      } else {
-        // If 5:30 is full, treat as regular pairing
-        shuffledRegular.push(pairing);
       }
     }
 
