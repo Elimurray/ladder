@@ -101,6 +101,7 @@ function Draw() {
             borderRadius: "8px",
             marginBottom: "2rem",
             textAlign: "center",
+            color: "black",
           }}
         >
           <h2 style={{ margin: 0, fontSize: "1.25rem" }}>

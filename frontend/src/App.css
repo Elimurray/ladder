@@ -584,6 +584,7 @@ td:first-child {
   border-radius: 8px;
   font-size: 1.25rem;
   margin-bottom: 1rem;
+  color: black;
 }
 
 .draw-matches {
@@ -1054,7 +1055,7 @@ td:first-child {
     width: 70%;
     max-width: 300px;
     height: 100vh;
-    background: linear-gradient(135deg, #fd720d 0%, #9c5c0e 100%);
+    background: #f5f7fa;
     flex-direction: column;
     gap: 0;
     padding: 5rem 0 2rem;
@@ -1076,11 +1077,11 @@ td:first-child {
     width: 100%;
     padding: 1rem 2rem;
     border-radius: 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(41, 37, 37, 0.726);
     font-size: 1.1rem;
     text-align: left;
     background: none;
-    color: white;
+    color: black;
     text-decoration: none;
     font-weight: 500;
   }
@@ -1188,12 +1189,10 @@ td:first-child {
   }
 
   .match-players {
-    flex-direction: column;
     gap: 0.5rem;
   }
 
   .vs {
-    transform: rotate(90deg);
     font-size: 0.8rem;
   }
 
