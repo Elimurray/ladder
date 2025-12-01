@@ -2,6 +2,7 @@ import axios from "axios";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || "http://100.115.180.68:5000";
+// import.meta.env.VITE_API_URL || "http://localhost:5005";
 
 const api = axios.create({
   baseURL: `${API_BASE_URL}/api`,
@@ -38,7 +39,10 @@ export const ladderAPI = {
   getUserPosition: (userId) => api.get(`/ladder/user/${userId}`),
   updateStatus: (status) => api.patch("/ladder/status", { status }),
   withdrawFromLadder: () => api.delete("/ladder/withdraw"),
-  removeFromLadder: (userId) => api.delete(`/ladder/withdraw/${userId}`), // Add this line
+  removeFromLadder: (userId) => api.delete(`/ladder/withdraw/${userId}`),
+  updatePlayerStatus: (userId, status) =>
+    api.patch(`/ladder/status/${userId}`, { status }),
+
   addToLadder: (user_id, position) =>
     api.post("/ladder/add", { user_id, position }),
   updatePosition: (id, position) => api.put(`/ladder/${id}`, { position }),

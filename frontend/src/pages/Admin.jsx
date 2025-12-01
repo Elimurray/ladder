@@ -469,6 +469,44 @@ function Admin() {
     }
   };
 
+
+
+  const handleUpdatePlayerStatus = async (userId, playerName, status) => {
+    let confirmMessage = "";
+
+    switch (status) {
+      case "active":
+        confirmMessage = `Set ${playerName} as active?`;
+        break;
+      case "no_play":
+        confirmMessage = `Are you sure you want to set ${playerName} to no play?`;
+        break;
+      case "withdrawn":
+        confirmMessage = `Are you sure you want to withdraw ${playerName} from the ladder? This will remove them completely and move everyone below up one position.`;
+        break;
+      default:
+        console.error("Unknown status:", status);
+        return;
+    }
+
+    if (!confirm(confirmMessage)) return;
+
+    try {
+
+      if (status === "withdrawn") {
+        await ladderAPI.removeFromLadder(userId);
+      } else {
+        await ladderAPI.updatePlayerStatus(userId, status);
+      }
+
+      showSuccess(`${playerName} has been set to ${status}`);
+      fetchData();
+    } catch (err) {
+      showError(err.response?.data?.error || `Failed to update status`);
+    }
+  };
+
+
   // Create and delete match handlers
   const handleDeletePairing = async (pairingId, player1Name, player2Name) => {
     if (
@@ -2140,10 +2178,41 @@ function Admin() {
                           </button>
                           <button
                             onClick={() =>
-                              handleWithdrawPlayer(
-                                entry.user_id,
-                                entry.full_name
-                              )
+                              handleUpdatePlayerStatus(entry.user_id, entry.full_name, "active")
+                            }
+                            style={{
+                              padding: "0.75rem 1.5rem",
+                              background: "#48bb78",
+                              color: "white",
+                              border: "none",
+                              borderRadius: "8px",
+                              cursor: "pointer",
+                              fontWeight: "600",
+                            }}
+                          >
+                            ✓ Active
+                          </button>
+
+                          <button
+                            onClick={() =>
+                              handleUpdatePlayerStatus(entry.user_id, entry.full_name, "no_play")
+                            }
+                            style={{
+                              padding: "0.75rem 1.5rem",
+                              background: "#ed8936",
+                              color: "white",
+                              border: "none",
+                              borderRadius: "8px",
+                              cursor: "pointer",
+                              fontWeight: "600",
+                            }}
+                          >
+                            ⏸ No Play
+                          </button>
+
+                          <button
+                            onClick={() =>
+                              handleUpdatePlayerStatus(entry.user_id, entry.full_name, "withdrawn")
                             }
                             style={{
                               padding: "0.5rem 1rem",
@@ -2158,6 +2227,7 @@ function Admin() {
                           >
                             Withdraw
                           </button>
+
                         </div>
                       )}
                     </td>

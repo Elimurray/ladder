@@ -150,7 +150,7 @@ router.patch("/status", authMiddleware, async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: "You are not on the ladder" });
+      return res.status(404).json({ error: "You are not currently on the ladder – please email fscladder@gmail.com to be added back on" });
     }
 
     res.json(result.rows[0]);

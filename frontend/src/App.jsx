@@ -146,6 +146,7 @@ function AppContent() {
           padding: "3rem 1rem",
           marginTop: "4rem",
           textAlign: "center",
+          color: "black",
         }}
       >
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
