@@ -207,11 +207,13 @@ td {
   border-bottom: 1px solid #e2e8f0;
   color: #2d3748;
 }
+
 .position-first td,
 .position-top3 td,
 .position-top100 td {
   padding: 0.4rem;
 }
+
 tr:last-child td {
   border-bottom: none;
 }
@@ -290,6 +292,7 @@ td:first-child {
   justify-content: space-between;
   align-items: center;
 }
+
 .login-link {
   border: none;
   color: black;
@@ -348,6 +351,7 @@ td:first-child {
 .email-link {
   color: #667eea;
 }
+
 .rules-email-link {
   color: #667eea;
   text-decoration: underline;
@@ -1038,6 +1042,7 @@ td:first-child {
 }
 
 @media (max-width: 768px) {
+
   /* Show hamburger menu */
   .menu-toggle {
     display: block;
@@ -1207,6 +1212,7 @@ td:first-child {
     padding: 0.75rem 0.5rem;
     font-size: 0.9rem;
   }
+
   .admin-sidebar {
     display: none;
   }
@@ -1232,6 +1238,13 @@ td:first-child {
     align-items: center;
     gap: 0.5rem;
     white-space: nowrap;
+  }
+}
+
+@media (max-width: 370px) {
+  .draw-match-card {
+    font-size: 12px;
+    padding: 0.8rem;
   }
 }
 
