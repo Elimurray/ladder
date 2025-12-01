@@ -64,7 +64,7 @@ function SubmitMatchForm() {
 
   const validateSetScore = (score) => {
     if (!score) return false;
-    const parts = score.split("-");
+    const parts = score.split("/");
     if (parts.length !== 2) return false;
 
     const [score1, score2] = parts.map((s) => parseInt(s.trim()));
@@ -198,8 +198,7 @@ function SubmitMatchForm() {
 
     if (
       !confirm(
-        `Are you sure ${
-          submittingFor === "player1" ? match.player1_name : match.player2_name
+        `Are you sure ${submittingFor === "player1" ? match.player1_name : match.player2_name
         } won by default?`
       )
     )
@@ -462,7 +461,7 @@ function SubmitMatchForm() {
                         marginBottom: "1rem",
                       }}
                     >
-                      Format: 15-10 (winner's score first)
+                      Format: 15/10 (winner's score first)
                     </p>
                     <div
                       style={{
@@ -481,7 +480,7 @@ function SubmitMatchForm() {
                           <label>Set {index + 1}:</label>
                           <input
                             type="text"
-                            placeholder="15-10"
+                            placeholder="15/10"
                             value={score}
                             onChange={(e) =>
                               handleSetScoreChange(index, e.target.value)

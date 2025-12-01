@@ -473,8 +473,7 @@ function Admin() {
   const handleDeletePairing = async (pairingId, player1Name, player2Name) => {
     if (
       !confirm(
-        `Are you sure you want to delete the match between ${player1Name} and ${
-          player2Name || "BYE"
+        `Are you sure you want to delete the match between ${player1Name} and ${player2Name || "BYE"
         }?`
       )
     ) {
@@ -1179,7 +1178,7 @@ function Admin() {
                                   </label>
                                   <input
                                     type="text"
-                                    placeholder="15-10"
+                                    placeholder="15/10"
                                     value={score}
                                     onChange={(e) => {
                                       const newScores = [...editSetScores];

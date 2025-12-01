@@ -104,7 +104,7 @@ router.put("/preferences", authMiddleware, async (req, res) => {
 // Update contact information
 router.put("/contact", authMiddleware, async (req, res) => {
   try {
-    const { email, phone_number, is_junior } = req.body;
+    const { email, phone_number, squash_grade, is_junior } = req.body;
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -123,8 +123,8 @@ router.put("/contact", authMiddleware, async (req, res) => {
     }
 
     const result = await pool.query(
-      "UPDATE users SET email = $1, phone_number = $2, is_junior = $3 WHERE id = $4 RETURNING id, email, full_name, phone_number, is_member, is_admin, is_junior",
-      [email, phone_number, is_junior, req.user.id]
+      "UPDATE users SET email = $1, phone_number = $2, squash_grade = $3, is_junior = $4 WHERE id = $5 RETURNING id, email, full_name, phone_number, is_member, is_admin, squash_grade, is_junior",
+      [email, phone_number, squash_grade, is_junior, req.user.id]
     );
 
     res.json(result.rows[0]);

@@ -114,10 +114,10 @@ router.post("/submit", authMiddleware, async (req, res) => {
           opponentMatchScore,
           set_scores
             ? JSON.stringify({
-                sets: set_scores.sets.map((s) =>
-                  s.split("-").reverse().join("-")
-                ),
-              })
+              sets: set_scores.sets.map((s) =>
+                s.split("/").reverse().join("/")
+              ),
+            })
             : null, // Reverse scores for opponent
         ]
       );
@@ -648,10 +648,10 @@ router.put(
           `${player1_games_lost}-${player1_games_won}`,
           set_scores
             ? JSON.stringify({
-                sets: set_scores.sets.map((s) =>
-                  s.split("-").reverse().join("-")
-                ),
-              })
+              sets: set_scores.sets.map((s) =>
+                s.split("/").reverse().join("/")
+              ),
+            })
             : null,
           player2Id,
           player1Id,
