@@ -529,7 +529,7 @@ router.post("/pairing", authMiddleware, adminMiddleware, async (req, res) => {
     const { week_date, player1_id, player2_id, time_slot, reschedule_notes } =
       req.body;
 
-    // Get player positions
+    // Player 1 position
     const player1Pos = await pool.query(
       "SELECT position FROM ladder_positions WHERE user_id = $1",
       [player1_id]
@@ -539,6 +539,7 @@ router.post("/pairing", authMiddleware, adminMiddleware, async (req, res) => {
       return res.status(404).json({ error: "Player 1 not found on ladder" });
     }
 
+    // Player 2 position if applicable
     let player2Position = null;
     if (player2_id) {
       const player2Pos = await pool.query(
@@ -549,28 +550,34 @@ router.post("/pairing", authMiddleware, adminMiddleware, async (req, res) => {
       if (player2Pos.rows.length === 0) {
         return res.status(404).json({ error: "Player 2 not found on ladder" });
       }
+
       player2Position = player2Pos.rows[0].position;
     }
 
-    await client.query(
-      "INSERT INTO draws (week_date, player1_id, player2_id, player1_position, player2_position, time_slot, is_published) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+    // Insert pairing
+    const insertResult = await pool.query(
+      `INSERT INTO draws 
+        (week_date, player1_id, player2_id, player1_position, player2_position, time_slot, reschedule_notes, is_published)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, false)
+       RETURNING *`,
       [
         week_date,
-        pairing.player1_id,
-        pairing.player2_id,
-        pairing.player1_position,
-        pairing.player2_position,
-        pairing.time_slot,
-        false,
+        player1_id,
+        player2_id,
+        player1Pos.rows[0].position,
+        player2Position,
+        time_slot,
+        reschedule_notes,
       ]
     );
 
-    res.json(result.rows[0]);
+    res.json(insertResult.rows[0]);
   } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ error: "Server error" });
+    console.error("Create pairing error:", err);
+    res.status(500).json({ error: "Server error creating pairing" });
   }
 });
+
 
 // Admin: Publish a draw (make it visible to users)
 router.patch(
