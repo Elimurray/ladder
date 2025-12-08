@@ -69,13 +69,13 @@ function SubmitMatchForm() {
 
     const [score1, score2] = parts.map((s) => parseInt(s.trim()));
     if (isNaN(score1) || isNaN(score2)) return false;
-    if (score1 < 15 && score2 < 15) return false;
+    if (score1 < 11 && score2 < 11) return false;
 
     const winner = Math.max(score1, score2);
     const loser = Math.min(score1, score2);
 
-    if (winner < 15) return false;
-    if (loser >= 14 && winner - loser < 2) return false;
+    if (winner < 11) return false;
+    if (loser >= 10 && winner - loser < 2) return false;
 
     return true;
   };
@@ -198,7 +198,8 @@ function SubmitMatchForm() {
 
     if (
       !confirm(
-        `Are you sure ${submittingFor === "player1" ? match.player1_name : match.player2_name
+        `Are you sure ${
+          submittingFor === "player1" ? match.player1_name : match.player2_name
         } won by default?`
       )
     )
@@ -461,7 +462,7 @@ function SubmitMatchForm() {
                         marginBottom: "1rem",
                       }}
                     >
-                      Format: 15/10 (winner's score first)
+                      Format: 11/10 (winner's score first)
                     </p>
                     <div
                       style={{
@@ -480,7 +481,7 @@ function SubmitMatchForm() {
                           <label>Set {index + 1}:</label>
                           <input
                             type="text"
-                            placeholder="15/10"
+                            placeholder="11/10"
                             value={score}
                             onChange={(e) =>
                               handleSetScoreChange(index, e.target.value)
