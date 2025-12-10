@@ -278,7 +278,7 @@ function SubmitMatchForm() {
       {error && <div className="error">{error}</div>}
 
       {match && (
-        <div>
+        <div style={{ color: "black" }}>
           {/* Match Info */}
           <div
             style={{
@@ -286,6 +286,7 @@ function SubmitMatchForm() {
               padding: "1.5rem",
               borderRadius: "12px",
               marginBottom: "2rem",
+              color: "black",
             }}
           >
             <div
@@ -400,6 +401,8 @@ function SubmitMatchForm() {
                     borderRadius: "8px",
                     border: "2px solid #e2e8f0",
                     fontSize: "1rem",
+                    background: "white",
+                    color: "black",
                   }}
                   required
                 >
@@ -452,6 +455,7 @@ function SubmitMatchForm() {
                       padding: "1.5rem",
                       borderRadius: "8px",
                       marginBottom: "1rem",
+                      color: "black",
                     }}
                   >
                     <h3 style={{ marginBottom: "1rem" }}>Enter Set Scores</h3>
@@ -495,16 +499,19 @@ function SubmitMatchForm() {
                   </div>
                 )}
 
-                {result && (
+                {gamesWon && gamesLost && (
                   <div
                     style={{
-                      background: "#f0f4ff",
+                      marginTop: "1rem",
                       padding: "1rem",
+                      background: "#white",
                       borderRadius: "8px",
-                      marginBottom: "1rem",
+                      fontSize: "1.2rem",
+                      fontWeight: "bold",
+                      color: "#black",
                     }}
                   >
-                    <strong>Result:</strong> {result}
+                    Result: {gamesWon}-{gamesLost}
                   </div>
                 )}
 
@@ -533,7 +540,9 @@ function SubmitMatchForm() {
                   borderTop: "2px solid #e2e8f0",
                 }}
               >
-                <h3 style={{ marginBottom: "1rem" }}>Other Options</h3>
+                <h3 style={{ marginBottom: "1rem", color: "black" }}>
+                  Other Options
+                </h3>
                 <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
                   <button
                     onClick={handleDidNotPlay}
