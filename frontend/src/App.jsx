@@ -17,6 +17,7 @@ import Draw from "./pages/Draw";
 import Profile from "./pages/Profile";
 import Results from "./pages/Results";
 import logo from "./assets/logo.png";
+import ColorSteel from "./assets/colorsteel.png";
 
 import "./App.css";
 
@@ -49,6 +50,11 @@ function AppContent() {
         <div className="nav-container">
           <NavLink to="/" className="nav-logo" style={{ background: "none" }}>
             <img src={logo} alt="Ladder Logo" className="nav-logo-img" />
+            <img
+              src={ColorSteel}
+              alt="Sponsor Logo"
+              className="nav-sponsor-img"
+            />
           </NavLink>
 
           <button

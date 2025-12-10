@@ -57,6 +57,12 @@ body {
   height: 60px;
   width: auto;
   object-fit: contain;
+  margin-right: 0.3rem;
+}
+.nav-sponsor-img {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
 }
 
 /* Hamburger Menu Button */
@@ -74,7 +80,7 @@ body {
 .nav-menu {
   display: flex;
   list-style: none;
-  gap: 2rem;
+  gap: 1rem;
   align-items: center;
 }
 
