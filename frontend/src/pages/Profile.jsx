@@ -24,7 +24,6 @@ function Profile() {
   const [editPhone, setEditPhone] = useState("");
   const [editGrade, setEditGrade] = useState("");
 
-
   // Preferences state
 
   const [earliestTime, setEarliestTime] = useState("");
@@ -874,14 +873,14 @@ function Profile() {
                 >
                   {(profile.is_junior
                     ? timeSlots.filter((t) => {
-                      // Only show times before 7:30pm for juniors
-                      const hour = parseInt(t.split(":")[0]);
-                      const isPM = t.includes("pm");
-                      const time24 = isPM && hour !== 12 ? hour + 12 : hour;
-                      return (
-                        time24 < 19 || (time24 === 19 && t.includes("7:00"))
-                      );
-                    })
+                        // Only show times before 7:30pm for juniors
+                        const hour = parseInt(t.split(":")[0]);
+                        const isPM = t.includes("pm");
+                        const time24 = isPM && hour !== 12 ? hour + 12 : hour;
+                        return (
+                          time24 < 19 || (time24 === 19 && t.includes("7:00"))
+                        );
+                      })
                     : timeSlots
                   ).map((time) => (
                     <option key={time} value={time}>
@@ -906,6 +905,8 @@ function Profile() {
                     fontSize: "1rem",
                     fontFamily: "inherit",
                     resize: "vertical",
+                    color: "black",
+                    background: "white",
                   }}
                 />
               </div>
@@ -946,12 +947,12 @@ function Profile() {
                         <td>
                           {match.week_date
                             ? new Date(
-                              match.week_date + "T00:00:00"
-                            ).toLocaleDateString("en-NZ", {
-                              year: "numeric",
-                              month: "short",
-                              day: "numeric",
-                            })
+                                match.week_date + "T00:00:00"
+                              ).toLocaleDateString("en-NZ", {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                              })
                             : "N/A"}
                         </td>
                         <td>
@@ -985,31 +986,31 @@ function Profile() {
                                 match.result === "3"
                                   ? "#c6f6d5"
                                   : match.result === "2"
-                                    ? "#bee3f8"
-                                    : match.result === "1"
-                                      ? "#feebc8"
-                                      : "#fed7d7",
+                                  ? "#bee3f8"
+                                  : match.result === "1"
+                                  ? "#feebc8"
+                                  : "#fed7d7",
                               color:
                                 match.result === "3"
                                   ? "#22543d"
                                   : match.result === "2"
-                                    ? "#2c5282"
-                                    : match.result === "1"
-                                      ? "#7c2d12"
-                                      : "#742a2a",
+                                  ? "#2c5282"
+                                  : match.result === "1"
+                                  ? "#7c2d12"
+                                  : "#742a2a",
                             }}
                           >
                             {match.result === "3"
                               ? "Won"
                               : match.result === "2"
-                                ? "Won 2"
-                                : match.result === "1"
-                                  ? "Won 1"
-                                  : match.result === "0"
-                                    ? "Lost"
-                                    : match.result === "~"
-                                      ? "No Play"
-                                      : "Default"}
+                              ? "Won 2"
+                              : match.result === "1"
+                              ? "Won 1"
+                              : match.result === "0"
+                              ? "Lost"
+                              : match.result === "~"
+                              ? "No Play"
+                              : "Default"}
                           </span>
                         </td>
                       </tr>

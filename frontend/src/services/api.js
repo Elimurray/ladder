@@ -60,6 +60,8 @@ export const drawAPI = {
   createPairing: (data) => api.post("/draw/pairing", data),
   publishDraw: (date) => api.patch(`/draw/week/${date}/publish`),
   unpublishDraw: (date) => api.patch(`/draw/week/${date}/unpublish`),
+  getWeekNotes: () => api.get("/draw/week-notes"),
+  updateWeekNotes: (notes) => api.put("/draw/week-notes", { notes }),
 };
 
 export const matchesAPI = {

@@ -8,6 +8,9 @@ function Draw() {
   const [error, setError] = useState(null);
   const [currentWeek, setCurrentWeek] = useState("");
   const { user } = useAuth();
+  const [weekNotes, setWeekNotes] = useState("");
+  const [isEditingNotes, setIsEditingNotes] = useState(false);
+  const [notesInput, setNotesInput] = useState("");
 
   useEffect(() => {
     fetchCurrentDraw();
@@ -20,6 +23,15 @@ function Draw() {
 
       if (response.data.length > 0) {
         setCurrentWeek(response.data[0].week_date);
+
+        // Fetch week notes
+        try {
+          const notesResponse = await drawAPI.getWeekNotes();
+          setWeekNotes(notesResponse.data.notes || "");
+        } catch (err) {
+          console.error("Failed to fetch week notes:", err);
+          setWeekNotes("");
+        }
       }
 
       setLoading(false);
@@ -28,6 +40,25 @@ function Draw() {
       setLoading(false);
       console.error(err);
     }
+  };
+  const handleEditNotes = () => {
+    setNotesInput(weekNotes);
+    setIsEditingNotes(true);
+  };
+  const handleSaveNotes = async () => {
+    try {
+      await drawAPI.updateWeekNotes(notesInput);
+      setWeekNotes(notesInput);
+      setIsEditingNotes(false);
+    } catch (err) {
+      console.error("Failed to update notes:", err);
+      alert("Failed to update notes");
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditingNotes(false);
+    setNotesInput("");
   };
 
   const groupByTimeSlot = () => {
@@ -107,6 +138,126 @@ function Draw() {
           <h2 style={{ margin: 0, fontSize: "1.25rem" }}>
             Week of {formatDate(currentWeek)}
           </h2>
+        </div>
+      )}
+
+      {/* Week Notes Section */}
+      {draw.length > 0 && (
+        <div
+          style={{
+            border: "2px solid #e2e8f0",
+            padding: "1rem",
+            borderRadius: "8px",
+            marginBottom: "2rem",
+            background: "white",
+            color: "black",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: weekNotes || isEditingNotes ? "0.75rem" : "0",
+            }}
+          >
+            <h3 style={{ margin: 0, fontSize: "1rem", color: "#2d3748" }}>
+              📋 Week Notes
+            </h3>
+            {user?.is_admin && !isEditingNotes && (
+              <button
+                onClick={handleEditNotes}
+                style={{
+                  padding: "0.5rem 1rem",
+                  background: "#3182ce",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  fontSize: "0.875rem",
+                }}
+              >
+                {weekNotes ? "Edit" : "Add Notes"}
+              </button>
+            )}
+          </div>
+
+          {isEditingNotes ? (
+            <div>
+              <textarea
+                value={notesInput}
+                onChange={(e) => setNotesInput(e.target.value)}
+                placeholder="Add notes for this week's draw (e.g., court closures, special announcements...)"
+                style={{
+                  width: "100%",
+                  minHeight: "100px",
+                  padding: "0.75rem",
+                  borderRadius: "6px",
+                  border: "2px solid #cbd5e0",
+                  fontSize: "0.875rem",
+                  resize: "vertical",
+                }}
+              />
+              <div
+                style={{
+                  display: "flex",
+                  gap: "0.5rem",
+                  marginTop: "0.75rem",
+                }}
+              >
+                <button
+                  onClick={handleSaveNotes}
+                  style={{
+                    padding: "0.5rem 1rem",
+                    background: "#48bb78",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    fontSize: "0.875rem",
+                  }}
+                >
+                  Save
+                </button>
+                <button
+                  onClick={handleCancelEdit}
+                  style={{
+                    padding: "0.5rem 1rem",
+                    background: "#718096",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    fontSize: "0.875rem",
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : weekNotes ? (
+            <div
+              style={{
+                fontWeight: "600",
+
+                color: "#4a5568",
+                whiteSpace: "pre-wrap",
+              }}
+            >
+              {weekNotes}
+            </div>
+          ) : (
+            <p
+              style={{
+                margin: 0,
+                fontSize: "0.875rem",
+                color: "#a0aec0",
+                fontStyle: "italic",
+              }}
+            >
+              No notes for this week
+            </p>
+          )}
         </div>
       )}
 

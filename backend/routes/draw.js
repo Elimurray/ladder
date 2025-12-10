@@ -578,7 +578,6 @@ router.post("/pairing", authMiddleware, adminMiddleware, async (req, res) => {
   }
 });
 
-
 // Admin: Publish a draw (make it visible to users)
 router.patch(
   "/week/:date/publish",
@@ -672,4 +671,35 @@ router.get(
     }
   }
 );
+
+// GET week notes
+router.get("/week-notes", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT notes FROM week_notes WHERE id = 1"
+    );
+    res.json({ notes: result.rows[0]?.notes || "" });
+  } catch (error) {
+    console.error("Error fetching week notes:", error);
+    res.status(500).json({ error: "Failed to fetch notes" });
+  }
+});
+
+// UPDATE week notes (admin only)
+router.put("/week-notes", authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const { notes } = req.body;
+
+    await pool.query(
+      "UPDATE week_notes SET notes = $1, updated_at = CURRENT_TIMESTAMP WHERE id = 1",
+      [notes]
+    );
+
+    res.json({ message: "Notes updated successfully" });
+  } catch (error) {
+    console.error("Error updating week notes:", error);
+    res.status(500).json({ error: "Failed to update notes" });
+  }
+});
+
 module.exports = router;
