@@ -5,121 +5,99 @@ function Home() {
     <div className="page">
       <div className="home-title">
         <h1>Franklin Squash Club Ladder</h1>
-        <Link to="/login" className="login-link">
-          Login
-        </Link>
       </div>
       {/* About Ladder Section */}
       <div className="ladder-rules-section">
-        <h2>About Ladder</h2>
-        <p className="info-intro">
-          Ladder is a FREE club competition held on Thursday evenings from
-          5:30pm for ALL financial club members.
-        </p>
-        <p>
-          Players are initially given a position on the ladder (based on grading
-          or past ladder results). A draw is generated weekly (By Monday),
-          pairing up those closest on the ladder starting from position #1, and
-          matches played that Thursday night. Players will move up and down the
-          ladder based on the week's match result.
-        </p>
-        <br />
-
-        <p>
-          Ladder is a fantastic way to meet other club members and enjoy our
-          fantastic bar and kitchen facilities. You can learn how to score
-          squash in a friendly environment with senior members there to assist
-          if needed. You can also choose to play for Squash Levels!
-        </p>
+        <h2>🏆 About Ladder</h2>
+        <ul className="rules-list">
+          <li>
+            Free weekly competition: Thursdays, 5:30pm, open to all financial
+            club members.
+          </li>
+          <li>
+            Players are ranked on a ladder (based on grading/past results).
+          </li>
+          <li>Weekly draw (posted Mondays) pairs players closest in rank.</li>
+          <li>Results move players up or down the ladder.</li>
+        </ul>
       </div>
 
-      {/* How to Join Ladder Section */}
+      {/* Why Join Section */}
       <div className="ladder-rules-section">
-        <h2>How to join ladder:</h2>
-        <ol className="rules-list">
+        <h2>🎉 Why Join?</h2>
+        <ul className="rules-list">
+          <li>Meet fellow members & enjoy the bar/kitchen.</li>
+          <li>Learn squash scoring with senior members' support.</li>
+          <li>Option to play for Squash Levels.</li>
+        </ul>
+      </div>
+
+      {/* How to Join Section */}
+      <div className="ladder-rules-section">
+        <h2>📌 How to Join</h2>
+        <ul className="rules-list">
           <li>
-            Complete the Ladder Requests Form on our{" "}
+            Fill out the{" "}
             <a
               href="https://www.franklinsquash.org.nz/club-ladder/"
               className="email-link"
             >
-              Club Website
+              Ladder Request Form
             </a>{" "}
-            or email{" "}
+            on the club website or email{" "}
             <a href="mailto:fscladder@gmail.com" className="email-link">
               fscladder@gmail.com
             </a>
+            .
           </li>
           <li>
-            Once you have been registered on the ladder, an account login will
-            be created for you to go and change your password and complete your
-            profile details.
+            Once registered, you'll get a login to set your password & profile.
           </li>
-          <li style={{ marginBottom: "1rem" }}>
-            You can then be added to the next draw!
+          <li>
+            Registered players can enter draws, submit scores, and view
+            contacts.
           </li>
-        </ol>
-        <p>
-          <strong>Note:</strong> Only Registered players can be added to the
-          draw, submit scores, and view other player phone numbers.
-        </p>
+        </ul>
       </div>
 
-      {/* Once Registered Section */}
+      {/* Player Responsibilities Section */}
       <div className="ladder-rules-section">
-        <h2>Once registered, players should:</h2>
-        <ol className="rules-list">
+        <h2>✅ Player Responsibilities</h2>
+        <ul className="rules-list">
           <li>
-            Before 5 pm the Sunday prior:
-            <ol
-              type="a"
-              style={{
-                marginTop: "0.5rem",
-                marginLeft: "2rem",
-                marginBottom: "0.5rem",
-              }}
-            >
-              <li>
-                Check your status for next Thursday is correct. If not available
-                for 1 week, check that box, if unavailable for 3 or more weeks,
-                use the withdraw button and email the ladder controller when you
-                wish to return. If remaining active, then no change is
-                necessary.
-              </li>
-              <li>
-                Check that your match score has been submitted correctly -
-                especially if for squash levels.
-              </li>
-            </ol>
+            <strong>By Sunday 5pm:</strong> Confirm your status for Thursday.
+          </li>
+          <li>Mark unavailable (1 week) or withdraw (3+ weeks) if needed.</li>
+          <li>
+            Ensure scores are submitted correctly (especially for Squash
+            Levels).
           </li>
           <li>
-            If you cannot play your scheduled time, then you may contact your
-            opponent to play at another agreeable time. The game must be played
-            and scores submitted online before Sunday 5pm. Advise the ladder
-            Coordinator.
+            If rescheduling, play before Sunday 5pm & notify the Coordinator.
           </li>
           <li>
-            Turn up 15 minutes before your scheduled match time, referee the
-            subsequent match, and enter match results online.
+            Arrive 15 mins early, referee the next match, and enter results
+            online.
           </li>
-          <li style={{ marginBottom: "1rem" }}>
-            Please follow this link for the complete{" "}
-            <a
-              href="https://www.franklinsquash.org.nz/club-ladder/"
-              className="email-link"
-            >
-              Ladder Rules
-            </a>{" "}
-            and etiquette.
-          </li>
-        </ol>
+        </ul>
+      </div>
+
+      {/* Contact Section */}
+      <div className="ladder-rules-section">
+        <h2>📧 Contact</h2>
         <p>
-          The Ladder Coordinator controls the ladder. Any queries, please
-          contact them via the ladder online entry system or email{" "}
+          Questions? Reach out via the ladder entry system or email{" "}
           <a href="mailto:fscladder@gmail.com" className="email-link">
             fscladder@gmail.com
           </a>
-          .
+          . Full{" "}
+          <a
+            href="https://www.franklinsquash.org.nz/club-ladder/"
+            className="email-link"
+          >
+            rules & etiquette
+          </a>{" "}
+          available on the club website.
         </p>
       </div>
 
