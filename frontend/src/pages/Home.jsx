@@ -8,7 +8,7 @@ function Home() {
       </div>
       {/* About Ladder Section */}
       <div className="ladder-rules-section">
-        <h2>🏆 About Ladder</h2>
+        <h2>About Ladder</h2>
         <ul className="rules-list">
           <li>
             Free weekly competition: Thursdays, 5:30pm, open to all financial
@@ -24,7 +24,7 @@ function Home() {
 
       {/* Why Join Section */}
       <div className="ladder-rules-section">
-        <h2>🎉 Why Join?</h2>
+        <h2>Why Join?</h2>
         <ul className="rules-list">
           <li>Meet fellow members & enjoy the bar/kitchen.</li>
           <li>Learn squash scoring with senior members' support.</li>
@@ -34,7 +34,7 @@ function Home() {
 
       {/* How to Join Section */}
       <div className="ladder-rules-section">
-        <h2>📌 How to Join</h2>
+        <h2>How to Join</h2>
         <ul className="rules-list">
           <li>
             Fill out the{" "}
@@ -62,7 +62,7 @@ function Home() {
 
       {/* Player Responsibilities Section */}
       <div className="ladder-rules-section">
-        <h2>✅ Player Responsibilities</h2>
+        <h2>Player Responsibilities</h2>
         <ul className="rules-list">
           <li>
             <strong>By Sunday 5pm:</strong> Confirm your status for Thursday.
@@ -84,7 +84,7 @@ function Home() {
 
       {/* Contact Section */}
       <div className="ladder-rules-section">
-        <h2>📧 Contact</h2>
+        <h2>Contact</h2>
         <p>
           Questions? Reach out via the ladder entry system or email{" "}
           <a href="mailto:fscladder@gmail.com" className="email-link">
