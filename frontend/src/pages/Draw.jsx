@@ -313,7 +313,7 @@ function Draw() {
                               whiteSpace: "nowrap",
                             }}
                           >
-                            🏆 LEVELS
+                            LEVELS
                           </div>
                         )}
                         <span className="vs">VS</span>

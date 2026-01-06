@@ -250,7 +250,7 @@ function Results() {
                               display: "inline-block",
                             }}
                           >
-                            🏆 LEVELS
+                            LEVELS
                           </span>
                         ) : (
                           <span

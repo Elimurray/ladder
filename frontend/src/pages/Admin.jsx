@@ -469,8 +469,6 @@ function Admin() {
     }
   };
 
-
-
   const handleUpdatePlayerStatus = async (userId, playerName, status) => {
     let confirmMessage = "";
 
@@ -492,7 +490,6 @@ function Admin() {
     if (!confirm(confirmMessage)) return;
 
     try {
-
       if (status === "withdrawn") {
         await ladderAPI.removeFromLadder(userId);
       } else {
@@ -506,12 +503,12 @@ function Admin() {
     }
   };
 
-
   // Create and delete match handlers
   const handleDeletePairing = async (pairingId, player1Name, player2Name) => {
     if (
       !confirm(
-        `Are you sure you want to delete the match between ${player1Name} and ${player2Name || "BYE"
+        `Are you sure you want to delete the match between ${player1Name} and ${
+          player2Name || "BYE"
         }?`
       )
     ) {
@@ -1014,7 +1011,7 @@ function Admin() {
                               boxShadow: "0 2px 8px rgba(245, 158, 11, 0.3)",
                             }}
                           >
-                            🏆 LEVELS
+                            LEVELS
                           </div>
                         )}
                         {match.time_slot && (
@@ -2113,7 +2110,7 @@ function Admin() {
                 <tr>
                   <th>Position</th>
                   <th>Name</th>
-                  <th>Email</th>
+
                   <th>Status</th>
                   <th style={{ textAlign: "right" }}>Actions</th>
                 </tr>
@@ -2140,7 +2137,7 @@ function Admin() {
                       )}
                     </td>
                     <td>{entry.full_name}</td>
-                    <td>{entry.email}</td>
+
                     <td>
                       <span className={`status-badge status-${entry.status}`}>
                         {entry.status}
@@ -2178,7 +2175,11 @@ function Admin() {
                           </button>
                           <button
                             onClick={() =>
-                              handleUpdatePlayerStatus(entry.user_id, entry.full_name, "active")
+                              handleUpdatePlayerStatus(
+                                entry.user_id,
+                                entry.full_name,
+                                "active"
+                              )
                             }
                             style={{
                               padding: "0.75rem 1.5rem",
@@ -2195,7 +2196,11 @@ function Admin() {
 
                           <button
                             onClick={() =>
-                              handleUpdatePlayerStatus(entry.user_id, entry.full_name, "no_play")
+                              handleUpdatePlayerStatus(
+                                entry.user_id,
+                                entry.full_name,
+                                "no_play"
+                              )
                             }
                             style={{
                               padding: "0.75rem 1.5rem",
@@ -2212,7 +2217,11 @@ function Admin() {
 
                           <button
                             onClick={() =>
-                              handleUpdatePlayerStatus(entry.user_id, entry.full_name, "withdrawn")
+                              handleUpdatePlayerStatus(
+                                entry.user_id,
+                                entry.full_name,
+                                "withdrawn"
+                              )
                             }
                             style={{
                               padding: "0.5rem 1rem",
@@ -2227,7 +2236,6 @@ function Admin() {
                           >
                             Withdraw
                           </button>
-
                         </div>
                       )}
                     </td>
