@@ -112,7 +112,7 @@ function Ladder() {
               <th>Rank</th>
               <th>Name</th>
               {user && <th>Phone</th>}
-              {user && user.is_admin && <th>Levels</th>}
+              {user && user.is_admin && <th>LVLS</th>}
               <th style={{ textAlign: "center" }}>Status (Next draw)</th>
             </tr>
           </thead>
@@ -133,9 +133,9 @@ function Ladder() {
                 }
               >
                 <td>
-                  {entry.position === 1 && "🥇 "}
-                  {entry.position === 2 && "🥈 "}
-                  {entry.position === 3 && "🥉 "}
+                  {entry.position === 1}
+                  {entry.position === 2}
+                  {entry.position === 3}
                   {entry.position}
                 </td>
                 <td>
@@ -153,14 +153,14 @@ function Ladder() {
                           color: "white",
                           padding: "0.25rem 0.75rem",
                           borderRadius: "20px",
-                          fontSize: "0.7rem",
+                          fontSize: "0.5rem",
                           fontWeight: "bold",
                           boxShadow: "0 2px 8px rgba(245, 158, 11, 0.3)",
                           whiteSpace: "nowrap",
                           display: "inline-block",
                         }}
                       >
-                        🏆 LEVELS
+                        ✔
                       </span>
                     ) : (
                       <span style={{ color: "#cbd5e0" }}>-</span>
