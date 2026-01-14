@@ -38,6 +38,12 @@ router.post("/register", async (req, res) => {
 
     const user = result.rows[0];
 
+    // Insert default preferences for new user
+    await pool.query(
+      "INSERT INTO user_preferences (user_id, earliest_time, notes) VALUES ($1, $2, $3)",
+      [user.id, "5:30pm", ""]
+    );
+
     // Create JWT token
     const token = jwt.sign(
       {
