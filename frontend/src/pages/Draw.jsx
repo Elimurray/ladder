@@ -352,7 +352,7 @@ function Draw() {
                             color: "#78350f",
                           }}
                         >
-                          <strong>📅 Reschedule Details:</strong>
+                          <strong>Reschedule Details:</strong>
                           <div style={{ marginTop: "0.25rem" }}>
                             {pairing.reschedule_notes}
                           </div>
