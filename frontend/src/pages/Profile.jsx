@@ -106,7 +106,7 @@ function Profile() {
   const handleWithdraw = async () => {
     if (
       !confirm(
-        "Are you sure you want to withdraw from the ladder? This will remove you completely and an admin will need to add you back."
+        "Are you sure you want to withdraw from the ladder? This will remove you completely and an admin will need to add you back.",
       )
     ) {
       return;
@@ -180,7 +180,7 @@ function Profile() {
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       setPasswordError(
-        err.response?.data?.error || "Failed to change password"
+        err.response?.data?.error || "Failed to change password",
       );
     }
   };
@@ -202,7 +202,7 @@ function Profile() {
       fetchProfile();
     } catch (err) {
       setError(
-        err.response?.data?.error || "Failed to update contact information"
+        err.response?.data?.error || "Failed to update contact information",
       );
     }
   };
@@ -947,7 +947,7 @@ function Profile() {
                         <td>
                           {match.week_date
                             ? new Date(
-                                match.week_date + "T00:00:00"
+                                match.week_date + "T00:00:00",
                               ).toLocaleDateString("en-NZ", {
                                 year: "numeric",
                                 month: "short",
@@ -986,31 +986,31 @@ function Profile() {
                                 match.result === "3"
                                   ? "#c6f6d5"
                                   : match.result === "2"
-                                  ? "#bee3f8"
-                                  : match.result === "1"
-                                  ? "#feebc8"
-                                  : "#fed7d7",
+                                    ? "#bee3f8"
+                                    : match.result === "1"
+                                      ? "#feebc8"
+                                      : "#fed7d7",
                               color:
                                 match.result === "3"
                                   ? "#22543d"
                                   : match.result === "2"
-                                  ? "#2c5282"
-                                  : match.result === "1"
-                                  ? "#7c2d12"
-                                  : "#742a2a",
+                                    ? "#7c2d12"
+                                    : match.result === "1"
+                                      ? "#7c2d12"
+                                      : "#742a2a",
                             }}
                           >
                             {match.result === "3"
                               ? "Won"
                               : match.result === "2"
-                              ? "Won 2"
-                              : match.result === "1"
-                              ? "Won 1"
-                              : match.result === "0"
-                              ? "Lost"
-                              : match.result === "~"
-                              ? "No Play"
-                              : "Default"}
+                                ? "Lost"
+                                : match.result === "1"
+                                  ? "Lost"
+                                  : match.result === "0"
+                                    ? "Lost"
+                                    : match.result === "~"
+                                      ? "No Play"
+                                      : "Default"}
                           </span>
                         </td>
                       </tr>
