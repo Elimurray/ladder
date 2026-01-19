@@ -366,7 +366,7 @@ function Draw() {
                     )}
 
                     {pairing.notes && (
-                      <div className="match-notes">📝 {pairing.notes}</div>
+                      <div className="match-notes">{pairing.notes}</div>
                     )}
                   </div>
                 ))}
