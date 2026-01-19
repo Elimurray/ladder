@@ -1001,13 +1001,13 @@ function Profile() {
                             }}
                           >
                             {match.result === "3"
-                              ? "Won"
+                              ? "Win"
                               : match.result === "2"
-                                ? "Lost"
+                                ? "Loss"
                                 : match.result === "1"
-                                  ? "Lost"
+                                  ? "Loss"
                                   : match.result === "0"
-                                    ? "Lost"
+                                    ? "Loss"
                                     : match.result === "~"
                                       ? "No Play"
                                       : "Default"}

@@ -179,7 +179,7 @@ function Admin() {
     try {
       await ladderAPI.addToLadder(
         parseInt(selectedUser),
-        parseInt(newPosition)
+        parseInt(newPosition),
       );
       showSuccess("User added to ladder successfully!");
       setSelectedUser("");
@@ -275,7 +275,7 @@ function Admin() {
 
     if (
       !confirm(
-        "Are you sure you want to delete the current draw? This cannot be undone."
+        "Are you sure you want to delete the current draw? This cannot be undone.",
       )
     ) {
       return;
@@ -355,7 +355,7 @@ function Admin() {
 
     if (
       !confirm(
-        `Are you sure you want to delete the draw for ${selectedDrawDate}? This will delete all matches and cannot be undone.`
+        `Are you sure you want to delete the draw for ${selectedDrawDate}? This will delete all matches and cannot be undone.`,
       )
     ) {
       return;
@@ -433,7 +433,7 @@ function Admin() {
 
     if (
       !confirm(
-        `Process all approved matches for week of ${processWeekDate}? This will update the ladder positions.`
+        `Process all approved matches for week of ${processWeekDate}? This will update the ladder positions.`,
       )
     ) {
       return;
@@ -442,7 +442,7 @@ function Admin() {
     try {
       const response = await matchesAPI.processWeek(processWeekDate);
       showSuccess(
-        `Ladder updated! Processed ${response.data.processed} matches with ${response.data.updates} position changes.`
+        `Ladder updated! Processed ${response.data.processed} matches with ${response.data.updates} position changes.`,
       );
       setProcessWeekDate("");
       fetchData();
@@ -454,7 +454,7 @@ function Admin() {
   const handleWithdrawPlayer = async (userId, playerName) => {
     if (
       !confirm(
-        `Are you sure you want to withdraw ${playerName} from the ladder? This will remove them completely and move everyone below up one position.`
+        `Are you sure you want to withdraw ${playerName} from the ladder? This will remove them completely and move everyone below up one position.`,
       )
     ) {
       return;
@@ -509,7 +509,7 @@ function Admin() {
       !confirm(
         `Are you sure you want to delete the match between ${player1Name} and ${
           player2Name || "BYE"
-        }?`
+        }?`,
       )
     ) {
       return;
@@ -718,7 +718,7 @@ function Admin() {
                 fetchData(); // Refresh users list
               } catch (err) {
                 showError(
-                  err.response?.data?.error || "Failed to register user"
+                  err.response?.data?.error || "Failed to register user",
                 );
               }
             }}
@@ -922,7 +922,7 @@ function Admin() {
                                 color: "#78350f",
                               }}
                             >
-                              <strong>📝 Notes:</strong> {player.notes}
+                              <strong>Notes:</strong> {player.notes}
                             </div>
                           )}
                         </>
@@ -1256,7 +1256,7 @@ function Admin() {
                           <small style={{ color: "#718096" }}>
                             Submitted{" "}
                             {new Date(
-                              match.player1_submitted_at
+                              match.player1_submitted_at,
                             ).toLocaleString()}
                           </small>
                         </div>
@@ -1451,7 +1451,7 @@ function Admin() {
                       fetchDrawByDate(selectedDrawDate);
                     } catch (err) {
                       showError(
-                        err.response?.data?.error || "Failed to update draw"
+                        err.response?.data?.error || "Failed to update draw",
                       );
                     }
                   }}
@@ -1552,7 +1552,7 @@ function Admin() {
                             const isInMatch = currentDraw.some(
                               (match) =>
                                 match.player1_id === l.user_id ||
-                                match.player2_id === l.user_id
+                                match.player2_id === l.user_id,
                             );
                             return !isInMatch;
                           })
@@ -1590,7 +1590,7 @@ function Admin() {
                             const isInMatch = currentDraw.some(
                               (match) =>
                                 match.player1_id === l.user_id ||
-                                match.player2_id === l.user_id
+                                match.player2_id === l.user_id,
                             );
                             return !isInMatch;
                           })
@@ -1723,10 +1723,10 @@ function Admin() {
                       .map((pairing) => {
                         // Find preferences for both players
                         const player1Prefs = userPreferences.find(
-                          (p) => p.id === pairing.player1_id
+                          (p) => p.id === pairing.player1_id,
                         );
                         const player2Prefs = userPreferences.find(
-                          (p) => p.id === pairing.player2_id
+                          (p) => p.id === pairing.player2_id,
                         );
 
                         return (
@@ -1810,7 +1810,7 @@ function Admin() {
                                         marginTop: "0.25rem",
                                       }}
                                     >
-                                      📝 {player1Prefs.notes}
+                                      {player1Prefs.notes}
                                     </div>
                                   )}
                                 </div>
@@ -1872,7 +1872,7 @@ function Admin() {
                                           marginTop: "0.25rem",
                                         }}
                                       >
-                                        📝 {player2Prefs.notes}
+                                        {player2Prefs.notes}
                                       </div>
                                     )}
                                   </div>
@@ -2013,7 +2013,7 @@ function Admin() {
                                       handleDeletePairing(
                                         pairing.id,
                                         pairing.player1_name,
-                                        pairing.player2_name
+                                        pairing.player2_name,
                                       )
                                     }
                                     style={{
@@ -2178,7 +2178,7 @@ function Admin() {
                               handleUpdatePlayerStatus(
                                 entry.user_id,
                                 entry.full_name,
-                                "active"
+                                "active",
                               )
                             }
                             style={{
@@ -2199,7 +2199,7 @@ function Admin() {
                               handleUpdatePlayerStatus(
                                 entry.user_id,
                                 entry.full_name,
-                                "no_play"
+                                "no_play",
                               )
                             }
                             style={{
@@ -2220,7 +2220,7 @@ function Admin() {
                               handleUpdatePlayerStatus(
                                 entry.user_id,
                                 entry.full_name,
-                                "withdrawn"
+                                "withdrawn",
                               )
                             }
                             style={{
