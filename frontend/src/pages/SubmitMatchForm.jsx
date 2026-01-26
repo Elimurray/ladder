@@ -40,10 +40,21 @@ function SubmitMatchForm() {
         return;
       }
 
-      // The draw now includes a 'submitted' flag from the backend
+      // If match was submitted, fetch the result details
+      let resultData = null;
+      if (matchData.submitted) {
+        try {
+          const resultResponse = await matchesAPI.getMatchResult(matchData.id);
+          resultData = resultResponse.data;
+        } catch (err) {
+          console.error("Failed to fetch result details:", err);
+        }
+      }
+
       setMatch({
         ...matchData,
         already_submitted: matchData.submitted || false,
+        result_data: resultData,
       });
       setLoading(false);
     } catch (err) {
@@ -198,8 +209,7 @@ function SubmitMatchForm() {
 
     if (
       !confirm(
-        `Are you sure ${
-          submittingFor === "player1" ? match.player1_name : match.player2_name
+        `Are you sure ${submittingFor === "player1" ? match.player1_name : match.player2_name
         } won by default?`
       )
     )
@@ -359,13 +369,92 @@ function SubmitMatchForm() {
                 border: "2px solid #81e6d9",
                 borderRadius: "12px",
                 padding: "2rem",
-                textAlign: "center",
               }}
             >
               <h3 style={{ color: "#234e52", marginBottom: "1rem" }}>
                 ✓ Result Already Submitted
               </h3>
-              <p style={{ color: "#2c7a7b" }}>Awaiting admin approval</p>
+              <p style={{ color: "#2c7a7b", marginBottom: "1.5rem" }}>
+                Awaiting admin approval
+              </p>
+
+              {match.result_data && (
+                <div
+                  style={{
+                    background: "white",
+                    padding: "1.5rem",
+                    borderRadius: "8px",
+                    marginTop: "1rem",
+                  }}
+                >
+                  {/* Winner Display */}
+                  {match.result_data.result !== "~" && match.result_data.result !== "D" && (
+                    <div style={{
+                      marginBottom: "1rem",
+                      padding: "0.75rem",
+                      background: "#f0fdf4",
+                      borderLeft: "4px solid #22c55e",
+                      borderRadius: "4px"
+                    }}>
+                      <strong style={{ color: "#15803d" }}>
+                        Winner: {match.result_data.winner_name}
+                      </strong>
+                    </div>
+                  )}
+
+                  <div style={{ marginBottom: "1rem" }}>
+                    <strong>Score:</strong> {match.result_data.games_won}-
+                    {match.result_data.games_lost}
+                  </div>
+
+                  {match.result_data.set_scores?.sets && (
+                    <div>
+                      <strong>Set Scores:</strong>
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))",
+                          gap: "0.5rem",
+                          marginTop: "0.5rem",
+                        }}
+                      >
+                        {match.result_data.set_scores.sets.map((score, index) => (
+                          <div
+                            key={index}
+                            style={{
+                              padding: "0.5rem",
+                              background: "#f7fafc",
+                              borderRadius: "6px",
+                              textAlign: "center",
+                              fontWeight: "600",
+                            }}
+                          >
+                            Set {index + 1}: {score}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {match.result_data.result === "~" && (
+                    <div style={{ color: "#718096", fontStyle: "italic" }}>
+                      Did not play
+                    </div>
+                  )}
+
+                  {match.result_data.result === "D" && (
+                    <div style={{
+                      padding: "0.75rem",
+                      background: "#fef3c7",
+                      borderLeft: "4px solid #f59e0b",
+                      borderRadius: "4px",
+                      color: "#92400e"
+                    }}>
+                      <strong>{match.result_data.winner_name}</strong> won by default
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           ) : !match.player2_id ? (
             <div

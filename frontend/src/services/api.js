@@ -76,6 +76,7 @@ export const matchesAPI = {
   deleteMatch: (matchId) => api.delete(`/matches/match/${matchId}`), // UPDATED
   processWeek: (date) => api.post(`/matches/process-week/${date}`),
   getCurrentDraw: () => api.get("/draw/current"),
+  getMatchResult: (drawId) => api.get(`/matches/result/${drawId}`),
 };
 
 export const profileAPI = {

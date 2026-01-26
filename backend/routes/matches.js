@@ -670,5 +670,66 @@ router.put(
     }
   }
 );
+// Get match result by draw_id
+router.get("/result/:draw_id", async (req, res) => {
+  try {
+    const { draw_id } = req.params;
+
+    console.log("Fetching result for draw_id:", draw_id);
+
+    // Query the matches table with player names
+    const result = await pool.query(
+      `SELECT 
+        m.games_won, 
+        m.games_lost, 
+        m.result, 
+        m.set_scores, 
+        m.match_score,
+        m.player_id,
+        m.opponent_id,
+        u1.full_name as player_name,
+        u2.full_name as opponent_name
+       FROM matches m
+       JOIN users u1 ON m.player_id = u1.id
+       LEFT JOIN users u2 ON m.opponent_id = u2.id
+       WHERE m.draw_id = $1
+       LIMIT 1`,
+      [draw_id]
+    );
+
+    console.log("Query result:", result.rows);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Result not found" });
+    }
+
+    // Parse set_scores if it's a string
+    const matchResult = result.rows[0];
+    if (typeof matchResult.set_scores === 'string') {
+      matchResult.set_scores = JSON.parse(matchResult.set_scores);
+    }
+
+    // Determine winner based on games_won
+    if (matchResult.games_won > matchResult.games_lost) {
+      matchResult.winner_name = matchResult.player_name;
+      matchResult.loser_name = matchResult.opponent_name;
+    } else if (matchResult.games_lost > matchResult.games_won) {
+      matchResult.winner_name = matchResult.opponent_name;
+      matchResult.loser_name = matchResult.player_name;
+    } else {
+      // Tie or did not play
+      matchResult.winner_name = null;
+      matchResult.loser_name = null;
+    }
+
+    res.json(matchResult);
+  } catch (error) {
+    console.error("Error fetching match result:", error);
+    res.status(500).json({
+      error: "Server error",
+      details: error.message
+    });
+  }
+});
 
 module.exports = router;
