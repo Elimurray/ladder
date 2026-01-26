@@ -507,8 +507,7 @@ function Admin() {
   const handleDeletePairing = async (pairingId, player1Name, player2Name) => {
     if (
       !confirm(
-        `Are you sure you want to delete the match between ${player1Name} and ${
-          player2Name || "BYE"
+        `Are you sure you want to delete the match between ${player1Name} and ${player2Name || "BYE"
         }?`,
       )
     ) {
@@ -714,6 +713,7 @@ function Admin() {
                   password: "",
                   phone_number: "",
                   squash_grade: "",
+                  is_junior: "",
                 });
                 fetchData(); // Refresh users list
               } catch (err) {
@@ -786,6 +786,24 @@ function Admin() {
                 <option value="E">E Grade</option>
                 <option value="F">F Grade</option>
                 <option value="J">J Grade</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>Junior:</label>
+              <select
+                value={newUserData.is_junior}
+                onChange={(e) =>
+                  setNewUserData({
+                    ...newUserData,
+                    is_junior: e.target.value,
+                  })
+                }
+                required
+              >
+                <option value="">-- Select --</option>
+                <option value="true">Yes</option>
+                <option value="false">No</option>
               </select>
             </div>
 

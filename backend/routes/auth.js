@@ -8,10 +8,10 @@ const { authMiddleware } = require("../middleware/auth");
 // Register new user
 router.post("/register", async (req, res) => {
   try {
-    const { email, full_name, password, phone_number, squash_grade } = req.body;
+    const { email, full_name, password, phone_number, squash_grade, is_junior } = req.body;
 
     // Validate input
-    if (!email || !full_name || !password || !phone_number) {
+    if (!email || !full_name || !password || !phone_number || !is_junior) {
       return res
         .status(400)
         .json({ error: "Please provide all required fields" });
@@ -32,8 +32,8 @@ router.post("/register", async (req, res) => {
 
     // Create user
     const result = await pool.query(
-      "INSERT INTO users (email, full_name, password_hash, phone_number, squash_grade, is_member) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, email, full_name, phone_number, squash_grade, is_member, is_admin, is_junior, play_for_levels",
-      [email, full_name, password_hash, phone_number, squash_grade, true]
+      "INSERT INTO users (email, full_name, password_hash, phone_number, squash_grade, is_member, is_junior) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, email, full_name, phone_number, squash_grade, is_member, is_admin, is_junior, play_for_levels",
+      [email, full_name, password_hash, phone_number, squash_grade, true, is_junior]
     );
 
     const user = result.rows[0];
@@ -41,7 +41,7 @@ router.post("/register", async (req, res) => {
     // Insert default preferences for new user
     await pool.query(
       "INSERT INTO user_preferences (user_id, earliest_time, notes) VALUES ($1, $2, $3)",
-      [user.id, "5:30pm", ""]
+      [user.id, "6:00pm", ""]
     );
 
     // Create JWT token
