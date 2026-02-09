@@ -542,98 +542,6 @@ function Profile() {
             </div>
           </div>
 
-          {/* Stats Card */}
-          {stats && stats.total_matches > 0 && (
-            <div
-              style={{
-                background: "white",
-                border: "2px solid #e2e8f0",
-                borderRadius: "12px",
-                padding: "2rem",
-                marginBottom: "2rem",
-              }}
-            >
-              <h3 style={{ marginBottom: "1.5rem", color: "#2d3748" }}>
-                My Stats
-              </h3>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
-                  gap: "1.5rem",
-                }}
-              >
-                <div style={{ textAlign: "center" }}>
-                  <div
-                    style={{
-                      fontSize: "2rem",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    {stats.total_matches}
-                  </div>
-                  <div style={{ color: "#718096", fontSize: "0.875rem" }}>
-                    Total Matches
-                  </div>
-                </div>
-                <div style={{ textAlign: "center" }}>
-                  <div
-                    style={{
-                      fontSize: "2rem",
-                      fontWeight: "bold",
-                      color: "#48bb78",
-                    }}
-                  >
-                    {stats.wins}
-                  </div>
-                  <div style={{ color: "#718096", fontSize: "0.875rem" }}>
-                    Wins
-                  </div>
-                </div>
-                <div style={{ textAlign: "center" }}>
-                  <div
-                    style={{
-                      fontSize: "2rem",
-                      fontWeight: "bold",
-                      color: "#e53e3e",
-                    }}
-                  >
-                    {stats.losses}
-                  </div>
-                  <div style={{ color: "#718096", fontSize: "0.875rem" }}>
-                    Losses
-                  </div>
-                </div>
-                <div style={{ textAlign: "center" }}>
-                  <div
-                    style={{
-                      fontSize: "2rem",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    {calculateWinRate()}%
-                  </div>
-                  <div style={{ color: "#718096", fontSize: "0.875rem" }}>
-                    Win Rate
-                  </div>
-                </div>
-                <div style={{ textAlign: "center" }}>
-                  <div
-                    style={{
-                      fontSize: "2rem",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    {stats.total_games_won || 0}
-                  </div>
-                  <div style={{ color: "#718096", fontSize: "0.875rem" }}>
-                    Games Won
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* Squash Levels */}
           <div
             style={{
@@ -916,6 +824,97 @@ function Profile() {
               </button>
             </form>
           </div>
+          {/* Stats Card */}
+          {stats && stats.total_matches > 0 && (
+            <div
+              style={{
+                background: "white",
+                border: "2px solid #e2e8f0",
+                borderRadius: "12px",
+                padding: "2rem",
+                marginBottom: "2rem",
+              }}
+            >
+              <h3 style={{ marginBottom: "1.5rem", color: "#2d3748" }}>
+                My Stats
+              </h3>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
+                  gap: "1.5rem",
+                }}
+              >
+                <div style={{ textAlign: "center" }}>
+                  <div
+                    style={{
+                      fontSize: "2rem",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {stats.total_matches}
+                  </div>
+                  <div style={{ color: "#718096", fontSize: "0.875rem" }}>
+                    Total Matches
+                  </div>
+                </div>
+                <div style={{ textAlign: "center" }}>
+                  <div
+                    style={{
+                      fontSize: "2rem",
+                      fontWeight: "bold",
+                      color: "#48bb78",
+                    }}
+                  >
+                    {stats.wins}
+                  </div>
+                  <div style={{ color: "#718096", fontSize: "0.875rem" }}>
+                    Wins
+                  </div>
+                </div>
+                <div style={{ textAlign: "center" }}>
+                  <div
+                    style={{
+                      fontSize: "2rem",
+                      fontWeight: "bold",
+                      color: "#e53e3e",
+                    }}
+                  >
+                    {stats.losses}
+                  </div>
+                  <div style={{ color: "#718096", fontSize: "0.875rem" }}>
+                    Losses
+                  </div>
+                </div>
+                <div style={{ textAlign: "center" }}>
+                  <div
+                    style={{
+                      fontSize: "2rem",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {calculateWinRate()}%
+                  </div>
+                  <div style={{ color: "#718096", fontSize: "0.875rem" }}>
+                    Win Rate
+                  </div>
+                </div>
+                <div style={{ textAlign: "center" }}>
+                  <div
+                    style={{
+                      fontSize: "2rem",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {stats.total_games_won || 0}
+                  </div>
+                  <div style={{ color: "#718096", fontSize: "0.875rem" }}>
+                    Games Won
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Match History */}
           {history.length > 0 && (
