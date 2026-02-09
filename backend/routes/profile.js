@@ -14,7 +14,7 @@ router.get("/me", authMiddleware, async (req, res) => {
    LEFT JOIN ladder_positions lp ON u.id = lp.user_id
    LEFT JOIN user_preferences up ON u.id = up.user_id
    WHERE u.id = $1`,
-      [req.user.id]
+      [req.user.id],
     );
 
     if (user.rows.length === 0) {
@@ -43,7 +43,7 @@ router.get("/history", authMiddleware, async (req, res) => {
        WHERE m.player_id = $1 AND m.admin_approved = true
        ORDER BY m.week_date DESC
        LIMIT 20`,
-      [req.user.id]
+      [req.user.id],
     );
 
     res.json(matches.rows);
@@ -66,8 +66,8 @@ router.get("/stats", authMiddleware, async (req, res) => {
         SUM(games_won) as total_games_won,
         SUM(games_lost) as total_games_lost
        FROM matches
-       WHERE player_id = $1 AND admin_approved = true`,
-      [req.user.id]
+       WHERE player_id = $1 AND admin_approved = true AND submitted_at >= '2026-02-09'`,
+      [req.user.id],
     );
 
     res.json(stats.rows[0]);
@@ -91,7 +91,7 @@ router.put("/preferences", authMiddleware, async (req, res) => {
          notes = $3,
          updated_at = NOW()
        RETURNING *`,
-      [req.user.id, earliest_time, notes]
+      [req.user.id, earliest_time, notes],
     );
 
     res.json(result.rows[0]);
@@ -115,7 +115,7 @@ router.put("/contact", authMiddleware, async (req, res) => {
     // Check if email is already taken by another user
     const existingUser = await pool.query(
       "SELECT id FROM users WHERE email = $1 AND id != $2",
-      [email, req.user.id]
+      [email, req.user.id],
     );
 
     if (existingUser.rows.length > 0) {
@@ -124,7 +124,7 @@ router.put("/contact", authMiddleware, async (req, res) => {
 
     const result = await pool.query(
       "UPDATE users SET email = $1, phone_number = $2, squash_grade = $3, is_junior = $4 WHERE id = $5 RETURNING id, email, full_name, phone_number, is_member, is_admin, squash_grade, is_junior",
-      [email, phone_number, squash_grade, is_junior, req.user.id]
+      [email, phone_number, squash_grade, is_junior, req.user.id],
     );
 
     res.json(result.rows[0]);
@@ -146,11 +146,16 @@ router.patch("/status", authMiddleware, async (req, res) => {
 
     const result = await pool.query(
       "UPDATE ladder_positions SET status = $1, updated_at = NOW() WHERE user_id = $2 RETURNING *",
-      [status, req.user.id]
+      [status, req.user.id],
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: "You are not currently on the ladder – please email fscladder@gmail.com to be added back on" });
+      return res
+        .status(404)
+        .json({
+          error:
+            "You are not currently on the ladder – please email fscladder@gmail.com to be added back on",
+        });
     }
 
     res.json(result.rows[0]);
@@ -181,7 +186,7 @@ router.get(
    LEFT JOIN ladder_positions lp ON u.id = lp.user_id
    LEFT JOIN user_preferences up ON u.id = up.user_id
    WHERE lp.status = 'active'
-   ORDER BY lp.position`
+   ORDER BY lp.position`,
       );
 
       res.json(preferences.rows);
@@ -189,7 +194,7 @@ router.get(
       console.error(err.message);
       res.status(500).json({ error: "Server error" });
     }
-  }
+  },
 );
 
 // Update squash levels preference
@@ -199,7 +204,7 @@ router.patch("/squash-levels", authMiddleware, async (req, res) => {
 
     const result = await pool.query(
       "UPDATE users SET play_for_levels = $1 WHERE id = $2 RETURNING id, email, full_name, is_member, is_admin, is_junior, play_for_levels",
-      [play_for_levels, req.user.id]
+      [play_for_levels, req.user.id],
     );
 
     if (result.rows.length === 0) {
