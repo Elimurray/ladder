@@ -1065,6 +1065,49 @@ td:first-child {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+.admin-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #e2e8f0;
+  overflow-x: auto;
+}
+
+.admin-tab {
+  padding: 1rem 1.5rem;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  font-weight: 600;
+  color: #718096;
+  transition: all 0.2s;
+  white-space: nowrap;
+  position: relative;
+}
+
+.admin-tab:hover {
+  color: #2d3748;
+  background: #f7fafc;
+}
+
+.admin-tab.active {
+  color: #fd720d;
+  border-bottom-color: #fd720d;
+}
+
+.admin-tab .badge {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: #e53e3e;
+  color: white;
+  border-radius: 12px;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
 @media (max-width: 768px) {
   /* Show hamburger menu */
   .menu-toggle {
