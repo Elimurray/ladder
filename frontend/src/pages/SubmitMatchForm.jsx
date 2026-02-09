@@ -254,19 +254,8 @@ function SubmitMatchForm() {
 
   return (
     <div className="page">
-      <button
-        onClick={() => navigate("/submit")}
-        style={{
-          marginBottom: "1rem",
-          padding: "0.5rem 1rem",
-          background: "#718096",
-          color: "white",
-          border: "none",
-          borderRadius: "6px",
-          cursor: "pointer",
-        }}
-      >
-        ← Back to All Matches
+      <button onClick={() => navigate("/submit")} className="back-button">
+        ← Back
       </button>
 
       <h1>Submit Match Result</h1>
