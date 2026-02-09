@@ -209,8 +209,9 @@ function SubmitMatchForm() {
 
     if (
       !confirm(
-        `Are you sure ${submittingFor === "player1" ? match.player1_name : match.player2_name
-        } won by default?`
+        `Are you sure ${
+          submittingFor === "player1" ? match.player1_name : match.player2_name
+        } won by default?`,
       )
     )
       return;
@@ -388,19 +389,22 @@ function SubmitMatchForm() {
                   }}
                 >
                   {/* Winner Display */}
-                  {match.result_data.result !== "~" && match.result_data.result !== "D" && (
-                    <div style={{
-                      marginBottom: "1rem",
-                      padding: "0.75rem",
-                      background: "#f0fdf4",
-                      borderLeft: "4px solid #22c55e",
-                      borderRadius: "4px"
-                    }}>
-                      <strong style={{ color: "#15803d" }}>
-                        Winner: {match.result_data.winner_name}
-                      </strong>
-                    </div>
-                  )}
+                  {match.result_data.result !== "~" &&
+                    match.result_data.result !== "D" && (
+                      <div
+                        style={{
+                          marginBottom: "1rem",
+                          padding: "0.75rem",
+                          background: "#f0fdf4",
+                          borderLeft: "4px solid #22c55e",
+                          borderRadius: "4px",
+                        }}
+                      >
+                        <strong style={{ color: "#15803d" }}>
+                          Winner: {match.result_data.winner_name}
+                        </strong>
+                      </div>
+                    )}
 
                   <div style={{ marginBottom: "1rem" }}>
                     <strong>Score:</strong> {match.result_data.games_won}-
@@ -413,25 +417,28 @@ function SubmitMatchForm() {
                       <div
                         style={{
                           display: "grid",
-                          gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))",
+                          gridTemplateColumns:
+                            "repeat(auto-fit, minmax(100px, 1fr))",
                           gap: "0.5rem",
                           marginTop: "0.5rem",
                         }}
                       >
-                        {match.result_data.set_scores.sets.map((score, index) => (
-                          <div
-                            key={index}
-                            style={{
-                              padding: "0.5rem",
-                              background: "#f7fafc",
-                              borderRadius: "6px",
-                              textAlign: "center",
-                              fontWeight: "600",
-                            }}
-                          >
-                            Set {index + 1}: {score}
-                          </div>
-                        ))}
+                        {match.result_data.set_scores.sets.map(
+                          (score, index) => (
+                            <div
+                              key={index}
+                              style={{
+                                padding: "0.5rem",
+                                background: "#f7fafc",
+                                borderRadius: "6px",
+                                textAlign: "center",
+                                fontWeight: "600",
+                              }}
+                            >
+                              Set {index + 1}: {score}
+                            </div>
+                          ),
+                        )}
                       </div>
                     </div>
                   )}
@@ -443,14 +450,17 @@ function SubmitMatchForm() {
                   )}
 
                   {match.result_data.result === "D" && (
-                    <div style={{
-                      padding: "0.75rem",
-                      background: "#fef3c7",
-                      borderLeft: "4px solid #f59e0b",
-                      borderRadius: "4px",
-                      color: "#92400e"
-                    }}>
-                      <strong>{match.result_data.winner_name}</strong> won by default
+                    <div
+                      style={{
+                        padding: "0.75rem",
+                        background: "#fef3c7",
+                        borderLeft: "4px solid #f59e0b",
+                        borderRadius: "4px",
+                        color: "#92400e",
+                      }}
+                    >
+                      <strong>{match.result_data.winner_name}</strong> won by
+                      default
                     </div>
                   )}
                 </div>

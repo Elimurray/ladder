@@ -45,7 +45,7 @@ router.post("/submit", authMiddleware, async (req, res) => {
    WHERE week_date = $1 
    AND ((player_id = $2 AND opponent_id = $3) 
         OR (player_id = $3 AND opponent_id = $2))`,
-      [week_date, player_id, opponent_id]
+      [week_date, player_id, opponent_id],
     );
 
     if (existingResult.rows.length > 0) {
@@ -74,7 +74,7 @@ router.post("/submit", authMiddleware, async (req, res) => {
         result,
         match_score,
         set_scores ? JSON.stringify(set_scores) : null,
-      ]
+      ],
     );
 
     // AUTO-CREATE OPPONENT'S RESULT (add this entire block)
@@ -114,12 +114,12 @@ router.post("/submit", authMiddleware, async (req, res) => {
           opponentMatchScore,
           set_scores
             ? JSON.stringify({
-              sets: set_scores.sets.map((s) =>
-                s.split("/").reverse().join("/")
-              ),
-            })
+                sets: set_scores.sets.map((s) =>
+                  s.split("/").reverse().join("/"),
+                ),
+              })
             : null, // Reverse scores for opponent
-        ]
+        ],
       );
     }
 
@@ -146,7 +146,7 @@ router.get("/my-results", authMiddleware, async (req, res) => {
       LEFT JOIN draws d ON m.draw_id = d.id
       WHERE m.player_id = $1
       ORDER BY m.submitted_at DESC`,
-      [req.user.id]
+      [req.user.id],
     );
 
     res.json(result.rows);
@@ -173,7 +173,7 @@ router.get("/my-match", authMiddleware, async (req, res) => {
       WHERE d.week_date = (SELECT MAX(week_date) FROM draws)
       AND (d.player1_id = $1 OR d.player2_id = $1)
       LIMIT 1`,
-      [req.user.id]
+      [req.user.id],
     );
 
     if (result.rows.length === 0) {
@@ -194,7 +194,7 @@ router.get("/my-match", authMiddleware, async (req, res) => {
     // Check if already submitted
     const submitted = await pool.query(
       "SELECT * FROM matches WHERE draw_id = $1 AND player_id = $2",
-      [match.id, req.user.id]
+      [match.id, req.user.id],
     );
 
     match.already_submitted = submitted.rows.length > 0;
@@ -226,7 +226,7 @@ router.get("/pending", authMiddleware, adminMiddleware, async (req, res) => {
       LEFT JOIN users u2 ON m.opponent_id = u2.id
       LEFT JOIN draws d ON m.draw_id = d.id
       WHERE m.admin_approved = false
-      ORDER BY d.week_date DESC, m.player_id`
+      ORDER BY d.week_date DESC, m.player_id`,
     );
 
     // Group by match (each match has 2 entries - one per player)
@@ -238,7 +238,7 @@ router.get("/pending", authMiddleware, adminMiddleware, async (req, res) => {
         // Find opponent's result
         const opponentResult = result.rows.find(
           (r) =>
-            r.player_id === row.opponent_id && r.opponent_id === row.player_id
+            r.player_id === row.opponent_id && r.opponent_id === row.player_id,
         );
 
         matches.push({
@@ -302,7 +302,7 @@ router.get("/week/:date", authMiddleware, adminMiddleware, async (req, res) => {
       LEFT JOIN draws d ON m.draw_id = d.id
       WHERE m.week_date = $1
       ORDER BY d.player1_position`,
-      [date]
+      [date],
     );
 
     res.json(result.rows);
@@ -323,7 +323,7 @@ router.patch(
 
       const result = await pool.query(
         "UPDATE matches SET admin_approved = true WHERE id = $1 RETURNING *",
-        [id]
+        [id],
       );
 
       if (result.rows.length === 0) {
@@ -335,7 +335,7 @@ router.patch(
       console.error(err.message);
       res.status(500).json({ error: "Server error" });
     }
-  }
+  },
 );
 
 // Admin: Reject/delete match result
@@ -371,7 +371,7 @@ router.post(
        JOIN draws d ON m.draw_id = d.id
        WHERE m.week_date = $1 AND m.admin_approved = true
        ORDER BY d.player1_position`,
-        [date]
+        [date],
       );
 
       // Save current ladder positions to history BEFORE processing
@@ -380,7 +380,7 @@ router.post(
    SELECT user_id, $1, position
    FROM ladder_positions
    ON CONFLICT (user_id, week_date) DO NOTHING`,
-        [date]
+        [date],
       );
 
       console.log("Saved ladder snapshot to history");
@@ -396,7 +396,7 @@ router.post(
 
       // Get current ladder - map user_id to ladder_positions entry
       const currentLadder = await client.query(
-        "SELECT * FROM ladder_positions ORDER BY position"
+        "SELECT * FROM ladder_positions ORDER BY position",
       );
 
       // Create a map: user_id -> current ladder entry
@@ -417,11 +417,16 @@ router.post(
         const result = match.result;
 
         let movement = 0;
-        if (result === "3") movement = 6; // Won 3-0 - ADD 6 points
-        else if (result === "2") movement = 3; // Won 2-1 - ADD 3 points
-        else if (result === "1") movement = 0; // Won narrow - no change
-        else if (result === "0") movement = -1; // Lost 0-3 - SUBTRACT 1 point
-        else if (result === "~") movement = 0; // Didn't play - no change
+        if (result === "3")
+          movement = 6; // Won 3-0 - ADD 6 points
+        else if (result === "2")
+          movement = 3; // Won 2-1 - ADD 3 points
+        else if (result === "1")
+          movement = 0; // Won narrow - no change
+        else if (result === "0")
+          movement = -1; // Lost 0-3 - SUBTRACT 1 point
+        else if (result === "~")
+          movement = 0; // Didn't play - no change
         else if (result === "D") movement = -1; // Default - SUBTRACT 1 point
 
         positionChanges[playerId] = movement;
@@ -467,7 +472,7 @@ router.post(
 
         await client.query(
           "UPDATE ladder_positions SET position = $1, updated_at = NOW() WHERE id = $2",
-          [finalPosition, entry.id]
+          [finalPosition, entry.id],
         );
       }
 
@@ -477,7 +482,7 @@ router.post(
       // Set draw_id to NULL in matches (so they become history records)
       await client.query(
         "UPDATE matches SET draw_id = NULL WHERE week_date = $1",
-        [date]
+        [date],
       );
 
       // Delete the draw itself
@@ -498,7 +503,7 @@ router.post(
     } finally {
       client.release();
     }
-  }
+  },
 );
 
 // Admin: Approve a match (both players)
@@ -519,7 +524,7 @@ router.post(
        WHERE (player_id = $1 AND opponent_id = $2) 
           OR (player_id = $2 AND opponent_id = $1)
        RETURNING *`,
-        [player1Id, player2Id]
+        [player1Id, player2Id],
       );
 
       res.json({
@@ -530,7 +535,7 @@ router.post(
       console.error(err.message);
       res.status(500).json({ error: "Server error" });
     }
-  }
+  },
 );
 
 // Admin: Bulk approve all pending matches
@@ -541,7 +546,7 @@ router.post(
   async (req, res) => {
     try {
       const result = await pool.query(
-        "UPDATE matches SET admin_approved = true WHERE admin_approved = false RETURNING *"
+        "UPDATE matches SET admin_approved = true WHERE admin_approved = false RETURNING *",
       );
 
       res.json({
@@ -552,7 +557,7 @@ router.post(
       console.error(err.message);
       res.status(500).json({ error: "Server error" });
     }
-  }
+  },
 );
 
 // Admin: Delete a match (both players)
@@ -571,7 +576,7 @@ router.delete(
         `DELETE FROM matches 
        WHERE (player_id = $1 AND opponent_id = $2) 
           OR (player_id = $2 AND opponent_id = $1)`,
-        [player1Id, player2Id]
+        [player1Id, player2Id],
       );
 
       res.json({ message: "Match deleted" });
@@ -579,7 +584,7 @@ router.delete(
       console.error(err.message);
       res.status(500).json({ error: "Server error" });
     }
-  }
+  },
 );
 
 // Admin: Update match (both players)
@@ -629,7 +634,7 @@ router.put(
           set_scores ? JSON.stringify(set_scores) : null,
           player1Id,
           player2Id,
-        ]
+        ],
       );
 
       // Update player 2 (opposite scores)
@@ -648,14 +653,14 @@ router.put(
           `${player1_games_lost}-${player1_games_won}`,
           set_scores
             ? JSON.stringify({
-              sets: set_scores.sets.map((s) =>
-                s.split("/").reverse().join("/")
-              ),
-            })
+                sets: set_scores.sets.map((s) =>
+                  s.split("/").reverse().join("/"),
+                ),
+              })
             : null,
           player2Id,
           player1Id,
-        ]
+        ],
       );
 
       await client.query("COMMIT");
@@ -668,7 +673,7 @@ router.put(
     } finally {
       client.release();
     }
-  }
+  },
 );
 // Get match result by draw_id
 router.get("/result/:draw_id", async (req, res) => {
@@ -677,7 +682,6 @@ router.get("/result/:draw_id", async (req, res) => {
 
     console.log("Fetching result for draw_id:", draw_id);
 
-    // Query the matches table with player names
     const result = await pool.query(
       `SELECT 
         m.games_won, 
@@ -694,28 +698,44 @@ router.get("/result/:draw_id", async (req, res) => {
        LEFT JOIN users u2 ON m.opponent_id = u2.id
        WHERE m.draw_id = $1
        LIMIT 1`,
-      [draw_id]
+      [draw_id],
     );
-
-    console.log("Query result:", result.rows);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Result not found" });
     }
 
-    // Parse set_scores if it's a string
     const matchResult = result.rows[0];
-    if (typeof matchResult.set_scores === 'string') {
+
+    // Parse set_scores if it's a string
+    if (typeof matchResult.set_scores === "string") {
       matchResult.set_scores = JSON.parse(matchResult.set_scores);
     }
 
-    // Determine winner based on games_won
-    if (matchResult.games_won > matchResult.games_lost) {
+    // Check if the submitter (player_id) won or lost
+    const submitterWon = matchResult.games_won > matchResult.games_lost;
+
+    if (submitterWon) {
+      // Submitter won - data is already in correct format
       matchResult.winner_name = matchResult.player_name;
       matchResult.loser_name = matchResult.opponent_name;
-    } else if (matchResult.games_lost > matchResult.games_won) {
+      // games_won, games_lost, and set_scores are already correct
+    } else if (matchResult.games_won < matchResult.games_lost) {
+      // Opponent won - need to flip everything
       matchResult.winner_name = matchResult.opponent_name;
       matchResult.loser_name = matchResult.player_name;
+
+      // Swap games_won and games_lost
+      const temp = matchResult.games_won;
+      matchResult.games_won = matchResult.games_lost;
+      matchResult.games_lost = temp;
+
+      // Flip each set score (7/11 becomes 11/7)
+      if (matchResult.set_scores?.sets) {
+        matchResult.set_scores.sets = matchResult.set_scores.sets.map((score) =>
+          score.split("/").reverse().join("/"),
+        );
+      }
     } else {
       // Tie or did not play
       matchResult.winner_name = null;
@@ -727,7 +747,7 @@ router.get("/result/:draw_id", async (req, res) => {
     console.error("Error fetching match result:", error);
     res.status(500).json({
       error: "Server error",
-      details: error.message
+      details: error.message,
     });
   }
 });
