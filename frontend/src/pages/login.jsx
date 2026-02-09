@@ -19,7 +19,7 @@ function Login() {
     setLoading(true);
 
     try {
-      await login(formData.email, formData.password);
+      await login(formData.email.toLowerCase(), formData.password);
       navigate("/profile");
     } catch (err) {
       setError(err.response?.data?.error || "An error occurred");
