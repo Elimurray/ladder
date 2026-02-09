@@ -19,6 +19,8 @@ function Admin() {
   const [successMessage, setSuccessMessage] = useState(null);
   const [drawWeek, setDrawWeek] = useState("");
   const [processWeekDate, setProcessWeekDate] = useState("");
+  const [openDropdown, setOpenDropdown] = useState(null);
+  const [expandedPlayer, setExpandedPlayer] = useState(null);
 
   // Register User
   const [newUserData, setNewUserData] = useState({
@@ -507,7 +509,8 @@ function Admin() {
   const handleDeletePairing = async (pairingId, player1Name, player2Name) => {
     if (
       !confirm(
-        `Are you sure you want to delete the match between ${player1Name} and ${player2Name || "BYE"
+        `Are you sure you want to delete the match between ${player1Name} and ${
+          player2Name || "BYE"
         }?`,
       )
     ) {
@@ -554,6 +557,18 @@ function Admin() {
       fetchDrawByDate(selectedDrawDate);
     } catch (err) {
       showError(err.response?.data?.error || "Failed to create match");
+    }
+  };
+
+  const handleResetPassword = async (userId, email) => {
+    if (window.confirm(`Reset password for ${email} to "password"?`)) {
+      try {
+        await authAPI.resetPassword(userId);
+        alert(`Password reset to "password" for ${email}`);
+      } catch (error) {
+        console.error("Error resetting password:", error);
+        alert("Failed to reset password");
+      }
     }
   };
 
@@ -660,7 +675,7 @@ function Admin() {
                 .scrollIntoView({ behavior: "smooth" });
             }}
           >
-            Manage Positions
+            Manage Players
           </a>
         </nav>
       </div>
@@ -2135,129 +2150,309 @@ function Admin() {
               </thead>
               <tbody>
                 {ladder.map((entry) => (
-                  <tr key={entry.id}>
-                    <td>
-                      {editingId === entry.id ? (
-                        <input
-                          type="number"
-                          min="1"
-                          value={editPosition}
-                          onChange={(e) => setEditPosition(e.target.value)}
-                          className="admin-edit-input"
-                        />
-                      ) : (
+                  <>
+                    <tr key={entry.id}>
+                      <td>
                         <span className="ladder-position">
                           {entry.position === 1 && "🥇 "}
                           {entry.position === 2 && "🥈 "}
                           {entry.position === 3 && "🥉 "}
                           {entry.position}
                         </span>
-                      )}
-                    </td>
-                    <td>{entry.full_name}</td>
-
-                    <td>
-                      <span className={`status-badge status-${entry.status}`}>
-                        {entry.status}
-                      </span>
-                    </td>
-                    <td className="admin-actions">
-                      {editingId === entry.id ? (
-                        <div className="admin-edit-buttons">
-                          <button
-                            onClick={() => handleSavePosition(entry.id)}
-                            className="btn-save"
-                          >
-                            Save
-                          </button>
-                          <button
-                            onClick={handleCancelEdit}
-                            className="btn-cancel"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      ) : (
-                        <div
+                      </td>
+                      <td>{entry.full_name}</td>
+                      <td>
+                        <span className={`status-badge status-${entry.status}`}>
+                          {entry.status}
+                        </span>
+                      </td>
+                      <td className="admin-actions">
+                        <button
+                          onClick={() =>
+                            setExpandedPlayer(
+                              expandedPlayer === entry.id ? null : entry.id,
+                            )
+                          }
                           style={{
+                            padding: "0.5rem 1rem",
+                            background: "#4299e1",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "6px",
+                            cursor: "pointer",
                             display: "flex",
+                            alignItems: "center",
                             gap: "0.5rem",
-                            justifyContent: "flex-end",
+                            marginLeft: "auto",
                           }}
                         >
-                          <button
-                            onClick={() => handleStartEdit(entry)}
-                            className="btn-edit"
-                          >
-                            Edit Position
-                          </button>
-                          <button
-                            onClick={() =>
-                              handleUpdatePlayerStatus(
-                                entry.user_id,
-                                entry.full_name,
-                                "active",
-                              )
-                            }
+                          Manage
+                          <span
                             style={{
-                              padding: "0.75rem 1.5rem",
-                              background: "#48bb78",
-                              color: "white",
-                              border: "none",
-                              borderRadius: "8px",
-                              cursor: "pointer",
-                              fontWeight: "600",
+                              transform:
+                                expandedPlayer === entry.id
+                                  ? "rotate(180deg)"
+                                  : "rotate(0deg)",
+                              transition: "transform 0.2s",
                             }}
                           >
-                            ✓ Active
-                          </button>
+                            ▼
+                          </span>
+                        </button>
+                      </td>
+                    </tr>
 
-                          <button
-                            onClick={() =>
-                              handleUpdatePlayerStatus(
-                                entry.user_id,
-                                entry.full_name,
-                                "no_play",
-                              )
-                            }
+                    {/* Expanded Details Row */}
+                    {expandedPlayer === entry.id && (
+                      <tr key={`${entry.id}-details`}>
+                        <td
+                          colSpan="4"
+                          style={{
+                            background: "#f7fafc",
+                            padding: "1.5rem",
+                            borderTop: "2px solid #e2e8f0",
+                          }}
+                        >
+                          <div
                             style={{
-                              padding: "0.75rem 1.5rem",
-                              background: "#ed8936",
-                              color: "white",
-                              border: "none",
-                              borderRadius: "8px",
-                              cursor: "pointer",
-                              fontWeight: "600",
+                              display: "grid",
+                              gridTemplateColumns: "1fr 1fr",
+                              gap: "1.5rem",
+                              maxWidth: "800px",
                             }}
                           >
-                            ⏸ No Play
-                          </button>
+                            {/* Left Column - Player Details */}
+                            <div>
+                              <h3
+                                style={{
+                                  marginBottom: "1rem",
+                                  color: "#2d3748",
+                                }}
+                              >
+                                Player Details
+                              </h3>
+                              <div
+                                style={{
+                                  background: "white",
+                                  padding: "1rem",
+                                  borderRadius: "8px",
+                                  border: "1px solid #e2e8f0",
+                                }}
+                              >
+                                <div style={{ marginBottom: "0.75rem" }}>
+                                  <strong>Email:</strong> {entry.email}
+                                </div>
+                                <div style={{ marginBottom: "0.75rem" }}>
+                                  <strong>User ID:</strong> {entry.user_id}
+                                </div>
+                                <div>
+                                  <strong>Current Position:</strong> #
+                                  {entry.position}
+                                </div>
+                              </div>
 
-                          <button
-                            onClick={() =>
-                              handleUpdatePlayerStatus(
-                                entry.user_id,
-                                entry.full_name,
-                                "withdrawn",
-                              )
-                            }
-                            style={{
-                              padding: "0.5rem 1rem",
-                              background: "#e53e3e",
-                              color: "white",
-                              border: "none",
-                              borderRadius: "6px",
-                              cursor: "pointer",
-                              fontWeight: "600",
-                              fontSize: "0.875rem",
-                            }}
-                          >
-                            Withdraw
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
+                              {/* Edit Position */}
+                              <div style={{ marginTop: "1rem" }}>
+                                {editingId === entry.id ? (
+                                  <div>
+                                    <label
+                                      style={{
+                                        display: "block",
+                                        marginBottom: "0.5rem",
+                                        fontWeight: "600",
+                                        color: "#2d3748",
+                                      }}
+                                    >
+                                      New Position:
+                                    </label>
+                                    <input
+                                      type="number"
+                                      min="1"
+                                      value={editPosition}
+                                      onChange={(e) =>
+                                        setEditPosition(e.target.value)
+                                      }
+                                      style={{
+                                        width: "100%",
+                                        padding: "0.75rem",
+                                        border: "1px solid #cbd5e0",
+                                        borderRadius: "6px",
+                                        marginBottom: "0.5rem",
+                                        fontSize: "1rem",
+                                      }}
+                                    />
+                                    <div
+                                      style={{ display: "flex", gap: "0.5rem" }}
+                                    >
+                                      <button
+                                        onClick={() =>
+                                          handleSavePosition(entry.id)
+                                        }
+                                        style={{
+                                          flex: 1,
+                                          padding: "0.75rem",
+                                          background: "#48bb78",
+                                          color: "white",
+                                          border: "none",
+                                          borderRadius: "6px",
+                                          cursor: "pointer",
+                                          fontWeight: "600",
+                                        }}
+                                      >
+                                        Save
+                                      </button>
+                                      <button
+                                        onClick={handleCancelEdit}
+                                        style={{
+                                          flex: 1,
+                                          padding: "0.75rem",
+                                          background: "#cbd5e0",
+                                          color: "#2d3748",
+                                          border: "none",
+                                          borderRadius: "6px",
+                                          cursor: "pointer",
+                                          fontWeight: "600",
+                                        }}
+                                      >
+                                        Cancel
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <button
+                                    onClick={() => handleStartEdit(entry)}
+                                    style={{
+                                      width: "100%",
+                                      padding: "0.75rem",
+                                      background: "#4299e1",
+                                      color: "white",
+                                      border: "none",
+                                      borderRadius: "6px",
+                                      cursor: "pointer",
+                                      fontWeight: "600",
+                                    }}
+                                  >
+                                    Edit Position
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Right Column - Actions */}
+                            <div>
+                              <h3
+                                style={{
+                                  marginBottom: "1rem",
+                                  color: "#2d3748",
+                                }}
+                              >
+                                Actions
+                              </h3>
+
+                              {/* Status Buttons */}
+                              <div
+                                style={{
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  gap: "0.75rem",
+                                  marginBottom: "1rem",
+                                }}
+                              >
+                                <button
+                                  onClick={() => {
+                                    handleUpdatePlayerStatus(
+                                      entry.user_id,
+                                      entry.full_name,
+                                      "active",
+                                    );
+                                    setExpandedPlayer(null);
+                                  }}
+                                  style={{
+                                    padding: "0.75rem",
+                                    background: "#48bb78",
+                                    color: "white",
+                                    border: "none",
+                                    borderRadius: "6px",
+                                    cursor: "pointer",
+                                    fontWeight: "600",
+                                  }}
+                                >
+                                  ✓ Set Active
+                                </button>
+
+                                <button
+                                  onClick={() => {
+                                    handleUpdatePlayerStatus(
+                                      entry.user_id,
+                                      entry.full_name,
+                                      "no_play",
+                                    );
+                                    setExpandedPlayer(null);
+                                  }}
+                                  style={{
+                                    padding: "0.75rem",
+                                    background: "#ed8936",
+                                    color: "white",
+                                    border: "none",
+                                    borderRadius: "6px",
+                                    cursor: "pointer",
+                                    fontWeight: "600",
+                                  }}
+                                >
+                                  ⏸ Set No Play
+                                </button>
+
+                                <button
+                                  onClick={() => {
+                                    handleUpdatePlayerStatus(
+                                      entry.user_id,
+                                      entry.full_name,
+                                      "withdrawn",
+                                    );
+                                    setExpandedPlayer(null);
+                                  }}
+                                  style={{
+                                    padding: "0.75rem",
+                                    background: "#e53e3e",
+                                    color: "white",
+                                    border: "none",
+                                    borderRadius: "6px",
+                                    cursor: "pointer",
+                                    fontWeight: "600",
+                                  }}
+                                >
+                                  Withdraw Player
+                                </button>
+                              </div>
+
+                              {/* Reset Password Button */}
+                              <button
+                                onClick={() => {
+                                  handleResetPassword(
+                                    entry.user_id,
+                                    entry.email,
+                                  );
+                                  setExpandedPlayer(null);
+                                }}
+                                style={{
+                                  width: "100%",
+                                  padding: "0.75rem",
+                                  background: "#805ad5",
+                                  color: "white",
+                                  border: "none",
+                                  borderRadius: "6px",
+                                  cursor: "pointer",
+                                  fontWeight: "600",
+                                }}
+                              >
+                                Reset Password
+                              </button>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </>
                 ))}
               </tbody>
             </table>

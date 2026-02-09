@@ -13,6 +13,7 @@ router.get("/", async (req, res) => {
     lp.status,
     u.id as user_id,
     u.full_name,
+    u.email,
     u.phone_number,
     u.is_member,
     u.play_for_levels,
@@ -46,7 +47,7 @@ router.get("/user/:userId", async (req, res) => {
       JOIN users u ON lp.user_id = u.id
       WHERE lp.user_id = $1
     `,
-      [userId]
+      [userId],
     );
 
     if (result.rows.length === 0) {
@@ -75,7 +76,7 @@ router.get("/me", authMiddleware, async (req, res) => {
       JOIN users u ON lp.user_id = u.id
       WHERE lp.user_id = $1
     `,
-      [req.user.id]
+      [req.user.id],
     );
 
     if (result.rows.length === 0) {
@@ -101,7 +102,7 @@ router.patch("/status", authMiddleware, async (req, res) => {
 
     const result = await pool.query(
       "UPDATE ladder_positions SET status = $1, updated_at = NOW() WHERE user_id = $2 RETURNING *",
-      [status, req.user.id]
+      [status, req.user.id],
     );
 
     if (result.rows.length === 0) {
@@ -115,7 +116,6 @@ router.patch("/status", authMiddleware, async (req, res) => {
   }
 });
 
-
 // Withdraw from ladder (removes user completely)
 router.delete("/withdraw", authMiddleware, async (req, res) => {
   const client = await pool.connect();
@@ -126,7 +126,7 @@ router.delete("/withdraw", authMiddleware, async (req, res) => {
     // Get user's current position
     const currentPos = await client.query(
       "SELECT position FROM ladder_positions WHERE user_id = $1",
-      [req.user.id]
+      [req.user.id],
     );
 
     if (currentPos.rows.length === 0) {
@@ -144,7 +144,7 @@ router.delete("/withdraw", authMiddleware, async (req, res) => {
     // Move everyone below up one position
     await client.query(
       "UPDATE ladder_positions SET position = position - 1 WHERE position > $1",
-      [position]
+      [position],
     );
 
     await client.query("COMMIT");
@@ -167,7 +167,7 @@ router.patch("/status/:userId", authMiddleware, async (req, res) => {
 
     const result = await pool.query(
       "UPDATE ladder_positions SET status = $1, updated_at = NOW() WHERE user_id = $2 RETURNING *",
-      [status, userId]
+      [status, userId],
     );
 
     if (result.rows.length === 0) {
@@ -180,8 +180,6 @@ router.patch("/status/:userId", authMiddleware, async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
-
-
 
 // Admin: Withdraw a user from ladder
 router.delete(
@@ -199,7 +197,7 @@ router.delete(
       // Get user's current position
       const currentPos = await client.query(
         "SELECT position FROM ladder_positions WHERE user_id = $1",
-        [targetUserId]
+        [targetUserId],
       );
 
       if (currentPos.rows.length === 0) {
@@ -217,7 +215,7 @@ router.delete(
       // Move everyone below up one position
       await client.query(
         "UPDATE ladder_positions SET position = position - 1 WHERE position > $1",
-        [position]
+        [position],
       );
 
       await client.query("COMMIT");
@@ -230,10 +228,8 @@ router.delete(
     } finally {
       client.release();
     }
-  }
+  },
 );
-
-
 
 // Admin: Add new user to ladder at specific position
 router.post("/add", authMiddleware, adminMiddleware, async (req, res) => {
@@ -243,7 +239,7 @@ router.post("/add", authMiddleware, adminMiddleware, async (req, res) => {
     // Check if user already on ladder
     const checkExisting = await pool.query(
       "SELECT * FROM ladder_positions WHERE user_id = $1",
-      [user_id]
+      [user_id],
     );
 
     if (checkExisting.rows.length > 0) {
@@ -253,13 +249,13 @@ router.post("/add", authMiddleware, adminMiddleware, async (req, res) => {
     // Shift everyone down who is at or below this position
     await pool.query(
       "UPDATE ladder_positions SET position = position + 1 WHERE position >= $1",
-      [position]
+      [position],
     );
 
     // Insert new position
     const result = await pool.query(
       "INSERT INTO ladder_positions (user_id, position, status) VALUES ($1, $2, $3) RETURNING *",
-      [user_id, position, "active"]
+      [user_id, position, "active"],
     );
 
     res.status(201).json(result.rows[0]);
@@ -282,7 +278,7 @@ router.put("/:id", authMiddleware, adminMiddleware, async (req, res) => {
     // Get current position
     const current = await client.query(
       "SELECT position, user_id FROM ladder_positions WHERE id = $1",
-      [id]
+      [id],
     );
 
     if (current.rows.length === 0) {
@@ -301,7 +297,7 @@ router.put("/:id", authMiddleware, adminMiddleware, async (req, res) => {
     // Remove this person from the ladder temporarily (set to 9999)
     await client.query(
       "UPDATE ladder_positions SET position = 9999 WHERE id = $1",
-      [id]
+      [id],
     );
 
     // Shift others
@@ -309,31 +305,31 @@ router.put("/:id", authMiddleware, adminMiddleware, async (req, res) => {
       // Moving down - shift others up
       await client.query(
         "UPDATE ladder_positions SET position = position - 1 WHERE position > $1 AND position <= $2 AND id != $3",
-        [oldPosition, position, id]
+        [oldPosition, position, id],
       );
     } else {
       // Moving up - shift others down
       await client.query(
         "UPDATE ladder_positions SET position = position + 1 WHERE position >= $1 AND position < $2 AND id != $3",
-        [position, oldPosition, id]
+        [position, oldPosition, id],
       );
     }
 
     // Now place the person at the new position
     await client.query(
       "UPDATE ladder_positions SET position = $1, updated_at = NOW() WHERE id = $2",
-      [position, id]
+      [position, id],
     );
 
     // Normalize all positions to be sequential (1, 2, 3, 4...)
     const allPositions = await client.query(
-      "SELECT id FROM ladder_positions ORDER BY position, updated_at"
+      "SELECT id FROM ladder_positions ORDER BY position, updated_at",
     );
 
     for (let i = 0; i < allPositions.rows.length; i++) {
       await client.query(
         "UPDATE ladder_positions SET position = $1 WHERE id = $2",
-        [i + 1, allPositions.rows[i].id]
+        [i + 1, allPositions.rows[i].id],
       );
     }
 
@@ -342,7 +338,7 @@ router.put("/:id", authMiddleware, adminMiddleware, async (req, res) => {
     // Return updated ladder
     const result = await client.query(
       "SELECT * FROM ladder_positions WHERE id = $1",
-      [id]
+      [id],
     );
 
     res.json(result.rows[0]);

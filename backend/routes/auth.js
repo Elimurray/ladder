@@ -8,7 +8,14 @@ const { authMiddleware } = require("../middleware/auth");
 // Register new user
 router.post("/register", async (req, res) => {
   try {
-    const { email, full_name, password, phone_number, squash_grade, is_junior } = req.body;
+    const {
+      email,
+      full_name,
+      password,
+      phone_number,
+      squash_grade,
+      is_junior,
+    } = req.body;
 
     // Validate input
     if (!email || !full_name || !password || !phone_number || !is_junior) {
@@ -33,7 +40,15 @@ router.post("/register", async (req, res) => {
     // Create user
     const result = await pool.query(
       "INSERT INTO users (email, full_name, password_hash, phone_number, squash_grade, is_member, is_junior) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, email, full_name, phone_number, squash_grade, is_member, is_admin, is_junior, play_for_levels",
-      [email, full_name, password_hash, phone_number, squash_grade, true, is_junior]
+      [
+        email,
+        full_name,
+        password_hash,
+        phone_number,
+        squash_grade,
+        true,
+        is_junior,
+      ],
     );
 
     const user = result.rows[0];
@@ -41,7 +56,7 @@ router.post("/register", async (req, res) => {
     // Insert default preferences for new user
     await pool.query(
       "INSERT INTO user_preferences (user_id, earliest_time, notes) VALUES ($1, $2, $3)",
-      [user.id, "6:00pm", ""]
+      [user.id, "6:00pm", ""],
     );
 
     // Create JWT token
@@ -52,7 +67,7 @@ router.post("/register", async (req, res) => {
         is_admin: user.is_admin,
       },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: "7d" },
     );
 
     res.status(201).json({
@@ -113,7 +128,7 @@ router.post("/login", async (req, res) => {
         is_admin: user.is_admin,
       },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: "7d" },
     );
 
     res.json({
@@ -141,7 +156,7 @@ router.get("/me", authMiddleware, async (req, res) => {
   try {
     const result = await pool.query(
       "SELECT id, email, full_name, phone_number, squash_grade, is_member, is_admin, is_junior, play_for_levels, created_at FROM users WHERE id = $1",
-      [req.user.id]
+      [req.user.id],
     );
 
     if (result.rows.length === 0) {
@@ -200,6 +215,36 @@ router.put("/change-password", authMiddleware, async (req, res) => {
     ]);
 
     res.json({ message: "Password changed successfully" });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Reset password to "password" (Admin only)
+router.post("/reset-password/:userId", authMiddleware, async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Hash the default password "password"
+    const defaultPassword = "password";
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(defaultPassword, salt);
+
+    // Update user's password
+    const result = await pool.query(
+      "UPDATE users SET password_hash = $1 WHERE id = $2 RETURNING id, email, full_name",
+      [hashedPassword, userId],
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({
+      message: "Password reset to 'password'",
+      user: result.rows[0],
+    });
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ error: "Server error" });
