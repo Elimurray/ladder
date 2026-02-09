@@ -11,6 +11,7 @@ router.get("/", async (req, res) => {
     lp.id,
     lp.position,
     lp.status,
+    lp.has_shield,
     u.id as user_id,
     u.full_name,
     u.email,
@@ -350,5 +351,32 @@ router.put("/:id", authMiddleware, adminMiddleware, async (req, res) => {
     client.release();
   }
 });
+
+// Admin: Toggle shield status
+router.patch(
+  "/shield/:userId",
+  authMiddleware,
+  adminMiddleware,
+  async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { has_shield } = req.body;
+
+      const result = await pool.query(
+        "UPDATE ladder_positions SET has_shield = $1, updated_at = NOW() WHERE user_id = $2 RETURNING *",
+        [has_shield, userId],
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: "User not found in ladder" });
+      }
+
+      res.json(result.rows[0]);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ error: "Server error" });
+    }
+  },
+);
 
 module.exports = router;

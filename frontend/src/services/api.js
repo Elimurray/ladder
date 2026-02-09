@@ -47,6 +47,8 @@ export const ladderAPI = {
   addToLadder: (user_id, position) =>
     api.post("/ladder/add", { user_id, position }),
   updatePosition: (id, position) => api.put(`/ladder/${id}`, { position }),
+  toggleShield: (userId, hasShield) =>
+    api.patch(`/ladder/shield/${userId}`, { has_shield: hasShield }),
 };
 
 export const drawAPI = {

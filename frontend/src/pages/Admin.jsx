@@ -1876,9 +1876,9 @@ function Admin() {
                         <tr key={entry.id}>
                           <td>
                             <span className="ladder-position">
-                              {entry.position === 1 && "🥇 "}
-                              {entry.position === 2 && "🥈 "}
-                              {entry.position === 3 && "🥉 "}
+                              {entry.position === 1}
+                              {entry.position === 2}
+                              {entry.position === 3}
                               {entry.position}
                             </span>
                           </td>
@@ -2085,6 +2085,37 @@ function Admin() {
                                       marginBottom: "1rem",
                                     }}
                                   >
+                                    <button
+                                      onClick={async () => {
+                                        try {
+                                          await ladderAPI.toggleShield(
+                                            entry.user_id,
+                                            !entry.has_shield,
+                                          );
+                                          showSuccess(
+                                            `Shield ${entry.has_shield ? "removed" : "added"}`,
+                                          );
+                                          fetchData();
+                                        } catch (err) {
+                                          showError("Failed to toggle shield");
+                                        }
+                                      }}
+                                      style={{
+                                        padding: "0.75rem",
+                                        background: entry.has_shield
+                                          ? "#718096"
+                                          : "#3182ce",
+                                        color: "white",
+                                        border: "none",
+                                        borderRadius: "6px",
+                                        cursor: "pointer",
+                                        fontWeight: "600",
+                                      }}
+                                    >
+                                      {entry.has_shield
+                                        ? "🛡️ Remove Shield"
+                                        : "🛡️ Add Shield"}
+                                    </button>
                                     <button
                                       onClick={() => {
                                         handleUpdatePlayerStatus(
