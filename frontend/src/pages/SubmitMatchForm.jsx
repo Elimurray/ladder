@@ -554,7 +554,7 @@ function SubmitMatchForm() {
                         marginBottom: "1rem",
                       }}
                     >
-                      Format: 11/7 (winner's score first)
+                      Format: 15/7 (winner's score first)
                     </p>
                     <div
                       style={{
@@ -573,7 +573,7 @@ function SubmitMatchForm() {
                           <label>Set {index + 1}:</label>
                           <input
                             type="text"
-                            placeholder="11/7"
+                            placeholder="15/7"
                             value={score}
                             onChange={(e) =>
                               handleSetScoreChange(index, e.target.value)
