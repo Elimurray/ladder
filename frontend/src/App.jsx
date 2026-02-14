@@ -62,7 +62,9 @@ function AppContent() {
             onClick={toggleMenu}
             aria-label="Toggle menu"
           >
-            {menuOpen ? "✕" : "☰"}
+            <span className={menuOpen ? "open" : ""}></span>
+            <span className={menuOpen ? "open" : ""}></span>
+            <span className={menuOpen ? "open" : ""}></span>
           </button>
 
           <ul className={`nav-menu ${menuOpen ? "active" : ""}`}>

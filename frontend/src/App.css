@@ -68,14 +68,37 @@ body {
 
 /* Hamburger Menu Button */
 .menu-toggle {
-  display: none;
   background: none;
   border: none;
-  font-size: 1.75rem;
   cursor: pointer;
-  padding: 0.25rem;
+  display: none;
+  flex-direction: column;
+  gap: 6px;
   z-index: 101;
-  color: black;
+  padding: 8px;
+}
+
+.menu-toggle span {
+  width: 24px;
+  height: 2px;
+  background-color: #000;
+  transition: all 0.3s ease;
+  display: block;
+}
+
+/* First line - rotates down */
+.menu-toggle span:nth-child(1).open {
+  transform: rotate(45deg) translateY(11px);
+}
+
+/* Middle line - fades out */
+.menu-toggle span:nth-child(2).open {
+  opacity: 0;
+}
+
+/* Third line - rotates up */
+.menu-toggle span:nth-child(3).open {
+  transform: rotate(-45deg) translateY(-11px);
 }
 
 .nav-menu {
@@ -591,12 +614,12 @@ td:first-child {
 }
 
 .time-slot-header {
-  border: 2px solid rgb(226, 232, 240);
+  border: 2px solid #f97316;
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
   font-size: 1.25rem;
   margin-bottom: 1rem;
-  color: black;
+  color: #f97316;
 }
 
 .draw-matches {
@@ -609,7 +632,7 @@ td:first-child {
   background: white;
   border: 2px solid #e2e8f0;
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 1rem;
   transition: all 0.3s ease;
 }
 
@@ -629,7 +652,6 @@ td:first-child {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 1rem;
 }
 
 .player {
@@ -1111,7 +1133,7 @@ td:first-child {
 @media (max-width: 768px) {
   /* Show hamburger menu */
   .menu-toggle {
-    display: block;
+    display: flex;
   }
 
   .nav-logo {
@@ -1148,7 +1170,7 @@ td:first-child {
     width: 100%;
     padding: 1rem 2rem;
     border-radius: 0;
-    border-bottom: 1px solid rgba(41, 37, 37, 0.726);
+    border-bottom: 1px solid #e2e8f0;
     font-size: 1.1rem;
     text-align: left;
     background: none;

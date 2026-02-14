@@ -106,14 +106,16 @@ function Ladder() {
       )}
 
       <div className="ladder-table">
-        <table>
+        <table style={{ border: "1px solid #e2e8f0" }}>
           <thead>
             <tr>
               <th>Rank</th>
               <th>Name</th>
               {user && <th>Phone</th>}
               {user && user.is_admin && <th>LVLS</th>}
-              <th style={{ textAlign: "center" }}>Status (Next draw)</th>
+              {user && user.is_admin && (
+                <th style={{ textAlign: "center" }}>Status (Next draw)</th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -132,7 +134,7 @@ function Ladder() {
                     : {}
                 }
               >
-                <td>
+                <td style={{ color: "#f97316" }}>
                   {entry.has_shield && "🛡️ "}
                   {entry.position === 1}
                   {entry.position === 2}
@@ -169,9 +171,12 @@ function Ladder() {
                   </td>
                 )}
 
-                <td style={{ textAlign: "center" }}>
-                  {getStatusBadge(entry.status)}
-                </td>
+                {user && user.is_admin && (
+                  <td style={{ textAlign: "center" }}>
+                    {getStatusBadge(entry.status)}
+                  </td>
+                )}
+
                 {/* <td>{entry.is_member ? "✓" : "✗"}</td> */}
               </tr>
             ))}
