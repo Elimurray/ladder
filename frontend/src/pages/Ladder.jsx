@@ -136,9 +136,9 @@ function Ladder() {
               >
                 <td style={{ color: "#f97316" }}>
                   {entry.has_shield && "🛡️ "}
-                  {entry.position === 1}
-                  {entry.position === 2}
-                  {entry.position === 3}
+                  {entry.position === 1 && "🥇"}
+                  {entry.position === 2 && "🥈"}
+                  {entry.position === 3 && "🥉"}
                   {entry.position}
                 </td>
                 <td>
