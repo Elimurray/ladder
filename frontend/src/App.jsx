@@ -163,12 +163,14 @@ function AppContent() {
           </p>
 
           <p style={{ margin: "0.5rem 0", fontSize: "0.75rem", opacity: 0.7 }}>
-            © {new Date().getFullYear()} Developed by Eli Murray |{" "}
+            © {new Date().getFullYear()} Developed by{" "}
             <a
-              href="mailto:eli.murr04@gmail.com"
+              href="https://azzudo.com"
+              target="_blank"
+              rel="noopener noreferrer"
               style={{ textDecoration: "underline" }}
             >
-              eli.murr04@gmail.com
+              Azzudo
             </a>
           </p>
         </div>
