@@ -73,6 +73,7 @@ function Admin() {
 
   // Time slot options
   const timeSlots = [
+    "5:00pm",
     "5:30pm",
     "6:00pm",
     "6:30pm",
