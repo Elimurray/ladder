@@ -155,8 +155,12 @@ function Admin() {
         const allDrawsRes = await drawAPI.getAllDrawsAdmin(); // CHANGE THIS LINE
         console.log("All draws response:", allDrawsRes.data);
         if (allDrawsRes.data.length > 0) {
+          // Get unique week dates from draws
+          const uniqueDates = allDrawsRes.data.map((d) => d.week_date);
           // Get unique week dates from draws (strip time/timezone to plain YYYY-MM-DD)
-          const uniqueDates = allDrawsRes.data.map((d) => d.week_date.split("T")[0]);
+          // const uniqueDates = allDrawsRes.data.map(
+          //   (d) => d.week_date.split("T")[0],
+          // );
           console.log("Unique dates:", uniqueDates);
           setAvailableDraws(uniqueDates);
 
