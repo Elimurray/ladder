@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../config/db");
-const { authMiddleware, adminMiddleware } = require("../middleware/auth");
+const { authMiddleware, adminMiddleware, drawAdminMiddleware } = require("../middleware/auth");
 
 // Get my profile
 router.get("/me", authMiddleware, async (req, res) => {
@@ -169,7 +169,7 @@ router.patch("/status", authMiddleware, async (req, res) => {
 router.get(
   "/all-preferences",
   authMiddleware,
-  adminMiddleware,
+  drawAdminMiddleware,
   async (req, res) => {
     try {
       const preferences = await pool.query(

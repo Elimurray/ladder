@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../config/db");
-const { authMiddleware, adminMiddleware } = require("../middleware/auth");
+const { authMiddleware, drawAdminMiddleware } = require("../middleware/auth");
 
 // Get draw for a specific week
 router.get("/week/:date", async (req, res) => {
@@ -96,7 +96,7 @@ AND d.is_published = TRUE
 });
 
 // ADMIN: Get all draws (including unpublished) for dropdown
-router.get("/admin/all", authMiddleware, adminMiddleware, async (req, res) => {
+router.get("/admin/all", authMiddleware, drawAdminMiddleware, async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT DISTINCT week_date, is_published
@@ -112,7 +112,7 @@ router.get("/admin/all", authMiddleware, adminMiddleware, async (req, res) => {
 });
 
 // Admin: Generate draw for a week
-router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
+router.post("/generate", authMiddleware, drawAdminMiddleware, async (req, res) => {
   const client = await pool.connect();
 
   try {
@@ -442,7 +442,7 @@ router.post("/generate", authMiddleware, adminMiddleware, async (req, res) => {
 });
 
 // Admin: Update time slot for a pairing
-router.patch("/:id", authMiddleware, adminMiddleware, async (req, res) => {
+router.patch("/:id", authMiddleware, drawAdminMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     const { time_slot, bar_duty, notes, reschedule_notes } = req.body;
@@ -467,7 +467,7 @@ router.patch("/:id", authMiddleware, adminMiddleware, async (req, res) => {
 router.delete(
   "/week/:date",
   authMiddleware,
-  adminMiddleware,
+  drawAdminMiddleware,
   async (req, res) => {
     const client = await pool.connect();
 
@@ -499,7 +499,7 @@ router.delete(
 );
 
 // Admin: Delete a specific pairing
-router.delete("/:id", authMiddleware, adminMiddleware, async (req, res) => {
+router.delete("/:id", authMiddleware, drawAdminMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -524,7 +524,7 @@ router.delete("/:id", authMiddleware, adminMiddleware, async (req, res) => {
 });
 
 // Admin: Create a new pairing
-router.post("/pairing", authMiddleware, adminMiddleware, async (req, res) => {
+router.post("/pairing", authMiddleware, drawAdminMiddleware, async (req, res) => {
   try {
     const { week_date, player1_id, player2_id, time_slot, reschedule_notes } =
       req.body;
@@ -582,7 +582,7 @@ router.post("/pairing", authMiddleware, adminMiddleware, async (req, res) => {
 router.patch(
   "/week/:date/publish",
   authMiddleware,
-  adminMiddleware,
+  drawAdminMiddleware,
   async (req, res) => {
     try {
       const { date } = req.params;
@@ -611,7 +611,7 @@ router.patch(
 router.patch(
   "/week/:date/unpublish",
   authMiddleware,
-  adminMiddleware,
+  drawAdminMiddleware,
   async (req, res) => {
     try {
       const { date } = req.params;
@@ -640,7 +640,7 @@ router.patch(
 router.get(
   "/admin/week/:date",
   authMiddleware,
-  adminMiddleware,
+  drawAdminMiddleware,
   async (req, res) => {
     try {
       const { date } = req.params;
@@ -686,7 +686,7 @@ router.get("/week-notes", async (req, res) => {
 });
 
 // UPDATE week notes (admin only)
-router.put("/week-notes", authMiddleware, adminMiddleware, async (req, res) => {
+router.put("/week-notes", authMiddleware, drawAdminMiddleware, async (req, res) => {
   try {
     const { notes } = req.body;
 

@@ -39,7 +39,7 @@ router.post("/register", async (req, res) => {
 
     // Create user
     const result = await pool.query(
-      "INSERT INTO users (email, full_name, password_hash, phone_number, squash_grade, is_member, is_junior) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, email, full_name, phone_number, squash_grade, is_member, is_admin, is_junior, play_for_levels",
+      "INSERT INTO users (email, full_name, password_hash, phone_number, squash_grade, is_member, is_junior) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, email, full_name, phone_number, squash_grade, is_member, is_admin, is_draw_admin, is_junior, play_for_levels",
       [
         email,
         full_name,
@@ -65,6 +65,7 @@ router.post("/register", async (req, res) => {
         id: user.id,
         email: user.email,
         is_admin: user.is_admin,
+        is_draw_admin: user.is_draw_admin,
       },
       process.env.JWT_SECRET,
       { expiresIn: "7d" },
@@ -80,6 +81,7 @@ router.post("/register", async (req, res) => {
         squash_grade: user.squash_grade,
         is_member: user.is_member,
         is_admin: user.is_admin,
+        is_draw_admin: user.is_draw_admin,
         is_junior: user.is_junior,
         play_for_levels: user.play_for_levels,
       },
@@ -126,6 +128,7 @@ router.post("/login", async (req, res) => {
         id: user.id,
         email: user.email,
         is_admin: user.is_admin,
+        is_draw_admin: user.is_draw_admin,
       },
       process.env.JWT_SECRET,
       { expiresIn: "7d" },
@@ -141,6 +144,7 @@ router.post("/login", async (req, res) => {
         squash_grade: user.squash_grade,
         is_member: user.is_member,
         is_admin: user.is_admin,
+        is_draw_admin: user.is_draw_admin,
         is_junior: user.is_junior,
         play_for_levels: user.play_for_levels,
       },
@@ -155,7 +159,7 @@ router.post("/login", async (req, res) => {
 router.get("/me", authMiddleware, async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT id, email, full_name, phone_number, squash_grade, is_member, is_admin, is_junior, play_for_levels, created_at FROM users WHERE id = $1",
+      "SELECT id, email, full_name, phone_number, squash_grade, is_member, is_admin, is_draw_admin, is_junior, play_for_levels, created_at FROM users WHERE id = $1",
       [req.user.id],
     );
 

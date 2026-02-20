@@ -28,4 +28,12 @@ const adminMiddleware = async (req, res, next) => {
   next();
 };
 
-module.exports = { authMiddleware, adminMiddleware };
+// Middleware to check if user is admin or draw admin
+const drawAdminMiddleware = (req, res, next) => {
+  if (!req.user.is_admin && !req.user.is_draw_admin) {
+    return res.status(403).json({ error: "Access denied." });
+  }
+  next();
+};
+
+module.exports = { authMiddleware, adminMiddleware, drawAdminMiddleware };

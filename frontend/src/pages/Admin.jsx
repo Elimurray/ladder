@@ -90,18 +90,21 @@ function Admin() {
 
   const tabs = [
     { id: "draw", label: "Draw Management" },
-    {
-      id: "matches",
-      label: "Match Approval",
-
-      badge: pendingMatches.length,
-    },
-    { id: "ladder", label: "Ladder" },
-    { id: "users", label: "Users" },
+    ...(user?.is_admin
+      ? [
+          {
+            id: "matches",
+            label: "Match Approval",
+            badge: pendingMatches.length,
+          },
+          { id: "ladder", label: "Ladder" },
+          { id: "users", label: "Users" },
+        ]
+      : []),
   ];
 
   useEffect(() => {
-    if (!user || !user.is_admin) {
+    if (!user || (!user.is_admin && !user.is_draw_admin)) {
       navigate("/");
       return;
     }
@@ -123,15 +126,20 @@ function Admin() {
 
   const fetchData = async () => {
     try {
-      const [ladderRes, usersRes, pendingRes] = await Promise.all([
-        ladderAPI.getAll(),
-        usersAPI.getAll(),
-        matchesAPI.getPending(),
-      ]);
-
-      setLadder(ladderRes.data);
-      setUsers(usersRes.data);
-      setPendingMatches(pendingRes.data);
+      if (user.is_admin) {
+        try {
+          const [ladderRes, usersRes, pendingRes] = await Promise.all([
+            ladderAPI.getAll(),
+            usersAPI.getAll(),
+            matchesAPI.getPending(),
+          ]);
+          setLadder(ladderRes.data);
+          setUsers(usersRes.data);
+          setPendingMatches(pendingRes.data);
+        } catch (err) {
+          console.error("Error fetching admin data:", err);
+        }
+      }
 
       // Fetch preferences separately
       try {
@@ -147,8 +155,8 @@ function Admin() {
         const allDrawsRes = await drawAPI.getAllDrawsAdmin(); // CHANGE THIS LINE
         console.log("All draws response:", allDrawsRes.data);
         if (allDrawsRes.data.length > 0) {
-          // Get unique week dates from draws
-          const uniqueDates = allDrawsRes.data.map((d) => d.week_date);
+          // Get unique week dates from draws (strip time/timezone to plain YYYY-MM-DD)
+          const uniqueDates = allDrawsRes.data.map((d) => d.week_date.split("T")[0]);
           console.log("Unique dates:", uniqueDates);
           setAvailableDraws(uniqueDates);
 
@@ -1356,85 +1364,6 @@ function Admin() {
                 )}
               </div>
             )}
-
-            {/* Process Week and Update Ladder */}
-            <div className="admin-section" id="process-week">
-              <h2>Process Week & Update Ladder</h2>
-              <p style={{ color: "#718096", marginBottom: "1rem" }}>
-                After approving all matches, process the week to update ladder
-                positions based on results.
-              </p>
-
-              <form onSubmit={handleProcessWeek} className="admin-form">
-                <div className="admin-form-row">
-                  <div className="form-group" style={{ flex: 1 }}>
-                    <label>Select Week to Process:</label>
-                    <select
-                      value={processWeekDate}
-                      onChange={(e) => setProcessWeekDate(e.target.value)}
-                      style={{
-                        width: "100%",
-                        padding: "0.75rem",
-                        border: "2px solid #e2e8f0",
-                        borderRadius: "8px",
-                        fontSize: "1rem",
-                      }}
-                      required
-                    >
-                      <option value="">-- Select a week --</option>
-                      {availableDraws.map((date) => (
-                        <option key={date} value={date}>
-                          Week of{" "}
-                          {new Date(date).toLocaleDateString("en-NZ", {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          })}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="admin-button-group">
-                    <button type="submit" className="btn-primary">
-                      Process Week & Update Ladder
-                    </button>
-                  </div>
-                </div>
-              </form>
-
-              <div
-                style={{
-                  marginTop: "1rem",
-                  padding: "1rem",
-                  background: "#f0f4ff",
-                  borderRadius: "8px",
-                  fontSize: "0.875rem",
-                  color: "black",
-                }}
-              >
-                <strong>Position Changes:</strong>
-                <ul style={{ margin: "0.5rem 0", paddingLeft: "1.5rem" }}>
-                  <li>
-                    Won 3 games: <strong>Move UP 6 positions</strong>
-                  </li>
-                  <li>
-                    Won 2 games: <strong>Move UP 3 positions</strong>
-                  </li>
-                  <li>
-                    Won 1 game: <strong>Stay in position</strong>
-                  </li>
-                  <li>
-                    Won 0 games: <strong>Move DOWN 1 position</strong>
-                  </li>
-                  <li>
-                    Did not play (~): <strong>Stay in position</strong>
-                  </li>
-                  <li>
-                    Defaulted (D): <strong>Move DOWN 1 position</strong>
-                  </li>
-                </ul>
-              </div>
-            </div>
           </>
         )}
 
@@ -1805,6 +1734,85 @@ function Admin() {
                 </div>
               </div>
             )}
+
+            {/* Process Week and Update Ladder */}
+            <div className="admin-section" id="process-week">
+              <h2>Process Week & Update Ladder</h2>
+              <p style={{ color: "#718096", marginBottom: "1rem" }}>
+                After approving all matches, process the week to update ladder
+                positions based on results.
+              </p>
+
+              <form onSubmit={handleProcessWeek} className="admin-form">
+                <div className="admin-form-row">
+                  <div className="form-group" style={{ flex: 1 }}>
+                    <label>Select Week to Process:</label>
+                    <select
+                      value={processWeekDate}
+                      onChange={(e) => setProcessWeekDate(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "0.75rem",
+                        border: "2px solid #e2e8f0",
+                        borderRadius: "8px",
+                        fontSize: "1rem",
+                      }}
+                      required
+                    >
+                      <option value="">-- Select a week --</option>
+                      {availableDraws.map((date) => (
+                        <option key={date} value={date}>
+                          Week of{" "}
+                          {new Date(date).toLocaleDateString("en-NZ", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="admin-button-group">
+                    <button type="submit" className="btn-primary">
+                      Process Week & Update Ladder
+                    </button>
+                  </div>
+                </div>
+              </form>
+
+              <div
+                style={{
+                  marginTop: "1rem",
+                  padding: "1rem",
+                  background: "#f0f4ff",
+                  borderRadius: "8px",
+                  fontSize: "0.875rem",
+                  color: "black",
+                }}
+              >
+                <strong>Position Changes:</strong>
+                <ul style={{ margin: "0.5rem 0", paddingLeft: "1.5rem" }}>
+                  <li>
+                    Won 3 games: <strong>Move UP 6 positions</strong>
+                  </li>
+                  <li>
+                    Won 2 games: <strong>Move UP 3 positions</strong>
+                  </li>
+                  <li>
+                    Won 1 game: <strong>Stay in position</strong>
+                  </li>
+                  <li>
+                    Won 0 games: <strong>Move DOWN 1 position</strong>
+                  </li>
+                  <li>
+                    Did not play (~): <strong>Stay in position</strong>
+                  </li>
+                  <li>
+                    Defaulted (D): <strong>Move DOWN 1 position</strong>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </>
         )}
 

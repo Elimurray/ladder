@@ -103,7 +103,7 @@ function AppContent() {
                 </NavLink>
               </li>
             )}
-            {user && user.is_admin && (
+            {user && (user.is_admin || user.is_draw_admin) && (
               <li>
                 <NavLink to="/admin" onClick={closeMenu}>
                   Admin
