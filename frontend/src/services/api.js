@@ -88,7 +88,8 @@ export const profileAPI = {
   getStats: () => api.get("/profile/stats"),
   updatePreferences: (preferences) =>
     api.put("/profile/preferences", preferences),
-  updateStatus: (status) => api.patch("/profile/status", { status }),
+  updateStatus: (status, resume_date) =>
+    api.patch("/profile/status", { status, resume_date }),
   updateSquashLevels: (play_for_levels) =>
     api.patch("/profile/squash-levels", { play_for_levels }),
   getAllPreferences: () => api.get("/profile/all-preferences"),

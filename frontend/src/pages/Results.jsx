@@ -18,7 +18,7 @@ function Results() {
       setWeeks(response.data);
 
       if (response.data.length > 0) {
-        const mostRecent = response.data[0].week_date;
+        const mostRecent = toLocalDateString(response.data[0].week_date);
         setSelectedWeek(mostRecent);
         fetchWeekResults(mostRecent);
       } else {
@@ -48,6 +48,11 @@ function Results() {
     const date = e.target.value;
     setSelectedWeek(date);
     fetchWeekResults(date);
+  };
+
+  const toLocalDateString = (dateString) => {
+    const d = new Date(dateString);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   };
 
   const formatDate = (dateString) => {
@@ -91,11 +96,14 @@ function Results() {
                   fontSize: "1rem",
                 }}
               >
-                {weeks.map((week) => (
-                  <option key={week.week_date} value={week.week_date}>
-                    Week of {formatDate(week.week_date)}
-                  </option>
-                ))}
+                {weeks.map((week) => {
+                  const localDate = toLocalDateString(week.week_date);
+                  return (
+                    <option key={localDate} value={localDate}>
+                      Week of {formatDate(week.week_date)}
+                    </option>
+                  );
+                })}
               </select>
             </div>
           </div>

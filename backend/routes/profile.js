@@ -8,7 +8,7 @@ router.get("/me", authMiddleware, async (req, res) => {
   try {
     const user = await pool.query(
       `SELECT u.id, u.email, u.full_name, u.phone_number, u.squash_grade, u.is_member, u.is_admin, u.is_junior, u.play_for_levels, u.created_at,
-      lp.position, lp.status,
+      lp.position, lp.status, lp.resume_date,
       up.earliest_time, up.notes
    FROM users u
    LEFT JOIN ladder_positions lp ON u.id = lp.user_id
@@ -137,16 +137,20 @@ router.put("/contact", authMiddleware, async (req, res) => {
 // Update my ladder status (withdraw/active)
 router.patch("/status", authMiddleware, async (req, res) => {
   try {
-    const { status } = req.body;
+    const { status, resume_date } = req.body;
 
     // Validate status
     if (!["active", "withdrawn", "no_play"].includes(status)) {
       return res.status(400).json({ error: "Invalid status" });
     }
 
+    // resume_date only valid for no_play
+    const resolvedResumeDate =
+      status === "no_play" && resume_date ? resume_date : null;
+
     const result = await pool.query(
-      "UPDATE ladder_positions SET status = $1, updated_at = NOW() WHERE user_id = $2 RETURNING *",
-      [status, req.user.id],
+      "UPDATE ladder_positions SET status = $1, resume_date = $2, updated_at = NOW() WHERE user_id = $3 RETURNING *",
+      [status, resolvedResumeDate, req.user.id],
     );
 
     if (result.rows.length === 0) {

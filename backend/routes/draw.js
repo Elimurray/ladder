@@ -131,6 +131,14 @@ router.post(
 
       await client.query("BEGIN");
 
+      // Auto-resume players whose resume_date is on or before this week's draw date
+      await client.query(
+        `UPDATE ladder_positions
+         SET status = 'active', resume_date = NULL, updated_at = NOW()
+         WHERE status = 'no_play' AND resume_date IS NOT NULL AND resume_date <= $1`,
+        [week_date],
+      );
+
       // Check if draw already exists
       const existingDraw = await client.query(
         "SELECT COUNT(*) FROM draws WHERE week_date = $1",

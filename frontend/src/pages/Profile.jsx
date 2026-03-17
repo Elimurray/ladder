@@ -25,6 +25,7 @@ function Profile() {
   const [editGrade, setEditGrade] = useState("");
 
   // Preferences state
+  const [resumeDate, setResumeDate] = useState("");
 
   const [earliestTime, setEarliestTime] = useState("");
 
@@ -41,6 +42,27 @@ function Profile() {
     "7:00pm",
     "7:30pm",
   ];
+
+  const getUpcomingMondays = (count = 10) => {
+    const mondays = [];
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    const daysUntilMonday = (1 - dayOfWeek + 7) % 7 || 7;
+    const first = new Date(today);
+    first.setDate(today.getDate() + daysUntilMonday);
+    for (let i = 0; i < count; i++) {
+      const d = new Date(first);
+      d.setDate(first.getDate() + i * 7);
+      const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      const label = d.toLocaleDateString("en-NZ", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+      mondays.push({ value, label });
+    }
+    return mondays;
+  };
 
   const getNextMonday = () => {
     const today = new Date();
@@ -75,6 +97,14 @@ function Profile() {
       setEditPhone(response.data.phone_number || "");
       setEarliestTime(response.data.earliest_time || "");
       setNotes(response.data.notes || "");
+      if (response.data.resume_date) {
+        const d = new Date(response.data.resume_date);
+        setResumeDate(
+          `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
+        );
+      } else {
+        setResumeDate("");
+      }
       setLoading(false);
       setEditIsJunior(response.data.is_junior || false);
     } catch (err) {
@@ -149,7 +179,7 @@ function Profile() {
 
   const handleUpdateStatus = async (status) => {
     try {
-      await profileAPI.updateStatus(status);
+      await profileAPI.updateStatus(status, status === "no_play" ? resumeDate : null);
       setSuccess(`Status updated to: ${status}`);
       setTimeout(() => setSuccess(null), 3000);
       fetchProfile();
@@ -505,6 +535,75 @@ function Profile() {
               >
                 ⏸ Pause
               </button>
+            </div>
+
+            {profile.status === "no_play" && (
+              <div
+                style={{
+                  marginTop: "1rem",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.75rem",
+                  flexWrap: "wrap",
+                }}
+              >
+                <label style={{ fontWeight: "600", color: "#4a5568" }}>
+                  Resume playing from week of:
+                </label>
+                <select
+                  value={resumeDate}
+                  onChange={(e) => setResumeDate(e.target.value)}
+                  style={{
+                    padding: "0.5rem 0.75rem",
+                    border: "2px solid #e2e8f0",
+                    borderRadius: "8px",
+                    fontSize: "0.95rem",
+                    color: "#2d3748",
+                    background: "white",
+                  }}
+                >
+                  <option value="">-- No date set --</option>
+                  {(() => {
+                    const mondays = getUpcomingMondays();
+                    const hasMatch = mondays.some((m) => m.value === resumeDate);
+                    return (
+                      <>
+                        {resumeDate && !hasMatch && (
+                          <option value={resumeDate}>
+                            {new Date(resumeDate + "T12:00:00").toLocaleDateString("en-NZ", {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            })}
+                          </option>
+                        )}
+                        {mondays.map(({ value, label }) => (
+                          <option key={value} value={value}>
+                            {label}
+                          </option>
+                        ))}
+                      </>
+                    );
+                  })()}
+                </select>
+                <button
+                  onClick={() => handleUpdateStatus("no_play")}
+                  style={{
+                    padding: "0.5rem 1rem",
+                    background: "#4299e1",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                    fontWeight: "600",
+                  }}
+                >
+                  Save
+                </button>
+              </div>
+            )}
+
+            <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", marginTop: "1rem" }}>
               <button
                 onClick={handleWithdraw}
                 style={{
