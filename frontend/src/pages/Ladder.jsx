@@ -46,9 +46,9 @@ function Ladder() {
 
   const getStatusBadge = (status) => {
     const badges = {
-      active: { text: "Active", color: "#48bb78" },
+      active: { text: "Play", color: "#48bb78" },
       withdrawn: { text: "Withdrawn", color: "#f56565" },
-      no_play: { text: "No Play", color: "#ed8936" },
+      no_play: { text: "Pause", color: "#ed8936" },
     };
     const badge = badges[status] || badges.active;
     return (
