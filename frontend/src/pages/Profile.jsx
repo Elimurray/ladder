@@ -43,13 +43,13 @@ function Profile() {
     "7:30pm",
   ];
 
-  const getUpcomingMondays = (count = 10) => {
-    const mondays = [];
+  const getUpcomingSundays = (count = 10) => {
+    const sundays = [];
     const today = new Date();
     const dayOfWeek = today.getDay();
-    const daysUntilMonday = (1 - dayOfWeek + 7) % 7 || 7;
+    const daysUntilSunday = (7 - dayOfWeek) % 7 || 7;
     const first = new Date(today);
-    first.setDate(today.getDate() + daysUntilMonday);
+    first.setDate(today.getDate() + daysUntilSunday);
     for (let i = 0; i < count; i++) {
       const d = new Date(first);
       d.setDate(first.getDate() + i * 7);
@@ -59,19 +59,19 @@ function Profile() {
         month: "long",
         day: "numeric",
       });
-      mondays.push({ value, label });
+      sundays.push({ value, label });
     }
-    return mondays;
+    return sundays;
   };
 
-  const getNextMonday = () => {
+  const getNextSunday = () => {
     const today = new Date();
     const dayOfWeek = today.getDay();
-    const daysUntilMonday = (1 - dayOfWeek + 7) % 7 || 7; // 1 = Monday
-    const nextMonday = new Date(today);
-    nextMonday.setDate(today.getDate() + daysUntilMonday);
+    const daysUntilSunday = (7 - dayOfWeek) % 7 || 7;
+    const nextSunday = new Date(today);
+    nextSunday.setDate(today.getDate() + daysUntilSunday);
 
-    return nextMonday.toLocaleDateString("en-NZ", {
+    return nextSunday.toLocaleDateString("en-NZ", {
       year: "numeric",
       month: "long",
       day: "numeric",
@@ -492,7 +492,7 @@ function Profile() {
             }}
           >
             <h3 style={{ marginBottom: "1rem", color: "#2d3748" }}>
-              Availability Status for Week Starting {getNextMonday()}
+              Availability Status for Week Starting {getNextSunday()}
             </h3>
             <p
               style={{
@@ -564,7 +564,7 @@ function Profile() {
                 >
                   <option value="">-- No date set --</option>
                   {(() => {
-                    const mondays = getUpcomingMondays();
+                    const mondays = getUpcomingSundays();
                     const hasMatch = mondays.some((m) => m.value === resumeDate);
                     return (
                       <>

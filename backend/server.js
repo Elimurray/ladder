@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const pool = require("./config/db");
+const cron = require("node-cron");
 require("dotenv").config();
 
 const app = express();
@@ -36,6 +37,24 @@ app.get("/api/health", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Database connection failed" });
+  }
+});
+
+// Run every Sunday at 6:00am NZ time
+cron.schedule("0 6 * * 0", async () => {
+  try {
+    const d = new Date();
+    const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    const result = await pool.query(
+      `UPDATE ladder_positions
+       SET status = 'active', resume_date = NULL, updated_at = NOW()
+       WHERE status = 'no_play' AND resume_date IS NOT NULL AND resume_date <= $1
+       RETURNING user_id`,
+      [today],
+    );
+    console.log(`Auto-resume: ${result.rows.length} player(s) set back to active`);
+  } catch (err) {
+    console.error("Auto-resume cron error:", err);
   }
 });
 
