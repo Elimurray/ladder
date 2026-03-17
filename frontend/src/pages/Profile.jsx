@@ -488,7 +488,7 @@ function Profile() {
                   fontWeight: "600",
                 }}
               >
-                ✓ Active
+                ✓ Play
               </button>
               <button
                 onClick={() => handleUpdateStatus("no_play")}
@@ -503,7 +503,7 @@ function Profile() {
                   fontWeight: "600",
                 }}
               >
-                ⏸ No Play This Week
+                ⏸ Pause
               </button>
               <button
                 onClick={handleWithdraw}
@@ -534,12 +534,12 @@ function Profile() {
               <strong>Status Options:</strong>
               <ul style={{ marginTop: "0.5rem", paddingLeft: "1.5rem" }}>
                 <li>
-                  <strong>Active:</strong> Available to play this week -
-                  included in draw
+                  <strong>Play:</strong> Available to play this week - included
+                  in draw
                 </li>
                 <li>
-                  <strong>No Play This Week:</strong> Skip this week's draw but
-                  stay on ladder
+                  <strong>Pause:</strong> Skip this week's draw but stay on
+                  ladder
                 </li>
                 <li>
                   <strong>Withdraw:</strong> Permanently removes you from the
