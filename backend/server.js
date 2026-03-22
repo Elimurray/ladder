@@ -41,7 +41,8 @@ app.get("/api/health", async (req, res) => {
 });
 
 // Run every Sunday at 6:00am NZ time
-cron.schedule("0 6 * * 0", async () => {
+// Sunday 6:00am NZ time (NZDT UTC+13 = Saturday 17:00 UTC)
+cron.schedule("0 17 * * 6", async () => {
   try {
     const d = new Date();
     const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
