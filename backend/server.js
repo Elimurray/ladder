@@ -40,10 +40,12 @@ app.get("/api/health", async (req, res) => {
   }
 });
 
-// Daily at 6:00am NZ time (temp - to verify cron is working)
-cron.schedule("0 6 * * *", async () => {
+// Daily 17:00 UTC = 6:00am NZT (NZDT UTC+13)
+cron.schedule("0 17 * * *", async () => {
   try {
+    // Add 1 day since we're firing Saturday UTC but want Sunday NZ date
     const d = new Date();
+    d.setDate(d.getDate() + 1);
     const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
     const result = await pool.query(
       `UPDATE ladder_positions

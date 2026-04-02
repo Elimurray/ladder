@@ -14,6 +14,5 @@ services:
       - DATABASE_URL=postgresql://eli:password@192.168.1.11:5432/ladder_db
       - JWT_SECRET=your_super_secret_jwt_key_change_this_to_something_long_and_random_123456789
       - NODE_ENV=development
-      - TZ=Pacific/Auckland
       - EMAIL_USER=eli.murr04@gmail.com
       - EMAIL_PASS=password
