@@ -100,7 +100,7 @@ function Profile() {
       if (response.data.resume_date) {
         const d = new Date(response.data.resume_date);
         setResumeDate(
-          `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
+          `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`,
         );
       } else {
         setResumeDate("");
@@ -179,7 +179,10 @@ function Profile() {
 
   const handleUpdateStatus = async (status) => {
     try {
-      await profileAPI.updateStatus(status, status === "no_play" ? resumeDate : null);
+      await profileAPI.updateStatus(
+        status,
+        status === "no_play" ? resumeDate : null,
+      );
       setSuccess(`Status updated to: ${status}`);
       setTimeout(() => setSuccess(null), 3000);
       fetchProfile();
@@ -492,7 +495,8 @@ function Profile() {
             }}
           >
             <h3 style={{ marginBottom: "1rem", color: "#2d3748" }}>
-              Availability Status for Week Starting {getNextSunday()}
+              {/* Availability Status for Week Starting {getNextSunday()} */}
+              Availability status for the next draw - cut off Sunday’s @ 5pm.
             </h3>
             <p
               style={{
@@ -565,12 +569,16 @@ function Profile() {
                   <option value="">-- No date set --</option>
                   {(() => {
                     const mondays = getUpcomingSundays();
-                    const hasMatch = mondays.some((m) => m.value === resumeDate);
+                    const hasMatch = mondays.some(
+                      (m) => m.value === resumeDate,
+                    );
                     return (
                       <>
                         {resumeDate && !hasMatch && (
                           <option value={resumeDate}>
-                            {new Date(resumeDate + "T12:00:00").toLocaleDateString("en-NZ", {
+                            {new Date(
+                              resumeDate + "T12:00:00",
+                            ).toLocaleDateString("en-NZ", {
                               year: "numeric",
                               month: "long",
                               day: "numeric",
@@ -603,7 +611,14 @@ function Profile() {
               </div>
             )}
 
-            <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", marginTop: "1rem" }}>
+            <div
+              style={{
+                display: "flex",
+                gap: "1rem",
+                flexWrap: "wrap",
+                marginTop: "1rem",
+              }}
+            >
               <button
                 onClick={handleWithdraw}
                 style={{
