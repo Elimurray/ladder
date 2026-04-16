@@ -11,8 +11,8 @@ function Home() {
         <h2>About Ladder</h2>
         <ul className="rules-list">
           <li>
-            Free weekly competition: Thursdays, 5:30pm, open to all financial
-            club members.
+            Free weekly competition: Thursdays, 5pm, open to all financial club
+            members.
           </li>
           <li>
             Players are ranked on a ladder (based on grading/past results).
