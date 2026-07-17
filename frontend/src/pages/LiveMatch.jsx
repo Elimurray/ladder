@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { Maximize, Minimize, ArrowLeftRight } from "lucide-react";
 import { useParams, Link } from "react-router-dom";
 import { liveAPI } from "../services/api";
 import { useAuth } from "../context/AuthContext";
@@ -125,38 +126,44 @@ function LiveMatch() {
       >
         <button
           onClick={toggleFullscreen}
+          title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
           style={{
             position: "absolute",
             top: "1rem",
             right: "1rem",
-            padding: "0.5rem 0.75rem",
-            background: "#2d3748",
-            color: "white",
-            border: "none",
+            padding: "0.6rem",
+            background: "white",
+            color: "#718096",
+            border: "2px solid #e2e8f0",
             borderRadius: "8px",
             cursor: "pointer",
-            fontSize: "1rem",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
-          {isFullscreen ? "✕ Exit" : "⛶ Fullscreen"}
+          {isFullscreen ? <Minimize size={22} /> : <Maximize size={22} />}
         </button>
 
         <button
           onClick={() => setFlipped(!flipped)}
+          title="Flip sides"
           style={{
             position: "absolute",
             top: "1rem",
             left: "1rem",
-            padding: "0.5rem 0.75rem",
-            background: "#2d3748",
-            color: "white",
-            border: "none",
+            padding: "0.6rem",
+            background: "white",
+            color: "#718096",
+            border: "2px solid #e2e8f0",
             borderRadius: "8px",
             cursor: "pointer",
-            fontSize: "1rem",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
-          ⇄ Flip
+          <ArrowLeftRight size={22} />
         </button>
 
         <div style={{ marginBottom: "1rem" }}>
@@ -196,11 +203,11 @@ function LiveMatch() {
             alignItems: "center",
           }}
         >
-          <div style={{ flex: 1, fontWeight: "bold", fontSize: "1.1rem" }}>
+          <div style={{ flex: 1, fontWeight: "bold", fontSize: "2.2rem" }}>
             {nameOf(leftNum)}
           </div>
           <div style={{ flex: 1 }} />
-          <div style={{ flex: 1, fontWeight: "bold", fontSize: "1.1rem" }}>
+          <div style={{ flex: 1, fontWeight: "bold", fontSize: "2.2rem" }}>
             {nameOf(rightNum)}
           </div>
         </div>

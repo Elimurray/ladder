@@ -1,4 +1,11 @@
 import { useState, useEffect, useRef } from "react";
+import {
+  Maximize,
+  Minimize,
+  ArrowLeftRight,
+  Undo2,
+  Ban,
+} from "lucide-react";
 import { liveAPI, drawAPI } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 
@@ -177,19 +184,19 @@ function RefScoring() {
 
   if (loading) return <div className="page loading">Loading...</div>;
 
-  const bigButton = (background) => ({
-    flex: 1,
-    padding: "1rem",
-    fontSize: "1.5rem",
-    fontWeight: "bold",
-    color: "white",
-    background,
-    border: "none",
-    borderRadius: "12px",
+  const cornerButton = {
+    position: "absolute",
+    top: "1rem",
+    padding: "0.6rem",
+    background: "white",
+    color: "#718096",
+    border: "2px solid #e2e8f0",
+    borderRadius: "8px",
     cursor: "pointer",
-    opacity: busy ? 0.6 : 1,
-    touchAction: "manipulation",
-  });
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  };
 
   // ---------- Match finished screen ----------
   if (finished) {
@@ -256,7 +263,30 @@ function RefScoring() {
     const pointsOf = (n) => (n === 1 ? current.p1 : current.p2);
     const setsOf = (n) => (n === 1 ? sets.p1 : sets.p2);
     const setString = (s) => (flipped ? `${s.p2}/${s.p1}` : `${s.p1}/${s.p2}`);
-    const buttonColor = { 1: "#3182ce", 2: "#805ad5" };
+    const playerColor = { 1: "#3182ce", 2: "#805ad5" };
+
+    // The score digits ARE the point buttons: tap a player's score to add
+    // a point for them.
+    const scoreTap = (n) => ({
+      flex: 2,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      alignSelf: "stretch",
+      padding: "1rem",
+      background: "#f7fafc",
+      border: "2px solid #e2e8f0",
+      borderRadius: "12px",
+      color: playerColor[n],
+      cursor: "pointer",
+      touchAction: "manipulation",
+      userSelect: "none",
+      opacity: busy ? 0.6 : 1,
+    });
+    const digitSize = isFullscreen
+      ? "clamp(11rem, 42vh, 32rem)"
+      : "clamp(8rem, 18vw, 14rem)";
 
     return (
       <div className="page">
@@ -286,38 +316,18 @@ function RefScoring() {
         >
           <button
             onClick={toggleFullscreen}
-            style={{
-              position: "absolute",
-              top: "1rem",
-              right: "1rem",
-              padding: "0.5rem 0.75rem",
-              background: "#2d3748",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              cursor: "pointer",
-              fontSize: "1rem",
-            }}
+            title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+            style={{ ...cornerButton, right: "1rem" }}
           >
-            {isFullscreen ? "✕ Exit" : "⛶ Fullscreen"}
+            {isFullscreen ? <Minimize size={22} /> : <Maximize size={22} />}
           </button>
 
           <button
             onClick={() => setFlipped(!flipped)}
-            style={{
-              position: "absolute",
-              top: "1rem",
-              left: "1rem",
-              padding: "0.5rem 0.75rem",
-              background: "#2d3748",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              cursor: "pointer",
-              fontSize: "1rem",
-            }}
+            title="Flip sides"
+            style={{ ...cornerButton, left: "1rem" }}
           >
-            ⇄ Flip
+            <ArrowLeftRight size={22} />
           </button>
 
           <div style={{ textAlign: "center", marginBottom: "1rem" }}>
@@ -345,11 +355,11 @@ function RefScoring() {
               marginBottom: "0.5rem",
             }}
           >
-            <div style={{ flex: 1, fontWeight: "bold", fontSize: "1.1rem" }}>
+            <div style={{ flex: 1, fontWeight: "bold", fontSize: "2.2rem" }}>
               {nameOf(leftNum)}
             </div>
             <div style={{ flex: 1 }} />
-            <div style={{ flex: 1, fontWeight: "bold", fontSize: "1.1rem" }}>
+            <div style={{ flex: 1, fontWeight: "bold", fontSize: "2.2rem" }}>
               {nameOf(rightNum)}
             </div>
           </div>
@@ -362,20 +372,34 @@ function RefScoring() {
               textAlign: "center",
               marginBottom: "0.5rem",
               flex: 1,
+              gap: "1rem",
             }}
           >
-            <div
-              style={{
-                flex: 1,
-                fontSize: isFullscreen
-                  ? "clamp(9rem, 32vh, 26rem)"
-                  : "clamp(7rem, 14vw, 11rem)",
-                fontWeight: "bold",
-                lineHeight: 1,
-              }}
+            <button
+              onClick={() => handlePoint(leftNum)}
+              disabled={busy}
+              style={scoreTap(leftNum)}
             >
-              {pointsOf(leftNum)}
-            </div>
+              <span
+                style={{
+                  fontSize: digitSize,
+                  fontWeight: "bold",
+                  lineHeight: 1,
+                }}
+              >
+                {pointsOf(leftNum)}
+              </span>
+              <span
+                style={{
+                  fontSize: "0.8rem",
+                  color: "#a0aec0",
+                  letterSpacing: "0.15em",
+                  marginTop: "0.75rem",
+                }}
+              >
+                TAP TO SCORE
+              </span>
+            </button>
             <div style={{ flex: 1, color: "#718096" }}>
               <div
                 style={{
@@ -389,18 +413,31 @@ function RefScoring() {
                 SETS
               </div>
             </div>
-            <div
-              style={{
-                flex: 1,
-                fontSize: isFullscreen
-                  ? "clamp(9rem, 32vh, 26rem)"
-                  : "clamp(7rem, 14vw, 11rem)",
-                fontWeight: "bold",
-                lineHeight: 1,
-              }}
+            <button
+              onClick={() => handlePoint(rightNum)}
+              disabled={busy}
+              style={scoreTap(rightNum)}
             >
-              {pointsOf(rightNum)}
-            </div>
+              <span
+                style={{
+                  fontSize: digitSize,
+                  fontWeight: "bold",
+                  lineHeight: 1,
+                }}
+              >
+                {pointsOf(rightNum)}
+              </span>
+              <span
+                style={{
+                  fontSize: "0.8rem",
+                  color: "#a0aec0",
+                  letterSpacing: "0.15em",
+                  marginTop: "0.75rem",
+                }}
+              >
+                TAP TO SCORE
+              </span>
+            </button>
           </div>
 
           {(score.completed_sets || []).length > 0 && (
@@ -416,31 +453,6 @@ function RefScoring() {
             </div>
           )}
 
-          {/* Point buttons — grow with the screen but capped so the score stays dominant */}
-          <div
-            style={{
-              display: "flex",
-              gap: "1rem",
-              marginTop: "1rem",
-              flex: 1,
-              maxHeight: "10rem",
-              minHeight: "7rem",
-            }}
-          >
-            {[leftNum, rightNum].map((n) => (
-              <button
-                key={n}
-                onClick={() => handlePoint(n)}
-                disabled={busy}
-                style={bigButton(buttonColor[n])}
-              >
-                Point
-                <br />
-                {nameOf(n)}
-              </button>
-            ))}
-          </div>
-
           <div
             style={{
               display: "flex",
@@ -453,30 +465,38 @@ function RefScoring() {
               onClick={handleUndo}
               disabled={busy || totalPoints(score) === 0}
               style={{
-                padding: "0.75rem 1.5rem",
-                background: "#718096",
-                color: "white",
-                border: "none",
+                padding: "0.85rem 1.5rem",
+                background: "white",
+                color: "#718096",
+                border: "2px solid #e2e8f0",
                 borderRadius: "8px",
                 cursor: "pointer",
                 opacity: busy || totalPoints(score) === 0 ? 0.5 : 1,
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                fontSize: "1rem",
               }}
             >
-              ↩ Undo Point
+              <Undo2 size={20} /> Undo Point
             </button>
             <button
               onClick={handleAbandon}
               disabled={busy}
               style={{
-                padding: "0.75rem 1.5rem",
+                padding: "0.85rem 1.5rem",
                 background: "#e53e3e",
                 color: "white",
                 border: "none",
                 borderRadius: "8px",
                 cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                fontSize: "1rem",
               }}
             >
-              Abandon
+              <Ban size={20} /> Abandon
             </button>
           </div>
         </div>
