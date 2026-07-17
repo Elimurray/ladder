@@ -27,6 +27,7 @@ function RefScoring() {
   const [error, setError] = useState(null);
   const [finished, setFinished] = useState(null); // completion info
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [flipped, setFlipped] = useState(false); // visual side swap only
   const cardRef = useRef(null);
 
   const canRef = user && (user.is_ref || user.is_admin);
@@ -246,6 +247,17 @@ function RefScoring() {
     const sets = score.sets_won || { p1: 0, p2: 0 };
     const current = score.current_set || { p1: 0, p2: 0 };
 
+    // Display-side mapping: flipping swaps which player renders left/right,
+    // but point_to always identifies the real player on the server.
+    const leftNum = flipped ? 2 : 1;
+    const rightNum = flipped ? 1 : 2;
+    const nameOf = (n) =>
+      n === 1 ? session.player1_name : session.player2_name;
+    const pointsOf = (n) => (n === 1 ? current.p1 : current.p2);
+    const setsOf = (n) => (n === 1 ? sets.p1 : sets.p2);
+    const setString = (s) => (flipped ? `${s.p2}/${s.p1}` : `${s.p1}/${s.p2}`);
+    const buttonColor = { 1: "#3182ce", 2: "#805ad5" };
+
     return (
       <div className="page">
         <h1 style={{ textAlign: "center" }}>Live Scoring</h1>
@@ -290,6 +302,24 @@ function RefScoring() {
             {isFullscreen ? "✕ Exit" : "⛶ Fullscreen"}
           </button>
 
+          <button
+            onClick={() => setFlipped(!flipped)}
+            style={{
+              position: "absolute",
+              top: "1rem",
+              left: "1rem",
+              padding: "0.5rem 0.75rem",
+              background: "#2d3748",
+              color: "white",
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+              fontSize: "1rem",
+            }}
+          >
+            ⇄ Flip
+          </button>
+
           <div style={{ textAlign: "center", marginBottom: "1rem" }}>
             <span
               style={{
@@ -316,11 +346,11 @@ function RefScoring() {
             }}
           >
             <div style={{ flex: 1, fontWeight: "bold", fontSize: "1.1rem" }}>
-              {session.player1_name}
+              {nameOf(leftNum)}
             </div>
             <div style={{ flex: 1 }} />
             <div style={{ flex: 1, fontWeight: "bold", fontSize: "1.1rem" }}>
-              {session.player2_name}
+              {nameOf(rightNum)}
             </div>
           </div>
 
@@ -344,7 +374,7 @@ function RefScoring() {
                 lineHeight: 1,
               }}
             >
-              {current.p1}
+              {pointsOf(leftNum)}
             </div>
             <div style={{ flex: 1, color: "#718096" }}>
               <div
@@ -353,7 +383,7 @@ function RefScoring() {
                   fontWeight: "bold",
                 }}
               >
-                {sets.p1} - {sets.p2}
+                {setsOf(leftNum)} - {setsOf(rightNum)}
               </div>
               <div style={{ fontSize: isFullscreen ? "2rem" : "1.25rem" }}>
                 SETS
@@ -369,7 +399,7 @@ function RefScoring() {
                 lineHeight: 1,
               }}
             >
-              {current.p2}
+              {pointsOf(rightNum)}
             </div>
           </div>
 
@@ -382,8 +412,7 @@ function RefScoring() {
                 marginBottom: "1rem",
               }}
             >
-              Sets:{" "}
-              {score.completed_sets.map((s) => `${s.p1}/${s.p2}`).join(", ")}
+              Sets: {score.completed_sets.map(setString).join(", ")}
             </div>
           )}
 
@@ -398,24 +427,18 @@ function RefScoring() {
               minHeight: "7rem",
             }}
           >
-            <button
-              onClick={() => handlePoint(1)}
-              disabled={busy}
-              style={bigButton("#3182ce")}
-            >
-              Point
-              <br />
-              {session.player1_name}
-            </button>
-            <button
-              onClick={() => handlePoint(2)}
-              disabled={busy}
-              style={bigButton("#805ad5")}
-            >
-              Point
-              <br />
-              {session.player2_name}
-            </button>
+            {[leftNum, rightNum].map((n) => (
+              <button
+                key={n}
+                onClick={() => handlePoint(n)}
+                disabled={busy}
+                style={bigButton(buttonColor[n])}
+              >
+                Point
+                <br />
+                {nameOf(n)}
+              </button>
+            ))}
           </div>
 
           <div

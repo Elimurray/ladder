@@ -16,6 +16,7 @@ function LiveMatch() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [flipped, setFlipped] = useState(false); // visual side swap only
   const cardRef = useRef(null);
 
   useEffect(() => {
@@ -92,6 +93,14 @@ function LiveMatch() {
   const current = score.current_set || { p1: 0, p2: 0 };
   const isLive = match.status === "live";
 
+  // Display-side mapping — flipping is cosmetic, the data stays canonical
+  const leftNum = flipped ? 2 : 1;
+  const rightNum = flipped ? 1 : 2;
+  const nameOf = (n) => (n === 1 ? match.player1_name : match.player2_name);
+  const pointsOf = (n) => (n === 1 ? current.p1 : current.p2);
+  const setsOf = (n) => (n === 1 ? sets.p1 : sets.p2);
+  const setString = (s) => (flipped ? `${s.p2}/${s.p1}` : `${s.p1}/${s.p2}`);
+
   return (
     <div className="page">
       <h1 style={{ textAlign: "center" }}>Live Match</h1>
@@ -132,6 +141,24 @@ function LiveMatch() {
           {isFullscreen ? "✕ Exit" : "⛶ Fullscreen"}
         </button>
 
+        <button
+          onClick={() => setFlipped(!flipped)}
+          style={{
+            position: "absolute",
+            top: "1rem",
+            left: "1rem",
+            padding: "0.5rem 0.75rem",
+            background: "#2d3748",
+            color: "white",
+            border: "none",
+            borderRadius: "8px",
+            cursor: "pointer",
+            fontSize: "1rem",
+          }}
+        >
+          ⇄ Flip
+        </button>
+
         <div style={{ marginBottom: "1rem" }}>
           {isLive ? (
             <span
@@ -170,11 +197,11 @@ function LiveMatch() {
           }}
         >
           <div style={{ flex: 1, fontWeight: "bold", fontSize: "1.1rem" }}>
-            {match.player1_name}
+            {nameOf(leftNum)}
           </div>
           <div style={{ flex: 1 }} />
           <div style={{ flex: 1, fontWeight: "bold", fontSize: "1.1rem" }}>
-            {match.player2_name}
+            {nameOf(rightNum)}
           </div>
         </div>
 
@@ -195,7 +222,7 @@ function LiveMatch() {
               lineHeight: 1,
             }}
           >
-            {current.p1}
+            {pointsOf(leftNum)}
           </div>
           <div style={{ flex: 1, color: "#718096" }}>
             <div
@@ -204,7 +231,7 @@ function LiveMatch() {
                 fontWeight: "bold",
               }}
             >
-              {sets.p1} - {sets.p2}
+              {setsOf(leftNum)} - {setsOf(rightNum)}
             </div>
             <div style={{ fontSize: isFullscreen ? "2rem" : "1.25rem" }}>
               SETS
@@ -220,7 +247,7 @@ function LiveMatch() {
               lineHeight: 1,
             }}
           >
-            {current.p2}
+            {pointsOf(rightNum)}
           </div>
         </div>
 
@@ -232,8 +259,7 @@ function LiveMatch() {
               marginTop: "0.75rem",
             }}
           >
-            Sets:{" "}
-            {score.completed_sets.map((s) => `${s.p1}/${s.p2}`).join(", ")}
+            Sets: {score.completed_sets.map(setString).join(", ")}
           </div>
         )}
 

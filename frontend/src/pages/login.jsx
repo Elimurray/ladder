@@ -19,8 +19,13 @@ function Login() {
     setLoading(true);
 
     try {
-      await login(formData.email.toLowerCase(), formData.password);
-      navigate("/profile");
+      const data = await login(formData.email.toLowerCase(), formData.password);
+      // Ref devices land straight on the scoring page
+      if (data.user?.is_ref && !data.user?.is_admin) {
+        navigate("/ref");
+      } else {
+        navigate("/profile");
+      }
     } catch (err) {
       setError(err.response?.data?.error || "An error occurred");
     } finally {
