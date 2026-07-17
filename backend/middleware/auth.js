@@ -36,4 +36,17 @@ const drawAdminMiddleware = (req, res, next) => {
   next();
 };
 
-module.exports = { authMiddleware, adminMiddleware, drawAdminMiddleware };
+// Middleware to check if user is a ref device or admin
+const refMiddleware = (req, res, next) => {
+  if (!req.user.is_ref && !req.user.is_admin) {
+    return res.status(403).json({ error: "Access denied. Ref devices only." });
+  }
+  next();
+};
+
+module.exports = {
+  authMiddleware,
+  adminMiddleware,
+  drawAdminMiddleware,
+  refMiddleware,
+};

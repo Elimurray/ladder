@@ -16,6 +16,8 @@ import Admin from "./pages/Admin";
 import Draw from "./pages/Draw";
 import Profile from "./pages/Profile";
 import Results from "./pages/Results";
+import RefScoring from "./pages/RefScoring";
+import LiveMatch from "./pages/LiveMatch";
 import logo from "./assets/logo.png";
 import ColorSteel from "./assets/colorsteel.png";
 
@@ -25,6 +27,9 @@ function AppContent() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { user, logout, loading } = useAuth();
   const navigate = useNavigate();
+
+  // Shared court tablets: trim the nav to just what a ref needs
+  const isRefDevice = user?.is_ref && !user?.is_admin;
 
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
@@ -68,16 +73,20 @@ function AppContent() {
           </button>
 
           <ul className={`nav-menu ${menuOpen ? "active" : ""}`}>
-            <li>
-              <NavLink to="/" onClick={closeMenu}>
-                Home
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/ladder" onClick={closeMenu}>
-                Ladder
-              </NavLink>
-            </li>
+            {!isRefDevice && (
+              <li>
+                <NavLink to="/" onClick={closeMenu}>
+                  Home
+                </NavLink>
+              </li>
+            )}
+            {!isRefDevice && (
+              <li>
+                <NavLink to="/ladder" onClick={closeMenu}>
+                  Ladder
+                </NavLink>
+              </li>
+            )}
             <li>
               <NavLink to="/draw" onClick={closeMenu}>
                 Draw
@@ -90,16 +99,25 @@ function AppContent() {
                 </NavLink>
               </li>
             )}
-            <li>
-              <NavLink to="/results" onClick={closeMenu}>
-                Results
-              </NavLink>
-            </li>
+            {!isRefDevice && (
+              <li>
+                <NavLink to="/results" onClick={closeMenu}>
+                  Results
+                </NavLink>
+              </li>
+            )}
 
-            {user && (
+            {user && !isRefDevice && (
               <li>
                 <NavLink to="/profile" onClick={closeMenu}>
                   Profile
+                </NavLink>
+              </li>
+            )}
+            {user && (user.is_ref || user.is_admin) && (
+              <li>
+                <NavLink to="/ref" onClick={closeMenu}>
+                  Ref Scoring
                 </NavLink>
               </li>
             )}
@@ -143,6 +161,8 @@ function AppContent() {
           <Route path="/draw" element={<Draw />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/results" element={<Results />} />
+          <Route path="/ref" element={<RefScoring />} />
+          <Route path="/live/:id" element={<LiveMatch />} />
         </Routes>
       </div>
 

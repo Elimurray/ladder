@@ -18,6 +18,8 @@ const drawRoutes = require("./routes/draw");
 const matchesRoutes = require("./routes/matches");
 const profileRoutes = require("./routes/profile");
 const resultsRoutes = require("./routes/results");
+const liveRoutes = require("./routes/live");
+app.use("/api/live", liveRoutes);
 app.use("/api/results", resultsRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/matches", matchesRoutes);

@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
-import { drawAPI } from "../services/api";
+import { Link } from "react-router-dom";
+import { drawAPI, liveAPI } from "../services/api";
 import { useAuth } from "../context/AuthContext";
+
+const LIVE_POLL_MS = 10000;
 
 function Draw() {
   const [draw, setDraw] = useState([]);
@@ -11,10 +14,40 @@ function Draw() {
   const [weekNotes, setWeekNotes] = useState("");
   const [isEditingNotes, setIsEditingNotes] = useState(false);
   const [notesInput, setNotesInput] = useState("");
+  const [liveByDraw, setLiveByDraw] = useState({}); // draw_id -> live match id
 
   useEffect(() => {
     fetchCurrentDraw();
   }, []);
+
+  // Poll for in-progress live matches to badge pairings (logged-in users only)
+  useEffect(() => {
+    if (!user) return;
+
+    let timer;
+    let cancelled = false;
+
+    const pollLive = async () => {
+      try {
+        const res = await liveAPI.getLiveMatches();
+        if (cancelled) return;
+        const map = {};
+        res.data.forEach((s) => {
+          map[s.draw_id] = s.id;
+        });
+        setLiveByDraw(map);
+      } catch (err) {
+        console.error("Failed to fetch live matches:", err);
+      }
+      if (!cancelled) timer = setTimeout(pollLive, LIVE_POLL_MS);
+    };
+
+    pollLive();
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [user]);
 
   const fetchCurrentDraw = async () => {
     try {
@@ -279,6 +312,27 @@ function Draw() {
                       isMyMatch(pairing) ? "my-match" : ""
                     }`}
                   >
+                    {liveByDraw[pairing.id] && (
+                      <div
+                        style={{ textAlign: "center", marginBottom: "0.75rem" }}
+                      >
+                        <Link
+                          to={`/live/${liveByDraw[pairing.id]}`}
+                          style={{
+                            background: "#e53e3e",
+                            color: "white",
+                            padding: "0.25rem 0.75rem",
+                            borderRadius: "20px",
+                            fontSize: "0.75rem",
+                            fontWeight: "bold",
+                            textDecoration: "none",
+                            boxShadow: "0 2px 8px rgba(229, 62, 62, 0.4)",
+                          }}
+                        >
+                          ● LIVE — tap to watch
+                        </Link>
+                      </div>
+                    )}
                     <div className="match-players">
                       <div className="player">
                         <span className="position-badge">

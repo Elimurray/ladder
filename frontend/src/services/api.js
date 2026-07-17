@@ -98,6 +98,16 @@ export const profileAPI = {
   updateContact: (contactData) => api.put("/profile/contact", contactData),
 };
 
+export const liveAPI = {
+  start: (draw_id, best_of) => api.post("/live/start", { draw_id, best_of }),
+  getLiveMatches: () => api.get("/live"),
+  getMatch: (id) => api.get(`/live/${id}`),
+  postPoint: (id, point_to, event_number) =>
+    api.post(`/live/${id}/point`, { point_to, event_number }),
+  undo: (id) => api.post(`/live/${id}/undo`),
+  abandon: (id) => api.post(`/live/${id}/abandon`),
+};
+
 export const resultsAPI = {
   getWeeks: () => api.get("/results/weeks"),
   getWeekResults: (date) => api.get(`/results/week/${date}`),
