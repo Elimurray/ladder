@@ -28,7 +28,6 @@ function RefScoring() {
   const [session, setSession] = useState(null); // active live match (with names)
   const [pairings, setPairings] = useState([]);
   const [liveDrawIds, setLiveDrawIds] = useState([]);
-  const [bestOf, setBestOf] = useState(5);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
@@ -95,7 +94,7 @@ function RefScoring() {
     setBusy(true);
     setError(null);
     try {
-      const res = await liveAPI.start(drawId, bestOf, firstServer);
+      const res = await liveAPI.start(drawId, 5, firstServer);
       const full = await liveAPI.getMatch(res.data.session.id);
       setSession(full.data);
       setFinished(null);
@@ -288,18 +287,16 @@ function RefScoring() {
     const playerColor = { 1: "#3182ce", 2: "#805ad5" };
 
     // The score digits ARE the point buttons: tap a player's score to add
-    // a point for them.
+    // a point for them. No chrome — just the giant digit as the tap target.
     const scoreTap = (n) => ({
-      flex: 2,
+      flex: 1,
+      width: "100%",
       display: "flex",
-      flexDirection: "column",
       alignItems: "center",
       justifyContent: "center",
-      alignSelf: "stretch",
-      padding: "1rem",
-      background: "#f7fafc",
-      border: "2px solid #e2e8f0",
-      borderRadius: "12px",
+      padding: 0,
+      background: "none",
+      border: "none",
       color: playerColor[n],
       cursor: "pointer",
       touchAction: "manipulation",
@@ -307,8 +304,65 @@ function RefScoring() {
       opacity: busy ? 0.6 : 1,
     });
     const digitSize = isFullscreen
-      ? "clamp(11rem, 42vh, 32rem)"
-      : "clamp(8rem, 18vw, 14rem)";
+      ? "clamp(6rem, min(42vh, 26vw), 32rem)"
+      : "clamp(4.5rem, 24vw, 14rem)";
+
+    // Score digit with the serve-box chip (L/R) underneath — the chip only
+    // appears under whoever is serving; tapping it switches the box. The
+    // slot is always reserved so the layout doesn't jump on handout.
+    const scoreColumn = (n) => (
+      <div
+        style={{
+          flex: 2,
+          minWidth: 0,
+          alignSelf: "stretch",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        <button
+          onClick={() => handlePoint(n)}
+          disabled={busy}
+          style={scoreTap(n)}
+        >
+          <span
+            style={{ fontSize: digitSize, fontWeight: "bold", lineHeight: 1 }}
+          >
+            {pointsOf(n)}
+          </span>
+        </button>
+        <div
+          style={{
+            minHeight: isFullscreen ? "3.5rem" : "2.5rem",
+            marginTop: "0.25rem",
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          {score.serving?.player === n && (
+            <button
+              onClick={handleServeSide}
+              disabled={busy}
+              title="Tap to switch service box"
+              style={{
+                padding: isFullscreen ? "0.4rem 1.2rem" : "0.3rem 0.9rem",
+                background: "white",
+                color: playerColor[n],
+                border: `2px solid ${playerColor[n]}`,
+                borderRadius: "8px",
+                cursor: "pointer",
+                fontWeight: "bold",
+                fontSize: isFullscreen ? "1.5rem" : "1.1rem",
+                opacity: busy ? 0.6 : 1,
+              }}
+            >
+              {score.serving.side}
+            </button>
+          )}
+        </div>
+      </div>
+    );
 
     return (
       <div className="page">
@@ -325,7 +379,7 @@ function RefScoring() {
           style={{
             border: "2px solid #e2e8f0",
             borderRadius: isFullscreen ? 0 : "12px",
-            padding: "1.5rem",
+            padding: "1rem 0.5rem",
             background: "white",
             color: "black",
             width: "100%",
@@ -377,11 +431,27 @@ function RefScoring() {
               marginBottom: "0.5rem",
             }}
           >
-            <div style={{ flex: 1, fontWeight: "bold", fontSize: "2.2rem" }}>
+            <div
+              style={{
+                flex: 2,
+                minWidth: 0,
+                fontWeight: "bold",
+                fontSize: "clamp(1.1rem, 5vw, 2.2rem)",
+                overflowWrap: "break-word",
+              }}
+            >
               {nameOf(leftNum)}
             </div>
             <div style={{ flex: 1 }} />
-            <div style={{ flex: 1, fontWeight: "bold", fontSize: "2.2rem" }}>
+            <div
+              style={{
+                flex: 2,
+                minWidth: 0,
+                fontWeight: "bold",
+                fontSize: "clamp(1.1rem, 5vw, 2.2rem)",
+                overflowWrap: "break-word",
+              }}
+            >
               {nameOf(rightNum)}
             </div>
           </div>
@@ -394,72 +464,33 @@ function RefScoring() {
               textAlign: "center",
               marginBottom: "0.5rem",
               flex: 1,
-              gap: "1rem",
+              gap: "0.5rem",
             }}
           >
-            <button
-              onClick={() => handlePoint(leftNum)}
-              disabled={busy}
-              style={scoreTap(leftNum)}
-            >
-              <span
-                style={{
-                  fontSize: digitSize,
-                  fontWeight: "bold",
-                  lineHeight: 1,
-                }}
-              >
-                {pointsOf(leftNum)}
-              </span>
-              <span
-                style={{
-                  fontSize: "0.8rem",
-                  color: "#a0aec0",
-                  letterSpacing: "0.15em",
-                  marginTop: "0.75rem",
-                }}
-              >
-                TAP TO SCORE
-              </span>
-            </button>
-            <div style={{ flex: 1, color: "#718096" }}>
+            {scoreColumn(leftNum)}
+            <div style={{ flex: 1, minWidth: 0, color: "#718096" }}>
               <div
                 style={{
-                  fontSize: isFullscreen ? "5rem" : "3rem",
+                  fontSize: isFullscreen
+                    ? "clamp(2rem, 8vw, 5rem)"
+                    : "clamp(1.5rem, 8vw, 3rem)",
                   fontWeight: "bold",
+                  whiteSpace: "nowrap",
                 }}
               >
-                {setsOf(leftNum)} - {setsOf(rightNum)}
+                {setsOf(leftNum)}-{setsOf(rightNum)}
               </div>
-              <div style={{ fontSize: isFullscreen ? "2rem" : "1.25rem" }}>
+              <div
+                style={{
+                  fontSize: isFullscreen
+                    ? "2rem"
+                    : "clamp(0.8rem, 3vw, 1.25rem)",
+                }}
+              >
                 SETS
               </div>
             </div>
-            <button
-              onClick={() => handlePoint(rightNum)}
-              disabled={busy}
-              style={scoreTap(rightNum)}
-            >
-              <span
-                style={{
-                  fontSize: digitSize,
-                  fontWeight: "bold",
-                  lineHeight: 1,
-                }}
-              >
-                {pointsOf(rightNum)}
-              </span>
-              <span
-                style={{
-                  fontSize: "0.8rem",
-                  color: "#a0aec0",
-                  letterSpacing: "0.15em",
-                  marginTop: "0.75rem",
-                }}
-              >
-                TAP TO SCORE
-              </span>
-            </button>
+            {scoreColumn(rightNum)}
           </div>
 
           {(score.completed_sets || []).length > 0 && (
@@ -478,8 +509,8 @@ function RefScoring() {
           <div
             style={{
               display: "flex",
-              gap: "1rem",
-              marginTop: "1rem",
+              gap: "0.5rem",
+              marginTop: "0.75rem",
               justifyContent: "space-between",
               alignItems: "center",
             }}
@@ -488,7 +519,7 @@ function RefScoring() {
               onClick={handleUndo}
               disabled={busy || totalPoints(score) === 0}
               style={{
-                padding: "0.85rem 1.5rem",
+                padding: "0.6rem 1rem",
                 background: "white",
                 color: "#718096",
                 border: "2px solid #e2e8f0",
@@ -497,56 +528,18 @@ function RefScoring() {
                 opacity: busy || totalPoints(score) === 0 ? 0.5 : 1,
                 display: "flex",
                 alignItems: "center",
-                gap: "0.5rem",
-                fontSize: "1rem",
+                gap: "0.4rem",
+                fontSize: "0.9rem",
               }}
             >
-              <Undo2 size={20} /> Undo Point
+              <Undo2 size={18} /> Undo
             </button>
-
-            {score.serving && (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.75rem",
-                }}
-              >
-                <span
-                  style={{
-                    fontWeight: "bold",
-                    fontSize: isFullscreen ? "1.75rem" : "1.25rem",
-                    color: playerColor[score.serving.player],
-                  }}
-                >
-                  {nameOf(score.serving.player)} serving
-                </span>
-                <button
-                  onClick={handleServeSide}
-                  disabled={busy}
-                  title="Tap to switch service box"
-                  style={{
-                    padding: "0.5rem 1rem",
-                    background: "white",
-                    color: "#718096",
-                    border: "2px solid #e2e8f0",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                    fontWeight: "bold",
-                    fontSize: isFullscreen ? "1.5rem" : "1.1rem",
-                    opacity: busy ? 0.6 : 1,
-                  }}
-                >
-                  {score.serving.side}
-                </button>
-              </div>
-            )}
 
             <button
               onClick={handleAbandon}
               disabled={busy}
               style={{
-                padding: "0.85rem 1.5rem",
+                padding: "0.6rem 1rem",
                 background: "#e53e3e",
                 color: "white",
                 border: "none",
@@ -554,11 +547,11 @@ function RefScoring() {
                 cursor: "pointer",
                 display: "flex",
                 alignItems: "center",
-                gap: "0.5rem",
-                fontSize: "1rem",
+                gap: "0.4rem",
+                fontSize: "0.9rem",
               }}
             >
-              <Ban size={20} /> Abandon
+              <Ban size={18} /> Abandon
             </button>
           </div>
         </div>
@@ -591,7 +584,7 @@ function RefScoring() {
         >
           <p style={{ fontSize: "1.1rem", marginTop: 0 }}>
             <strong>{pickServer.player1_name}</strong> vs{" "}
-            <strong>{pickServer.player2_name}</strong> — best of {bestOf}
+            <strong>{pickServer.player2_name}</strong> — best of 5
           </p>
 
           <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem" }}>
@@ -650,24 +643,6 @@ function RefScoring() {
           {error}
         </div>
       )}
-
-      <div style={{ marginBottom: "1.5rem", color: "black" }}>
-        <label style={{ fontWeight: "bold", marginRight: "1rem" }}>
-          Format:
-        </label>
-        <select
-          value={bestOf}
-          onChange={(e) => setBestOf(parseInt(e.target.value))}
-          style={{
-            padding: "0.5rem",
-            borderRadius: "6px",
-            border: "2px solid #cbd5e0",
-          }}
-        >
-          <option value={5}>Best of 5</option>
-          <option value={3}>Best of 3</option>
-        </select>
-      </div>
 
       {pairings.length === 0 ? (
         <p style={{ color: "#718096" }}>

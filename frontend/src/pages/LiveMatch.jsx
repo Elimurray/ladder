@@ -101,6 +101,58 @@ function LiveMatch() {
   const pointsOf = (n) => (n === 1 ? current.p1 : current.p2);
   const setsOf = (n) => (n === 1 ? sets.p1 : sets.p2);
   const setString = (s) => (flipped ? `${s.p2}/${s.p1}` : `${s.p1}/${s.p2}`);
+  const playerColor = { 1: "#3182ce", 2: "#805ad5" };
+
+  // Score digit with a read-only serve-box chip (L/R) under the server.
+  // The slot is always reserved so the layout doesn't jump on handout.
+  const scoreColumn = (n) => (
+    <div
+      style={{
+        flex: 1,
+        minWidth: 0,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+      }}
+    >
+      <div
+        style={{
+          fontSize: isFullscreen
+            ? "clamp(6rem, min(40vh, 26vw), 30rem)"
+            : "clamp(4.5rem, 24vw, 11rem)",
+          fontWeight: "bold",
+          lineHeight: 1,
+          color: playerColor[n],
+        }}
+      >
+        {pointsOf(n)}
+      </div>
+      <div
+        style={{
+          minHeight: isFullscreen ? "3.5rem" : "2.5rem",
+          marginTop: "0.25rem",
+          display: "flex",
+          alignItems: "center",
+        }}
+      >
+        {isLive && score.serving?.player === n && (
+          <span
+            style={{
+              padding: isFullscreen ? "0.4rem 1.2rem" : "0.3rem 0.9rem",
+              background: "white",
+              color: playerColor[n],
+              border: `2px solid ${playerColor[n]}`,
+              borderRadius: "8px",
+              fontWeight: "bold",
+              fontSize: isFullscreen ? "1.5rem" : "1.1rem",
+            }}
+          >
+            {score.serving.side}
+          </span>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <div className="page">
@@ -111,7 +163,7 @@ function LiveMatch() {
         style={{
           border: "2px solid #e2e8f0",
           borderRadius: isFullscreen ? 0 : "12px",
-          padding: "1.5rem",
+          padding: "1rem 0.5rem",
           background: "white",
           color: "black",
           width: "100%",
@@ -203,11 +255,27 @@ function LiveMatch() {
             alignItems: "center",
           }}
         >
-          <div style={{ flex: 1, fontWeight: "bold", fontSize: "2.2rem" }}>
+          <div
+            style={{
+              flex: 1,
+              minWidth: 0,
+              fontWeight: "bold",
+              fontSize: "clamp(1.1rem, 5vw, 2.2rem)",
+              overflowWrap: "break-word",
+            }}
+          >
             {nameOf(leftNum)}
           </div>
           <div style={{ flex: 1 }} />
-          <div style={{ flex: 1, fontWeight: "bold", fontSize: "2.2rem" }}>
+          <div
+            style={{
+              flex: 1,
+              minWidth: 0,
+              fontWeight: "bold",
+              fontSize: "clamp(1.1rem, 5vw, 2.2rem)",
+              overflowWrap: "break-word",
+            }}
+          >
             {nameOf(rightNum)}
           </div>
         </div>
@@ -219,43 +287,28 @@ function LiveMatch() {
             alignItems: "center",
           }}
         >
-          <div
-            style={{
-              flex: 1,
-              fontSize: isFullscreen
-                ? "clamp(9rem, 40vh, 30rem)"
-                : "clamp(7rem, 14vw, 11rem)",
-              fontWeight: "bold",
-              lineHeight: 1,
-            }}
-          >
-            {pointsOf(leftNum)}
-          </div>
-          <div style={{ flex: 1, color: "#718096" }}>
+          {scoreColumn(leftNum)}
+          <div style={{ flex: 1, minWidth: 0, color: "#718096" }}>
             <div
               style={{
-                fontSize: isFullscreen ? "5rem" : "3rem",
+                fontSize: isFullscreen
+                  ? "clamp(2rem, 8vw, 5rem)"
+                  : "clamp(1.5rem, 8vw, 3rem)",
                 fontWeight: "bold",
+                whiteSpace: "nowrap",
               }}
             >
-              {setsOf(leftNum)} - {setsOf(rightNum)}
+              {setsOf(leftNum)}-{setsOf(rightNum)}
             </div>
-            <div style={{ fontSize: isFullscreen ? "2rem" : "1.25rem" }}>
+            <div
+              style={{
+                fontSize: isFullscreen ? "2rem" : "clamp(0.8rem, 3vw, 1.25rem)",
+              }}
+            >
               SETS
             </div>
           </div>
-          <div
-            style={{
-              flex: 1,
-              fontSize: isFullscreen
-                ? "clamp(9rem, 40vh, 30rem)"
-                : "clamp(7rem, 14vw, 11rem)",
-              fontWeight: "bold",
-              lineHeight: 1,
-            }}
-          >
-            {pointsOf(rightNum)}
-          </div>
+          {scoreColumn(rightNum)}
         </div>
 
         {(score.completed_sets || []).length > 0 && (
@@ -270,30 +323,6 @@ function LiveMatch() {
           </div>
         )}
 
-        {isLive && score.serving && (
-          <div
-            style={{
-              marginTop: "1rem",
-              fontSize: isFullscreen ? "2rem" : "1.4rem",
-              fontWeight: "bold",
-            }}
-          >
-            {nameOf(score.serving.player)} serving
-            <span
-              style={{
-                marginLeft: "0.75rem",
-                padding: "0.25rem 0.75rem",
-                background: "#f7fafc",
-                border: "2px solid #e2e8f0",
-                borderRadius: "8px",
-                color: "#718096",
-                fontSize: isFullscreen ? "1.5rem" : "1.1rem",
-              }}
-            >
-              {score.serving.side}
-            </span>
-          </div>
-        )}
 
         {match.status === "completed" && (
           <p style={{ marginTop: "1rem", fontWeight: "bold" }}>
