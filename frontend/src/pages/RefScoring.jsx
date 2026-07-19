@@ -35,6 +35,7 @@ function RefScoring() {
   const [finished, setFinished] = useState(null); // completion info
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [flipped, setFlipped] = useState(false); // visual side swap only
+  const [pickServer, setPickServer] = useState(null); // pairing awaiting server choice
   const cardRef = useRef(null);
 
   const canRef = user && (user.is_ref || user.is_admin);
@@ -90,18 +91,39 @@ function RefScoring() {
     setLoading(false);
   };
 
-  const handleStart = async (drawId) => {
+  const handleStart = async (drawId, firstServer) => {
     setBusy(true);
     setError(null);
     try {
-      const res = await liveAPI.start(drawId, bestOf);
+      const res = await liveAPI.start(drawId, bestOf, firstServer);
       const full = await liveAPI.getMatch(res.data.session.id);
       setSession(full.data);
       setFinished(null);
+      setPickServer(null);
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.error || "Failed to start match");
+      setPickServer(null);
       loadInitial();
+    }
+    setBusy(false);
+  };
+
+  const handleServeSide = async () => {
+    const serving = session?.current_score?.serving;
+    if (!serving || busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const newSide = serving.side === "R" ? "L" : "R";
+      const res = await liveAPI.setServeSide(session.id, newSide);
+      setSession({
+        ...session,
+        current_score: { ...session.current_score, serving: res.data.serving },
+      });
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.error || "Failed to set serve side");
     }
     setBusy(false);
   };
@@ -459,6 +481,7 @@ function RefScoring() {
               gap: "1rem",
               marginTop: "1rem",
               justifyContent: "space-between",
+              alignItems: "center",
             }}
           >
             <button
@@ -480,6 +503,45 @@ function RefScoring() {
             >
               <Undo2 size={20} /> Undo Point
             </button>
+
+            {score.serving && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.75rem",
+                }}
+              >
+                <span
+                  style={{
+                    fontWeight: "bold",
+                    fontSize: isFullscreen ? "1.75rem" : "1.25rem",
+                    color: playerColor[score.serving.player],
+                  }}
+                >
+                  {nameOf(score.serving.player)} serving
+                </span>
+                <button
+                  onClick={handleServeSide}
+                  disabled={busy}
+                  title="Tap to switch service box"
+                  style={{
+                    padding: "0.5rem 1rem",
+                    background: "white",
+                    color: "#718096",
+                    border: "2px solid #e2e8f0",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                    fontWeight: "bold",
+                    fontSize: isFullscreen ? "1.5rem" : "1.1rem",
+                    opacity: busy ? 0.6 : 1,
+                  }}
+                >
+                  {score.serving.side}
+                </button>
+              </div>
+            )}
+
             <button
               onClick={handleAbandon}
               disabled={busy}
@@ -499,6 +561,80 @@ function RefScoring() {
               <Ban size={20} /> Abandon
             </button>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ---------- Choose first server (after tapping Start on a pairing) ----------
+  if (pickServer) {
+    return (
+      <div className="page">
+        <h1>Who Serves First?</h1>
+
+        {error && (
+          <div className="error" style={{ marginBottom: "1rem" }}>
+            {error}
+          </div>
+        )}
+
+        <div
+          style={{
+            border: "2px solid #e2e8f0",
+            borderRadius: "12px",
+            padding: "1.5rem",
+            background: "white",
+            color: "black",
+            width: "100%",
+            textAlign: "center",
+          }}
+        >
+          <p style={{ fontSize: "1.1rem", marginTop: 0 }}>
+            <strong>{pickServer.player1_name}</strong> vs{" "}
+            <strong>{pickServer.player2_name}</strong> — best of {bestOf}
+          </p>
+
+          <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem" }}>
+            {[1, 2].map((n) => (
+              <button
+                key={n}
+                onClick={() => handleStart(pickServer.id, n)}
+                disabled={busy}
+                style={{
+                  flex: 1,
+                  padding: "2rem 1rem",
+                  fontSize: "1.4rem",
+                  fontWeight: "bold",
+                  color: "white",
+                  background: n === 1 ? "#3182ce" : "#805ad5",
+                  border: "none",
+                  borderRadius: "12px",
+                  cursor: "pointer",
+                  opacity: busy ? 0.6 : 1,
+                  touchAction: "manipulation",
+                }}
+              >
+                {n === 1 ? pickServer.player1_name : pickServer.player2_name}
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={() => setPickServer(null)}
+            disabled={busy}
+            style={{
+              marginTop: "1.5rem",
+              padding: "0.75rem 1.5rem",
+              background: "white",
+              color: "#718096",
+              border: "2px solid #e2e8f0",
+              borderRadius: "8px",
+              cursor: "pointer",
+              fontSize: "1rem",
+            }}
+          >
+            Cancel
+          </button>
         </div>
       </div>
     );
@@ -577,7 +713,7 @@ function RefScoring() {
                   </span>
                 ) : (
                   <button
-                    onClick={() => handleStart(p.id)}
+                    onClick={() => setPickServer(p)}
                     disabled={busy}
                     style={{
                       padding: "0.5rem 1.25rem",

@@ -99,12 +99,14 @@ export const profileAPI = {
 };
 
 export const liveAPI = {
-  start: (draw_id, best_of) => api.post("/live/start", { draw_id, best_of }),
+  start: (draw_id, best_of, first_server) =>
+    api.post("/live/start", { draw_id, best_of, first_server }),
   getLiveMatches: () => api.get("/live"),
   getMatch: (id) => api.get(`/live/${id}`),
   postPoint: (id, point_to, event_number) =>
     api.post(`/live/${id}/point`, { point_to, event_number }),
   undo: (id) => api.post(`/live/${id}/undo`),
+  setServeSide: (id, side) => api.post(`/live/${id}/serve-side`, { side }),
   abandon: (id) => api.post(`/live/${id}/abandon`),
 };
 

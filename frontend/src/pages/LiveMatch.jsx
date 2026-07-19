@@ -270,6 +270,31 @@ function LiveMatch() {
           </div>
         )}
 
+        {isLive && score.serving && (
+          <div
+            style={{
+              marginTop: "1rem",
+              fontSize: isFullscreen ? "2rem" : "1.4rem",
+              fontWeight: "bold",
+            }}
+          >
+            {nameOf(score.serving.player)} serving
+            <span
+              style={{
+                marginLeft: "0.75rem",
+                padding: "0.25rem 0.75rem",
+                background: "#f7fafc",
+                border: "2px solid #e2e8f0",
+                borderRadius: "8px",
+                color: "#718096",
+                fontSize: isFullscreen ? "1.5rem" : "1.1rem",
+              }}
+            >
+              {score.serving.side}
+            </span>
+          </div>
+        )}
+
         {match.status === "completed" && (
           <p style={{ marginTop: "1rem", fontWeight: "bold" }}>
             🏆{" "}

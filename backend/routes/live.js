@@ -32,11 +32,15 @@ function canControl(session, user) {
 // Start a live scoring session on a draw pairing (ref or admin only)
 router.post("/start", authMiddleware, refMiddleware, async (req, res) => {
   try {
-    const { draw_id, best_of } = req.body;
+    const { draw_id, best_of, first_server } = req.body;
     const bestOf = best_of || 5;
+    const firstServer = first_server || 1;
 
     if (![3, 5].includes(bestOf)) {
       return res.status(400).json({ error: "best_of must be 3 or 5" });
+    }
+    if (![1, 2].includes(firstServer)) {
+      return res.status(400).json({ error: "first_server must be 1 or 2" });
     }
 
     const drawInfo = await pool.query("SELECT * FROM draws WHERE id = $1", [
@@ -66,10 +70,17 @@ router.post("/start", authMiddleware, refMiddleware, async (req, res) => {
       });
     }
 
+    const initialScore = {
+      sets_won: { p1: 0, p2: 0 },
+      completed_sets: [],
+      current_set: { p1: 0, p2: 0 },
+      winner: null,
+      serving: { player: firstServer, side: "R" },
+    };
     const result = await pool.query(
-      `INSERT INTO live_matches (draw_id, ref_user_id, best_of)
-       VALUES ($1, $2, $3) RETURNING *`,
-      [draw_id, req.user.id, bestOf],
+      `INSERT INTO live_matches (draw_id, ref_user_id, best_of, first_server, current_score)
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [draw_id, req.user.id, bestOf, firstServer, JSON.stringify(initialScore)],
     );
 
     res.status(201).json({
@@ -185,10 +196,29 @@ router.post("/:id/point", authMiddleware, async (req, res) => {
 
     let score;
     try {
-      score = computeScore([...points, point_to], session.best_of);
+      score = computeScore(
+        [...points, point_to],
+        session.best_of,
+        session.first_server,
+      );
     } catch (scoreErr) {
       await client.query("ROLLBACK");
       return res.status(400).json({ error: scoreErr.message });
+    }
+
+    // Serve retained within the same set: alternate from the box currently
+    // shown (which the ref may have manually overridden), not the derived
+    // default. On handout or a new set the computeScore default (R) stands
+    // and the new server picks their box.
+    const prevServing = session.current_score?.serving;
+    const prevSetCount = (session.current_score?.completed_sets || []).length;
+    if (
+      score.serving &&
+      prevServing &&
+      score.completed_sets.length === prevSetCount &&
+      prevServing.player === point_to
+    ) {
+      score.serving.side = prevServing.side === "R" ? "L" : "R";
     }
 
     await client.query(
@@ -329,7 +359,11 @@ router.post("/:id/undo", authMiddleware, async (req, res) => {
       [session.id],
     );
 
-    const score = computeScore(points.slice(0, -1), session.best_of);
+    const score = computeScore(
+      points.slice(0, -1),
+      session.best_of,
+      session.first_server,
+    );
     await client.query(
       "UPDATE live_matches SET current_score = $1 WHERE id = $2",
       [JSON.stringify(score), session.id],
@@ -342,6 +376,65 @@ router.post("/:id/undo", authMiddleware, async (req, res) => {
       current_score: score,
       status: "live",
     });
+  } catch (err) {
+    await client.query("ROLLBACK");
+    console.error(err.message);
+    res.status(500).json({ error: "Server error" });
+  } finally {
+    client.release();
+  }
+});
+
+// Set which box (L/R) the current server is serving from
+// (session's ref device or admin only)
+router.post("/:id/serve-side", authMiddleware, async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const { side } = req.body;
+    if (!["L", "R"].includes(side)) {
+      return res.status(400).json({ error: "side must be 'L' or 'R'" });
+    }
+
+    await client.query("BEGIN");
+
+    const session = await client.query(
+      "SELECT * FROM live_matches WHERE id = $1 FOR UPDATE",
+      [req.params.id],
+    );
+    if (session.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "Live match not found" });
+    }
+    const row = session.rows[0];
+
+    if (!canControl(row, req.user)) {
+      await client.query("ROLLBACK");
+      return res
+        .status(403)
+        .json({ error: "Only this session's ref device can score it" });
+    }
+    if (row.status !== "live") {
+      await client.query("ROLLBACK");
+      return res.status(400).json({ error: "This match is not live" });
+    }
+    if (!row.current_score?.serving) {
+      await client.query("ROLLBACK");
+      return res
+        .status(400)
+        .json({ error: "This session has no serving state" });
+    }
+
+    const updatedScore = {
+      ...row.current_score,
+      serving: { ...row.current_score.serving, side },
+    };
+    await client.query(
+      "UPDATE live_matches SET current_score = $1 WHERE id = $2",
+      [JSON.stringify(updatedScore), row.id],
+    );
+
+    await client.query("COMMIT");
+    res.json({ serving: updatedScore.serving });
   } catch (err) {
     await client.query("ROLLBACK");
     console.error(err.message);
