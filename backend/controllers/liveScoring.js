@@ -1,4 +1,4 @@
-// Squash scoring rules for live matches: rally-point to 11, win by 2,
+// Squash scoring rules for live matches: rally-point to 15, win by 2,
 // best of 3 or 5 sets. The ref device only ever posts "point to player 1/2";
 // everything here is derived server-side by replaying the event log.
 
@@ -41,7 +41,7 @@ function computeScore(points, bestOf, firstServer) {
 
     let setWinner = null;
     const { p1, p2 } = state.current_set;
-    if ((p1 >= 11 || p2 >= 11) && Math.abs(p1 - p2) >= 2) {
+    if ((p1 >= 15 || p2 >= 15) && Math.abs(p1 - p2) >= 2) {
       state.completed_sets.push({ p1, p2 });
       setWinner = p1 > p2 ? 1 : 2;
       if (p1 > p2) state.sets_won.p1++;
