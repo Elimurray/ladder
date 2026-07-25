@@ -485,6 +485,12 @@ router.post(
         [date],
       );
 
+      // Set draw_id to NULL in live_matches (FK constraint: can't delete draw while live_matches reference it)
+      await client.query(
+        "UPDATE live_matches SET draw_id = NULL WHERE draw_id IN (SELECT id FROM draws WHERE week_date = $1)",
+        [date],
+      );
+
       // Delete the draw itself
       await client.query("DELETE FROM draws WHERE week_date = $1", [date]);
 
