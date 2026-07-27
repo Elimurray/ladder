@@ -114,7 +114,7 @@ function AppContent() {
                 </NavLink>
               </li>
             )}
-            {user && (user.is_ref || user.is_admin) && (
+            {user && (
               <li>
                 <NavLink to="/ref" onClick={closeMenu}>
                   Start Live
