@@ -1,7 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../config/db");
-const { authMiddleware, adminMiddleware } = require("../middleware/auth");
+const {
+  authMiddleware,
+  adminMiddleware,
+  drawAdminMiddleware,
+} = require("../middleware/auth");
 
 // Submit match result (authenticated users only)
 router.post("/submit", authMiddleware, async (req, res) => {
@@ -593,11 +597,11 @@ router.delete(
   },
 );
 
-// Admin: Update match (both players)
+// Admin & Draw Admin: Update match (both players)
 router.put(
   "/match/:matchId",
   authMiddleware,
-  adminMiddleware,
+  drawAdminMiddleware,
   async (req, res) => {
     const client = await pool.connect();
 

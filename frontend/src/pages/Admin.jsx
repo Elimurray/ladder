@@ -90,15 +90,14 @@ function Admin() {
 
   const tabs = [
     { id: "draw", label: "Draw Management" },
-    ...(user?.is_admin
+    ...(user?.is_admin || user?.is_draw_admin
       ? [
           {
             id: "matches",
             label: "Match Approval",
             badge: pendingMatches.length,
           },
-          { id: "ladder", label: "Ladder" },
-          { id: "users", label: "Users" },
+          ...(user?.is_admin ? [{ id: "ladder", label: "Ladder" }, { id: "users", label: "Users" }] : []),
         ]
       : []),
   ];
@@ -1383,23 +1382,25 @@ function Admin() {
                   }}
                 >
                   <h2>Pending Match Approvals ({pendingMatches.length})</h2>
-                  <button
-                    onClick={handleApproveAll}
-                    style={{
-                      padding: "0.75rem 1.5rem",
-                      background:
-                        "linear-gradient(135deg, #48bb78 0%, #38a169 100%)",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "8px",
-                      cursor: "pointer",
-                      fontWeight: "600",
-                      boxShadow: "0 2px 8px rgba(72, 187, 120, 0.3)",
-                      fontSize: "1rem",
-                    }}
-                  >
-                    ✓ Approve All {pendingMatches.length} Matches
-                  </button>
+                  {user?.is_admin && (
+                    <button
+                      onClick={handleApproveAll}
+                      style={{
+                        padding: "0.75rem 1.5rem",
+                        background:
+                          "linear-gradient(135deg, #48bb78 0%, #38a169 100%)",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "8px",
+                        cursor: "pointer",
+                        fontWeight: "600",
+                        boxShadow: "0 2px 8px rgba(72, 187, 120, 0.3)",
+                        fontSize: "1rem",
+                      }}
+                    >
+                      ✓ Approve All {pendingMatches.length} Matches
+                    </button>
+                  )}
                 </div>
 
                 <div className="pending-matches-grid">
@@ -1711,14 +1712,16 @@ function Admin() {
                               >
                                 ✏️ Edit
                               </button>
-                              <button
-                                onClick={() =>
-                                  handleApproveMatch(match.match_id)
-                                }
-                                className="btn-approve"
-                              >
-                                ✓ Approve
-                              </button>
+                              {user?.is_admin && (
+                                <button
+                                  onClick={() =>
+                                    handleApproveMatch(match.match_id)
+                                  }
+                                  className="btn-approve"
+                                >
+                                  ✓ Approve
+                                </button>
+                              )}
                               <button
                                 onClick={() =>
                                   handleDeleteMatch(match.match_id)
