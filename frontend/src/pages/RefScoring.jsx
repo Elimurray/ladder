@@ -37,7 +37,7 @@ function RefScoring() {
   const [pickServer, setPickServer] = useState(null); // pairing awaiting server choice
   const cardRef = useRef(null);
 
-  const canRef = user && (user.is_ref || user.is_admin);
+  const canRef = !!user;
 
   useEffect(() => {
     const onChange = () => setIsFullscreen(!!fullscreenElement());
