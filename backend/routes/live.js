@@ -29,8 +29,8 @@ function canControl(session, user) {
   return session.ref_user_id === user.id || user.is_admin;
 }
 
-// Start a live scoring session on a draw pairing (ref or admin only)
-router.post("/start", authMiddleware, refMiddleware, async (req, res) => {
+// Start a live scoring session on a draw pairing
+router.post("/start", authMiddleware, async (req, res) => {
   try {
     const { draw_id, best_of, first_server } = req.body;
     const bestOf = best_of || 5;
