@@ -94,6 +94,13 @@ function AppContent() {
             </li>
             {user && (
               <li>
+                <NavLink to="/ref" onClick={closeMenu}>
+                  Live Score
+                </NavLink>
+              </li>
+            )}
+            {user && (
+              <li>
                 <NavLink to="/submit" onClick={closeMenu}>
                   Submit Match
                 </NavLink>
@@ -111,13 +118,6 @@ function AppContent() {
               <li>
                 <NavLink to="/profile" onClick={closeMenu}>
                   Profile
-                </NavLink>
-              </li>
-            )}
-            {user && (
-              <li>
-                <NavLink to="/ref" onClick={closeMenu}>
-                  Start Live
                 </NavLink>
               </li>
             )}
