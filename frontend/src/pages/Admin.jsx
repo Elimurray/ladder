@@ -127,16 +127,24 @@ function Admin() {
     try {
       if (user.is_admin) {
         try {
-          const [ladderRes, usersRes, pendingRes] = await Promise.all([
+          const [ladderRes, usersRes] = await Promise.all([
             ladderAPI.getAll(),
             usersAPI.getAll(),
-            matchesAPI.getPending(),
           ]);
           setLadder(ladderRes.data);
           setUsers(usersRes.data);
-          setPendingMatches(pendingRes.data);
         } catch (err) {
           console.error("Error fetching admin data:", err);
+        }
+      }
+
+      // Pending matches are visible to admins and draw admins
+      if (user.is_admin || user.is_draw_admin) {
+        try {
+          const pendingRes = await matchesAPI.getPending();
+          setPendingMatches(pendingRes.data);
+        } catch (err) {
+          console.error("Error fetching pending matches:", err);
         }
       }
 
@@ -1722,14 +1730,16 @@ function Admin() {
                                   ✓ Approve
                                 </button>
                               )}
-                              <button
-                                onClick={() =>
-                                  handleDeleteMatch(match.match_id)
-                                }
-                                className="btn-reject"
-                              >
-                                ✗ Reject
-                              </button>
+                              {user?.is_admin && (
+                                <button
+                                  onClick={() =>
+                                    handleDeleteMatch(match.match_id)
+                                  }
+                                  className="btn-reject"
+                                >
+                                  ✗ Reject
+                                </button>
+                              )}
                             </div>
                           </>
                         )}
@@ -1740,7 +1750,17 @@ function Admin() {
               </div>
             )}
 
+            {pendingMatches.length === 0 && (
+              <div className="admin-section" id="pending-matches">
+                <h2>Pending Match Approvals (0)</h2>
+                <p style={{ color: "#718096" }}>
+                  There are no matches waiting for approval.
+                </p>
+              </div>
+            )}
+
             {/* Process Week and Update Ladder */}
+            {user?.is_admin && (
             <div className="admin-section" id="process-week">
               <h2>Process Week & Update Ladder</h2>
               <p style={{ color: "#718096", marginBottom: "1rem" }}>
@@ -1818,6 +1838,7 @@ function Admin() {
                 </ul>
               </div>
             </div>
+            )}
           </>
         )}
 

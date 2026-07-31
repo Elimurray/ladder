@@ -213,8 +213,8 @@ router.get("/my-match", authMiddleware, async (req, res) => {
   }
 });
 
-// Admin: Get all pending results (grouped by match)
-router.get("/pending", authMiddleware, adminMiddleware, async (req, res) => {
+// Admin & Draw Admin: Get all pending results (grouped by match)
+router.get("/pending", authMiddleware, drawAdminMiddleware, async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT 
