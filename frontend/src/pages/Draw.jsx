@@ -197,7 +197,7 @@ function Draw() {
             <h3 style={{ margin: 0, fontSize: "1rem", color: "#2d3748" }}>
               📋 Week Notes
             </h3>
-            {user?.is_admin && !isEditingNotes && (
+            {(user?.is_admin || user?.is_draw_admin) && !isEditingNotes && (
               <button
                 onClick={handleEditNotes}
                 style={{
