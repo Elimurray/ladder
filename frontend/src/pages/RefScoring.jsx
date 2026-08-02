@@ -6,6 +6,7 @@ import {
   Undo2,
   Ban,
 } from "lucide-react";
+import { Navigate, useLocation } from "react-router-dom";
 import { liveAPI, drawAPI } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 
@@ -25,6 +26,7 @@ const totalPoints = (score) => {
 
 function RefScoring() {
   const { user } = useAuth();
+  const location = useLocation();
   const [session, setSession] = useState(null); // active live match (with names)
   const [pairings, setPairings] = useState([]);
   const [liveDrawIds, setLiveDrawIds] = useState([]);
@@ -195,11 +197,18 @@ function RefScoring() {
     setBusy(false);
   };
 
+  // Scanned a court QR code while logged out (or with an expired token):
+  // send them to login and come back here once they're in.
   if (!canRef) {
     return (
-      <div className="page">
-        <div className="error">Access denied. Ref devices only.</div>
-      </div>
+      <Navigate
+        to="/login"
+        state={{
+          from: location.pathname + location.search,
+          message: "Log in to start live scoring.",
+        }}
+        replace
+      />
     );
   }
 

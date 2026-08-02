@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -12,6 +12,11 @@ function Login() {
 
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Set when a protected page (e.g. a scanned court QR code) bounced us here
+  const redirectTo = location.state?.from;
+  const notice = location.state?.message;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,8 +25,10 @@ function Login() {
 
     try {
       const data = await login(formData.email.toLowerCase(), formData.password);
-      // Ref devices land straight on the scoring page
-      if (data.user?.is_ref && !data.user?.is_admin) {
+      if (redirectTo) {
+        navigate(redirectTo, { replace: true });
+      } else if (data.user?.is_ref && !data.user?.is_admin) {
+        // Ref devices land straight on the scoring page
         navigate("/ref");
       } else {
         navigate("/profile");
@@ -44,7 +51,7 @@ function Login() {
     <div className="page">
       <div className="login-container">
         <h1>Login</h1>
-        <p>Welcome back!</p>
+        <p>{notice || "Welcome back!"}</p>
 
         {error && <div className="error">{error}</div>}
 
