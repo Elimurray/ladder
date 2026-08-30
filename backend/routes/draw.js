@@ -348,13 +348,25 @@ router.post(
         }
 
         if (!assigned) {
-          console.warn(
-            "Could not fit junior pairing, forcing into first valid slot",
+          // No junior slot suits this pairing (both players prefer a time after
+          // 7:00pm) or every junior slot is full. Fall back to any slot at or
+          // after their earliest time, preferring one that still has space.
+          const fallbackSlots = timeSlots.filter(
+            (slot) => timeToMinutes(slot) >= earliestTime,
           );
-          timeSlotAssignments[validJuniorSlots[0]].push({
-            ...pairing,
-            time_slot: validJuniorSlots[0],
-          });
+
+          const target =
+            fallbackSlots.find((slot) => timeSlotAssignments[slot].length < 4) ||
+            [...fallbackSlots].sort(
+              (a, b) =>
+                timeSlotAssignments[a].length - timeSlotAssignments[b].length,
+            )[0] ||
+            timeSlots[timeSlots.length - 1];
+
+          console.warn(
+            `Could not fit junior pairing in a junior slot, placing at ${target}`,
+          );
+          timeSlotAssignments[target].push({ ...pairing, time_slot: target });
         }
       }
 
