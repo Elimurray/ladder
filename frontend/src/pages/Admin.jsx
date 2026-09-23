@@ -107,7 +107,7 @@ function Admin() {
             label: "Match Approval",
             badge: pendingMatches.length,
           },
-          ...(user?.is_admin ? [{ id: "ladder", label: "Ladder" }, { id: "users", label: "Users" }] : []),
+          ...(user?.is_admin ? [{ id: "ladder", label: "Ladder" }, { id: "users", label: "Users" }, { id: "export", label: "Export" }] : []),
         ]
       : []),
   ];
@@ -1876,49 +1876,6 @@ function Admin() {
               </div>
             </div>
             )}
-
-            {/* Export Results */}
-            {user?.is_admin && (
-            <div className="admin-section" id="export-results">
-              <h2>Export Results</h2>
-              <p style={{ color: "#718096", marginBottom: "1rem" }}>
-                Download all processed match results in a date range as a CSV
-                file.
-              </p>
-
-              <form onSubmit={handleExportResults} className="admin-form">
-                <div className="admin-form-row">
-                  <div className="form-group" style={{ flex: 1 }}>
-                    <label>From:</label>
-                    <input
-                      type="date"
-                      value={exportFrom}
-                      onChange={(e) => setExportFrom(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="form-group" style={{ flex: 1 }}>
-                    <label>To:</label>
-                    <input
-                      type="date"
-                      value={exportTo}
-                      onChange={(e) => setExportTo(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="admin-button-group">
-                    <button
-                      type="submit"
-                      className="btn-plain"
-                      disabled={exporting}
-                    >
-                      {exporting ? "Exporting..." : "Download CSV"}
-                    </button>
-                  </div>
-                </div>
-              </form>
-            </div>
-            )}
           </>
         )}
 
@@ -2334,6 +2291,51 @@ function Admin() {
                   <p className="admin-empty">No one on the ladder yet.</p>
                 )}
               </div>
+            </div>
+          </>
+        )}
+
+        {activeTab === "export" && (
+          <>
+            {/* Export Results */}
+            <div className="admin-section" id="export-results">
+              <h2>Export Results</h2>
+              <p style={{ color: "#718096", marginBottom: "1rem" }}>
+                Download all processed match results in a date range as a CSV
+                file.
+              </p>
+
+              <form onSubmit={handleExportResults} className="admin-form">
+                <div className="admin-form-row">
+                  <div className="form-group" style={{ flex: 1 }}>
+                    <label>From:</label>
+                    <input
+                      type="date"
+                      value={exportFrom}
+                      onChange={(e) => setExportFrom(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="form-group" style={{ flex: 1 }}>
+                    <label>To:</label>
+                    <input
+                      type="date"
+                      value={exportTo}
+                      onChange={(e) => setExportTo(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="admin-button-group">
+                    <button
+                      type="submit"
+                      className="btn-plain"
+                      disabled={exporting}
+                    >
+                      {exporting ? "Exporting..." : "Download CSV"}
+                    </button>
+                  </div>
+                </div>
+              </form>
             </div>
           </>
         )}
