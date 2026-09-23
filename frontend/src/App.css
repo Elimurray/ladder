@@ -1341,3 +1341,23 @@ td:first-child {
     display: none;
   }
 }
+
+.btn-plain {
+  background: #ea580c;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-plain:hover {
+  background: #c2410c;
+}
+
+.btn-plain:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

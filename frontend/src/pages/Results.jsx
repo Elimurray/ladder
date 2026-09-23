@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { resultsAPI } from "../services/api";
+import { resultsToCsv, downloadCsv } from "../utils/resultsCsv";
 
 function Results() {
   const [weeks, setWeeks] = useState([]);
@@ -50,6 +51,10 @@ function Results() {
     fetchWeekResults(date);
   };
 
+  const handleExportCsv = () => {
+    downloadCsv(resultsToCsv(results), `results-${selectedWeek}.csv`);
+  };
+
   const toLocalDateString = (dateString) => {
     const d = new Date(dateString);
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -82,8 +87,19 @@ function Results() {
       ) : (
         <>
           {/* Week Selector */}
-          <div style={{ marginBottom: "2rem" }}>
-            <div className="form-group" style={{ maxWidth: "400px" }}>
+          <div
+            style={{
+              marginBottom: "2rem",
+              display: "flex",
+              alignItems: "flex-end",
+              gap: "1rem",
+              flexWrap: "wrap",
+            }}
+          >
+            <div
+              className="form-group"
+              style={{ maxWidth: "400px", flex: 1, marginBottom: 0 }}
+            >
               <label>Select Week:</label>
               <select
                 value={selectedWeek}
@@ -106,6 +122,14 @@ function Results() {
                 })}
               </select>
             </div>
+            <button
+              type="button"
+              className="btn-plain"
+              onClick={handleExportCsv}
+              disabled={loading || results.length === 0}
+            >
+              Download CSV
+            </button>
           </div>
 
           {/* Results Table */}

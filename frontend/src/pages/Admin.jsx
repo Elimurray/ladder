@@ -6,7 +6,9 @@ import {
   drawAPI,
   matchesAPI,
   profileAPI,
+  resultsAPI,
 } from "../services/api";
+import { resultsToCsv, downloadCsv } from "../utils/resultsCsv";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
@@ -64,6 +66,14 @@ function Admin() {
   const [newMatchPlayer1, setNewMatchPlayer1] = useState("");
   const [newMatchPlayer2, setNewMatchPlayer2] = useState("");
   const [newMatchTimeSlot, setNewMatchTimeSlot] = useState("");
+
+  // Export results
+  const [exportFrom, setExportFrom] = useState("2026-02-12");
+  const [exportTo, setExportTo] = useState(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  });
+  const [exporting, setExporting] = useState(false);
 
   const [editRescheduleNotes, setEditRescheduleNotes] = useState("");
   const [newMatchRescheduleNotes, setNewMatchRescheduleNotes] = useState("");
@@ -481,6 +491,33 @@ function Admin() {
       fetchData();
     } catch (err) {
       showError(err.response?.data?.error || "Failed to process week");
+    }
+  };
+
+  const handleExportResults = async (e) => {
+    e.preventDefault();
+
+    if (exportFrom > exportTo) {
+      showError("Start date must be before end date");
+      return;
+    }
+
+    try {
+      setExporting(true);
+      const response = await resultsAPI.getRangeResults(exportFrom, exportTo);
+      if (response.data.length === 0) {
+        showError("No processed results in that date range");
+        return;
+      }
+      downloadCsv(
+        resultsToCsv(response.data),
+        `results-${exportFrom}-to-${exportTo}.csv`,
+      );
+      showSuccess(`Exported ${response.data.length} matches`);
+    } catch (err) {
+      showError(err.response?.data?.error || "Failed to export results");
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -1837,6 +1874,49 @@ function Admin() {
                   </li>
                 </ul>
               </div>
+            </div>
+            )}
+
+            {/* Export Results */}
+            {user?.is_admin && (
+            <div className="admin-section" id="export-results">
+              <h2>Export Results</h2>
+              <p style={{ color: "#718096", marginBottom: "1rem" }}>
+                Download all processed match results in a date range as a CSV
+                file.
+              </p>
+
+              <form onSubmit={handleExportResults} className="admin-form">
+                <div className="admin-form-row">
+                  <div className="form-group" style={{ flex: 1 }}>
+                    <label>From:</label>
+                    <input
+                      type="date"
+                      value={exportFrom}
+                      onChange={(e) => setExportFrom(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="form-group" style={{ flex: 1 }}>
+                    <label>To:</label>
+                    <input
+                      type="date"
+                      value={exportTo}
+                      onChange={(e) => setExportTo(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="admin-button-group">
+                    <button
+                      type="submit"
+                      className="btn-plain"
+                      disabled={exporting}
+                    >
+                      {exporting ? "Exporting..." : "Download CSV"}
+                    </button>
+                  </div>
+                </div>
+              </form>
             </div>
             )}
           </>

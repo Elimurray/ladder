@@ -113,6 +113,8 @@ export const liveAPI = {
 export const resultsAPI = {
   getWeeks: () => api.get("/results/weeks"),
   getWeekResults: (date) => api.get(`/results/week/${date}`),
+  getRangeResults: (from, to) =>
+    api.get("/results/range", { params: { from, to } }),
 };
 
 export default api;
