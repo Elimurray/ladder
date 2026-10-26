@@ -88,6 +88,13 @@ function Profile() {
     fetchHistory();
   }, [user, navigate]);
 
+  // Messages render at the top of the page, so bring them into view
+  useEffect(() => {
+    if (success || error) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [success, error]);
+
   const fetchProfile = async () => {
     try {
       const response = await profileAPI.getProfile();
