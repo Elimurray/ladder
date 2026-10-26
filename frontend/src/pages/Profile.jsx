@@ -43,7 +43,7 @@ function Profile() {
     "7:30pm",
   ];
 
-  const getUpcomingSundays = (count = 10) => {
+  const getUpcomingSundays = (count = 4) => {
     const sundays = [];
     const today = new Date();
     const dayOfWeek = today.getDay();
@@ -287,6 +287,355 @@ function Profile() {
       {/* Profile Info */}
       {profile && (
         <div>
+          {/* Status Management */}
+          <div
+            style={{
+              background: "white",
+              border: "2px solid #e2e8f0",
+              borderRadius: "12px",
+              padding: "2rem",
+              marginBottom: "2rem",
+            }}
+          >
+            <h3 style={{ marginBottom: "1rem", color: "#2d3748" }}>
+              {/* Availability Status for Week Starting {getNextSunday()} */}
+              Availability status for the next draw - cut off Sunday’s @ 5pm.
+            </h3>
+            <p
+              style={{
+                color: "#718096",
+                marginBottom: "1.5rem",
+                fontSize: "0.9rem",
+              }}
+            >
+              Set your status for the upcoming week.
+            </p>
+
+            <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+              <button
+                onClick={() => handleUpdateStatus("active")}
+                style={{
+                  padding: "0.75rem 1.5rem",
+                  background:
+                    profile.status === "active" ? "#48bb78" : "#e2e8f0",
+                  color: profile.status === "active" ? "white" : "#4a5568",
+                  border: "none",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  fontWeight: "600",
+                }}
+              >
+                ✓ Play
+              </button>
+              <button
+                onClick={() => handleUpdateStatus("no_play")}
+                style={{
+                  padding: "0.75rem 1.5rem",
+                  background:
+                    profile.status === "no_play" ? "#ed8936" : "#e2e8f0",
+                  color: profile.status === "no_play" ? "white" : "#4a5568",
+                  border: "none",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  fontWeight: "600",
+                }}
+              >
+                ⏸ Pause
+              </button>
+            </div>
+
+            {profile.status === "no_play" && (
+              <div
+                style={{
+                  marginTop: "1rem",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.75rem",
+                  flexWrap: "wrap",
+                }}
+              >
+                <label style={{ fontWeight: "600", color: "#4a5568" }}>
+                  Resume playing from week of:
+                </label>
+                <select
+                  value={resumeDate}
+                  onChange={(e) => setResumeDate(e.target.value)}
+                  style={{
+                    padding: "0.5rem 0.75rem",
+                    border: "2px solid #e2e8f0",
+                    borderRadius: "8px",
+                    fontSize: "0.95rem",
+                    color: "#2d3748",
+                    background: "white",
+                  }}
+                >
+                  <option value="">-- No date set --</option>
+                  {(() => {
+                    const mondays = getUpcomingSundays();
+                    const hasMatch = mondays.some(
+                      (m) => m.value === resumeDate,
+                    );
+                    return (
+                      <>
+                        {resumeDate && !hasMatch && (
+                          <option value={resumeDate}>
+                            {new Date(
+                              resumeDate + "T12:00:00",
+                            ).toLocaleDateString("en-NZ", {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            })}
+                          </option>
+                        )}
+                        {mondays.map(({ value, label }) => (
+                          <option key={value} value={value}>
+                            {label}
+                          </option>
+                        ))}
+                      </>
+                    );
+                  })()}
+                </select>
+                <button
+                  onClick={() => handleUpdateStatus("no_play")}
+                  style={{
+                    padding: "0.5rem 1rem",
+                    background: "#4299e1",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                    fontWeight: "600",
+                  }}
+                >
+                  Save
+                </button>
+              </div>
+            )}
+
+            <div
+              style={{
+                display: "flex",
+                gap: "1rem",
+                flexWrap: "wrap",
+                marginTop: "1rem",
+              }}
+            >
+              <button
+                onClick={handleWithdraw}
+                style={{
+                  padding: "0.75rem 1.5rem",
+                  background: "#e53e3e",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  fontWeight: "600",
+                }}
+              >
+                🚫 Withdraw From Ladder
+              </button>
+            </div>
+
+            <div
+              style={{
+                marginTop: "1rem",
+                padding: "1rem",
+                background: "#f7fafc",
+                borderRadius: "8px",
+                fontSize: "0.875rem",
+                color: "#4a5568",
+              }}
+            >
+              <strong>Status Options:</strong>
+              <ul style={{ marginTop: "0.5rem", paddingLeft: "1.5rem" }}>
+                <li>
+                  <strong>Play:</strong> Available to play this week - included
+                  in draw
+                </li>
+                <li>
+                  <strong>Pause:</strong> Skip this week's draw but stay on
+                  ladder
+                </li>
+                <li>
+                  <strong>Withdraw:</strong> Permanently removes you from the
+                  ladder (can be re-added by admin)
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Time Preferences */}
+          <div
+            style={{
+              background: "white",
+              border: "2px solid #e2e8f0",
+              borderRadius: "12px",
+              padding: "2rem",
+              marginBottom: "2rem",
+            }}
+          >
+            <h3 style={{ marginBottom: "1rem", color: "#2d3748" }}>
+              Time Preferences
+            </h3>
+
+            {/* Junior Notice */}
+            {profile.is_junior && (
+              <div
+                style={{
+                  background: "#fef3c7",
+                  border: "2px solid #fbbf24",
+                  borderRadius: "8px",
+                  padding: "1rem",
+                  marginBottom: "1.5rem",
+                }}
+              >
+                <strong style={{ color: "#92400e" }}>⚠️ Junior Player:</strong>
+                <span style={{ color: "#78350f", marginLeft: "0.5rem" }}>
+                  You must play before 7:30pm
+                </span>
+              </div>
+            )}
+
+            <p
+              style={{
+                color: "#718096",
+                marginBottom: "1.5rem",
+                fontSize: "0.9rem",
+              }}
+            >
+              Set your earliest available time slot. This helps admins schedule
+              matches.
+            </p>
+
+            <form onSubmit={handleSavePreferences}>
+              <div className="form-group">
+                <label>Earliest Time I Can Play:</label>
+                <select
+                  value={earliestTime}
+                  onChange={(e) => setEarliestTime(e.target.value)}
+                >
+                  {(profile.is_junior
+                    ? timeSlots.filter((t) => {
+                        // Only show times before 7:30pm for juniors
+                        const hour = parseInt(t.split(":")[0]);
+                        const isPM = t.includes("pm");
+                        const time24 = isPM && hour !== 12 ? hour + 12 : hour;
+                        return (
+                          time24 < 19 || (time24 === 19 && t.includes("7:00"))
+                        );
+                      })
+                    : timeSlots
+                  ).map((time) => (
+                    <option key={time} value={time}>
+                      {time}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Additional Notes:</label>
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="e.g., Can't play first week of each month"
+                  rows="3"
+                  style={{
+                    width: "100%",
+                    padding: "0.75rem",
+                    border: "2px solid #e2e8f0",
+                    borderRadius: "8px",
+                    fontSize: "1rem",
+                    fontFamily: "inherit",
+                    resize: "vertical",
+                    color: "black",
+                    background: "white",
+                  }}
+                />
+              </div>
+
+              <button type="submit" className="btn-primary">
+                Save Preferences
+              </button>
+            </form>
+          </div>
+
+          {/* Squash Levels */}
+          <div
+            style={{
+              background: "white",
+              border: "2px solid #e2e8f0",
+              borderRadius: "12px",
+              padding: "2rem",
+              marginBottom: "2rem",
+            }}
+          >
+            <h3 style={{ marginBottom: "1rem", color: "#2d3748" }}>
+              Squash Levels
+            </h3>
+            <p
+              style={{
+                color: "#718096",
+                marginBottom: "1.5rem",
+                fontSize: "0.9rem",
+              }}
+            >
+              Do you want to play for squash levels? When both players opt-in,
+              your match will count towards level rankings.
+            </p>
+
+            <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+              <button
+                onClick={async () => {
+                  try {
+                    await profileAPI.updateSquashLevels(true);
+                    setSuccess("Now playing for squash levels!");
+                    setTimeout(() => setSuccess(null), 3000);
+                    fetchProfile();
+                  } catch (err) {
+                    setError(err.response?.data?.error || "Failed to update");
+                  }
+                }}
+                style={{
+                  padding: "0.75rem 1.5rem",
+                  background: profile.play_for_levels ? "#48bb78" : "#e2e8f0",
+                  color: profile.play_for_levels ? "white" : "#4a5568",
+                  border: "none",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  fontWeight: "600",
+                }}
+              >
+                ✓ Yes, Play for Levels
+              </button>
+              <button
+                onClick={async () => {
+                  try {
+                    await profileAPI.updateSquashLevels(false);
+                    setSuccess("Not playing for levels");
+                    setTimeout(() => setSuccess(null), 3000);
+                    fetchProfile();
+                  } catch (err) {
+                    setError(err.response?.data?.error || "Failed to update");
+                  }
+                }}
+                style={{
+                  padding: "0.75rem 1.5rem",
+                  background: !profile.play_for_levels ? "#e53e3e" : "#e2e8f0",
+                  color: !profile.play_for_levels ? "white" : "#4a5568",
+                  border: "none",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  fontWeight: "600",
+                }}
+              >
+                ✗ No Thanks
+              </button>
+            </div>
+          </div>
+
           {/* Basic Info Card */}
           <div
             style={{
@@ -484,259 +833,6 @@ function Profile() {
             </div>
           </div>
 
-          {/* Status Management */}
-          <div
-            style={{
-              background: "white",
-              border: "2px solid #e2e8f0",
-              borderRadius: "12px",
-              padding: "2rem",
-              marginBottom: "2rem",
-            }}
-          >
-            <h3 style={{ marginBottom: "1rem", color: "#2d3748" }}>
-              {/* Availability Status for Week Starting {getNextSunday()} */}
-              Availability status for the next draw - cut off Sunday’s @ 5pm.
-            </h3>
-            <p
-              style={{
-                color: "#718096",
-                marginBottom: "1.5rem",
-                fontSize: "0.9rem",
-              }}
-            >
-              Set your status for the upcoming week.
-            </p>
-
-            <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-              <button
-                onClick={() => handleUpdateStatus("active")}
-                style={{
-                  padding: "0.75rem 1.5rem",
-                  background:
-                    profile.status === "active" ? "#48bb78" : "#e2e8f0",
-                  color: profile.status === "active" ? "white" : "#4a5568",
-                  border: "none",
-                  borderRadius: "8px",
-                  cursor: "pointer",
-                  fontWeight: "600",
-                }}
-              >
-                ✓ Play
-              </button>
-              <button
-                onClick={() => handleUpdateStatus("no_play")}
-                style={{
-                  padding: "0.75rem 1.5rem",
-                  background:
-                    profile.status === "no_play" ? "#ed8936" : "#e2e8f0",
-                  color: profile.status === "no_play" ? "white" : "#4a5568",
-                  border: "none",
-                  borderRadius: "8px",
-                  cursor: "pointer",
-                  fontWeight: "600",
-                }}
-              >
-                ⏸ Pause
-              </button>
-            </div>
-
-            {profile.status === "no_play" && (
-              <div
-                style={{
-                  marginTop: "1rem",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.75rem",
-                  flexWrap: "wrap",
-                }}
-              >
-                <label style={{ fontWeight: "600", color: "#4a5568" }}>
-                  Resume playing from week of:
-                </label>
-                <select
-                  value={resumeDate}
-                  onChange={(e) => setResumeDate(e.target.value)}
-                  style={{
-                    padding: "0.5rem 0.75rem",
-                    border: "2px solid #e2e8f0",
-                    borderRadius: "8px",
-                    fontSize: "0.95rem",
-                    color: "#2d3748",
-                    background: "white",
-                  }}
-                >
-                  <option value="">-- No date set --</option>
-                  {(() => {
-                    const mondays = getUpcomingSundays();
-                    const hasMatch = mondays.some(
-                      (m) => m.value === resumeDate,
-                    );
-                    return (
-                      <>
-                        {resumeDate && !hasMatch && (
-                          <option value={resumeDate}>
-                            {new Date(
-                              resumeDate + "T12:00:00",
-                            ).toLocaleDateString("en-NZ", {
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                            })}
-                          </option>
-                        )}
-                        {mondays.map(({ value, label }) => (
-                          <option key={value} value={value}>
-                            {label}
-                          </option>
-                        ))}
-                      </>
-                    );
-                  })()}
-                </select>
-                <button
-                  onClick={() => handleUpdateStatus("no_play")}
-                  style={{
-                    padding: "0.5rem 1rem",
-                    background: "#4299e1",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                    fontWeight: "600",
-                  }}
-                >
-                  Save
-                </button>
-              </div>
-            )}
-
-            <div
-              style={{
-                display: "flex",
-                gap: "1rem",
-                flexWrap: "wrap",
-                marginTop: "1rem",
-              }}
-            >
-              <button
-                onClick={handleWithdraw}
-                style={{
-                  padding: "0.75rem 1.5rem",
-                  background: "#e53e3e",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "8px",
-                  cursor: "pointer",
-                  fontWeight: "600",
-                }}
-              >
-                🚫 Withdraw From Ladder
-              </button>
-            </div>
-
-            <div
-              style={{
-                marginTop: "1rem",
-                padding: "1rem",
-                background: "#f7fafc",
-                borderRadius: "8px",
-                fontSize: "0.875rem",
-                color: "#4a5568",
-              }}
-            >
-              <strong>Status Options:</strong>
-              <ul style={{ marginTop: "0.5rem", paddingLeft: "1.5rem" }}>
-                <li>
-                  <strong>Play:</strong> Available to play this week - included
-                  in draw
-                </li>
-                <li>
-                  <strong>Pause:</strong> Skip this week's draw but stay on
-                  ladder
-                </li>
-                <li>
-                  <strong>Withdraw:</strong> Permanently removes you from the
-                  ladder (can be re-added by admin)
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Squash Levels */}
-          <div
-            style={{
-              background: "white",
-              border: "2px solid #e2e8f0",
-              borderRadius: "12px",
-              padding: "2rem",
-              marginBottom: "2rem",
-            }}
-          >
-            <h3 style={{ marginBottom: "1rem", color: "#2d3748" }}>
-              Squash Levels
-            </h3>
-            <p
-              style={{
-                color: "#718096",
-                marginBottom: "1.5rem",
-                fontSize: "0.9rem",
-              }}
-            >
-              Do you want to play for squash levels? When both players opt-in,
-              your match will count towards level rankings.
-            </p>
-
-            <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-              <button
-                onClick={async () => {
-                  try {
-                    await profileAPI.updateSquashLevels(true);
-                    setSuccess("Now playing for squash levels!");
-                    setTimeout(() => setSuccess(null), 3000);
-                    fetchProfile();
-                  } catch (err) {
-                    setError(err.response?.data?.error || "Failed to update");
-                  }
-                }}
-                style={{
-                  padding: "0.75rem 1.5rem",
-                  background: profile.play_for_levels ? "#48bb78" : "#e2e8f0",
-                  color: profile.play_for_levels ? "white" : "#4a5568",
-                  border: "none",
-                  borderRadius: "8px",
-                  cursor: "pointer",
-                  fontWeight: "600",
-                }}
-              >
-                ✓ Yes, Play for Levels
-              </button>
-              <button
-                onClick={async () => {
-                  try {
-                    await profileAPI.updateSquashLevels(false);
-                    setSuccess("Not playing for levels");
-                    setTimeout(() => setSuccess(null), 3000);
-                    fetchProfile();
-                  } catch (err) {
-                    setError(err.response?.data?.error || "Failed to update");
-                  }
-                }}
-                style={{
-                  padding: "0.75rem 1.5rem",
-                  background: !profile.play_for_levels ? "#e53e3e" : "#e2e8f0",
-                  color: !profile.play_for_levels ? "white" : "#4a5568",
-                  border: "none",
-                  borderRadius: "8px",
-                  cursor: "pointer",
-                  fontWeight: "600",
-                }}
-              >
-                ✗ No Thanks
-              </button>
-            </div>
-          </div>
-
           {/* Password Change */}
           <div
             style={{
@@ -850,101 +946,6 @@ function Profile() {
             )}
           </div>
 
-          {/* Time Preferences */}
-          <div
-            style={{
-              background: "white",
-              border: "2px solid #e2e8f0",
-              borderRadius: "12px",
-              padding: "2rem",
-              marginBottom: "2rem",
-            }}
-          >
-            <h3 style={{ marginBottom: "1rem", color: "#2d3748" }}>
-              Time Preferences
-            </h3>
-
-            {/* Junior Notice */}
-            {profile.is_junior && (
-              <div
-                style={{
-                  background: "#fef3c7",
-                  border: "2px solid #fbbf24",
-                  borderRadius: "8px",
-                  padding: "1rem",
-                  marginBottom: "1.5rem",
-                }}
-              >
-                <strong style={{ color: "#92400e" }}>⚠️ Junior Player:</strong>
-                <span style={{ color: "#78350f", marginLeft: "0.5rem" }}>
-                  You must play before 7:30pm
-                </span>
-              </div>
-            )}
-
-            <p
-              style={{
-                color: "#718096",
-                marginBottom: "1.5rem",
-                fontSize: "0.9rem",
-              }}
-            >
-              Set your earliest available time slot. This helps admins schedule
-              matches.
-            </p>
-
-            <form onSubmit={handleSavePreferences}>
-              <div className="form-group">
-                <label>Earliest Time I Can Play:</label>
-                <select
-                  value={earliestTime}
-                  onChange={(e) => setEarliestTime(e.target.value)}
-                >
-                  {(profile.is_junior
-                    ? timeSlots.filter((t) => {
-                        // Only show times before 7:30pm for juniors
-                        const hour = parseInt(t.split(":")[0]);
-                        const isPM = t.includes("pm");
-                        const time24 = isPM && hour !== 12 ? hour + 12 : hour;
-                        return (
-                          time24 < 19 || (time24 === 19 && t.includes("7:00"))
-                        );
-                      })
-                    : timeSlots
-                  ).map((time) => (
-                    <option key={time} value={time}>
-                      {time}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label>Additional Notes:</label>
-                <textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="e.g., Can't play first week of each month"
-                  rows="3"
-                  style={{
-                    width: "100%",
-                    padding: "0.75rem",
-                    border: "2px solid #e2e8f0",
-                    borderRadius: "8px",
-                    fontSize: "1rem",
-                    fontFamily: "inherit",
-                    resize: "vertical",
-                    color: "black",
-                    background: "white",
-                  }}
-                />
-              </div>
-
-              <button type="submit" className="btn-primary">
-                Save Preferences
-              </button>
-            </form>
-          </div>
           {/* Stats Card */}
           {stats && stats.total_matches > 0 && (
             <div
