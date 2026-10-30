@@ -471,8 +471,8 @@ function Profile() {
                   ladder
                 </li>
                 <li>
-                  <strong>Withdraw:</strong> Permanently removes you from the
-                  ladder (can be re-added by admin)
+                  <strong>Withdraw:</strong> Removes you from the ladder (can be
+                  re-added by admin)
                 </li>
               </ul>
             </div>
