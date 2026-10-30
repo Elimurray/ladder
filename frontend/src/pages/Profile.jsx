@@ -294,6 +294,11 @@ function Profile() {
       {/* Profile Info */}
       {profile && (
         <div>
+          {/* Player name - shown first so family members sharing a device can see whose profile this is */}
+          <h2 style={{ margin: "0 0 1rem 0", color: "#2d3748" }}>
+            {profile.full_name}
+          </h2>
+
           {/* Status Management */}
           <div
             style={{
@@ -653,7 +658,6 @@ function Profile() {
               marginBottom: "2rem",
             }}
           >
-            <h2 style={{ margin: "0 0 1rem 0" }}>{profile.full_name}</h2>
             <div
               style={{
                 display: "grid",
